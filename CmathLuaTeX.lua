@@ -15,7 +15,6 @@ local Carg, Cc, Cp, Ct, Cs, Cg, Cf = lpeg.Carg, lpeg.Cc, lpeg.Cp, lpeg.Ct, lpeg.
 -- Syntaxe Cmath
 local Espace = S(" \n\t")^0
 local Guillemet=P('"')
-local Guillemet=P('"')
 local SepListe=C(S(',;'))
 local Operateur=C(	P('<=>')+P('<=')+P('>=')+P('<>')+P('->')+S('=><')
 		+	P(':en')+P('≈')
@@ -421,6 +420,7 @@ local FonctionsCmath = 	P('abs')+ 			-- valeur absolue
 		P('tab')+
 		P('tor')+
 		P('cro')+
+		P('lim')+
 		P('ds')+
 		P('ts')+
 		P('im')+
@@ -696,6 +696,19 @@ local TraitementFonctionsCmath =
 	function(arbre)
 		return construitMatrix(arbre,"bmatrix")
 	end,
+	
+	['lim']=
+	function(arbre)
+		local n = nbArg(arbre)
+		local s='\\lim _{'
+		if n==2 then
+			s=s..Tree2Latex(arbre[1])..'} {'..Tree2Latex(arbre[2])..'} '
+		else
+			s=s..'\\substack{'..Tree2Latex(arbre[1])..'\\\\ '..Tree2Latex(arbre[2])..'}} {'..Tree2Latex(arbre[3])..'} '
+		end
+		return s
+	end,
+
 	
 	['im']=
 	function(arbre) 
