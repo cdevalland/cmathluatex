@@ -17,6 +17,7 @@ local Carg, Cc, Cp, Ct, Cs, Cg, Cf = lpeg.Carg, lpeg.Cc, lpeg.Cp, lpeg.Ct, lpeg.
 -- Syntaxe Cmath
 local Espace = S(" \n\t")^0
 local Guillemet=P('"')
+local Guillemet=P('"')
 local SepListe=C(S(',;'))
 local Operateur=C(	P('<=>')+P('<=')+P('>=')+P('<>')+P('->')+S('=><')
 				+	P(':en')+P('≈')
@@ -42,7 +43,7 @@ local Operateur=C(	P('<=>')+P('<=')+P('>=')+P('<>')+P('->')+S('=><')
 				+	P(':ic')+P('⊂')
 				+	P(':ni')+P('⊄')
 				+	P('⩽')+P('⩾')
-				+	P('≠ ')
+				+	P('≠ ')
 				) * Espace
 				
 local TSubstOperateurLaTeX = {	['<=>']='\\Leftrightarrow ', 
@@ -258,7 +259,7 @@ local TSubstRaccourciTW = {	[':al']='α',
 					[':i']='і'
 					}
 
-local Lettre = R("az")+R("AZ")					
+local Lettre = R("az")+R("AZ")+P("'")+P("!")					
 local Mot=C(Lettre^1+P('∭')+P('∬')+P('∫')+P('√')) - Guillemet
 local Op_LaTeX = C(P("\\")*Lettre^1) * Espace
 local TermOp = C(S("+-")) * Espace
@@ -273,7 +274,7 @@ local Accolade_Fermee = P("}") * Espace
 local Crochet = C(S("[]")) * Espace
 local Intervalle_Entier_Ouvert = P("[[")+P("⟦")
 local Intervalle_Entier_Ferme = P("]]")+P("⟧")
-local Fonction_sans_eval = P("xcas")
+local Fonction_sans_eval = P("xcas")+P("TVP")+P("TV")+P("TS")
 local CaractereSansParentheses=(1-S"()")
 
 -- Substitutions 
@@ -349,7 +350,7 @@ function fTexte(arg1)
 	return {'text',arg1}
 end
 
-function fFonction_sans_eval(arg1,arg2,arg3,arg4)
+function fFonction_sans_eval(arg1,arg2)
 	return {'no_eval',arg1,arg2}
 end
 
@@ -416,8 +417,32 @@ local FonctionsCmath = 	P('abs')+ 			-- valeur absolue
 						P('cnp')+
 						P('aut')+
 						P('bif')+
-						P('sys')
+						P('sys')+
+						P('mat')+
+						P('det')+
+						P('tab')+
+						P('tor')+
+						P('cro')+
+						P('ds')+
+						P('ts')+
+						P('im')+
+						P('re')
 												
+function construitMatrix(arbre,typeMatrice)
+local s='\\begin{'..typeMatrice..'}\n'
+local n = nbArg(arbre)
+local nb_col = tonumber(Tree2Latex(arbre[1]))
+for i=2,n-1 do 
+	s=s..Tree2Latex(arbre[i])
+	if (i-1)%nb_col==0 then
+		s=s..' \\\\\n'
+	else
+		s=s..' & '
+	end
+end
+s=s..Tree2Latex(arbre[n])..'\n\\end{'..typeMatrice..'}'
+return s
+end
 
 local TraitementFonctionsCmath = 
 { 	['abs']=
@@ -647,6 +672,51 @@ local TraitementFonctionsCmath =
 		end	
 		s=s..'\n\\end{cases}'
 		return s
+	end,
+	
+	['mat']=
+	function(arbre)
+		return construitMatrix(arbre,"pmatrix")
+	end,
+
+	['det']=
+	function(arbre)
+		return construitMatrix(arbre,"vmatrix")
+	end,
+
+	['tab']=
+	function(arbre)
+		return construitMatrix(arbre,"matrix")
+	end,
+
+	['tor']=
+	function(arbre)
+		return construitMatrix(arbre,"Bmatrix")
+	end,
+
+	['cro']=
+	function(arbre)
+		return construitMatrix(arbre,"bmatrix")
+	end,
+	
+	['im']=
+	function(arbre) 
+		return '\\Im{'..Tree2Latex(arbre)..'}' 
+	end,
+
+	['re']=
+	function(arbre) 
+		return '\\Re{'..Tree2Latex(arbre)..'}' 
+	end,
+
+	['ts']=
+	function(arbre) 
+		return '{\\textstyle '..Tree2Latex(arbre)..'} ' 
+	end,
+	
+	['ds']=
+	function(arbre) 
+		return '{\\displaystyle '..Tree2Latex(arbre)..'} ' 
 	end
 }
 
@@ -667,11 +737,11 @@ function fCommandes(arg1,arg2,arg3)
 	return arg1..','..arg2
 end
 
-function fExpressionsXcas(arg1,arg2,arg3)
+function fExpressionsXcas(arg1,arg2,arg3) --arg3 à supprimer
 	return string.sub(arg1,1,arg1:len()-1)..string.sub(arg2,2)
 end
 
-function fFacteursXcas(arg1,arg2,arg3)
+function fFacteursXcas(arg1,arg2) --arg2 à supprimer
 	return '"'..arg1..'"'
 end
 
@@ -724,8 +794,14 @@ elseif (op=='text') then
 	return '\\textrm{'..Arbre[2]..'}'
 elseif (op=='no_eval') then
 	if Arbre[2]=='xcas' then
-		return Giac(match(CommandesXcas,Arbre[3]))
-	else
+		return Giac("",Arbre[3],"true")
+	elseif Arbre[2]=='TV' then
+		return Giac(XCAS_Tableaux,'TV('..Arbre[3]..')',"false")
+	elseif Arbre[2]=='TS' then
+		return Giac(XCAS_Tableaux,'TS('..Arbre[3]..')',"false")	
+	elseif Arbre[2]=='TVP' then
+		return Giac(XCAS_Tableaux,'TVP('..Arbre[3]..')',"false")
+	else	
 		return Arbre[2]..'("'..Arbre[3]..'")'
 	end
 elseif (op=='latex') then
@@ -807,8 +883,11 @@ end
 end
 
 
-function Giac(formule)
+--[==[function Giac(formule)
+-- Formule doit être au format "instruction 1","instruction 2",...
+-- Seule la dernière instruction renvoie un résultat vers Luatex
 local prg=[[
+unarchive("giac.sav"):;
 Sortie:=fopen("giac.out");
 Resultat:=(instructions)->{
   local j,n;
@@ -816,14 +895,59 @@ Resultat:=(instructions)->{
     n:=dim(instructions);
     for(j:=0;j<=n-2;j++)
       execute(instructions[j]);
-    return(latex(eval(execute(instructions[n-1]))));
+	if (sommet(expr(instructions[n-1],quote))=='sto') {
+		latex(execute(instructions[n-1]));
+		return '""';}
+	else
+		return(latex(eval(execute(instructions[n-1]))));
     }
   else {
-    return(latex(execute(instructions)));
+	if (sommet(expr(instructions,quote))=='sto') {
+		latex(execute(instructions));
+		return '""';}
+	else
+		return(latex(execute(instructions)));
   }
 }(]]..formule..[[);
 fprint(Sortie,Unquoted,Resultat);
 fclose(Sortie);
+archive("giac.sav"):;
+]]
+local f,err = io.open("giac.in","w")
+if not f then return print(err) end
+f:write(prg)
+f:close()
+if QuelOs()=='linux' then
+	os.execute("icas giac.in")
+else --windows, à modifier pour identifier un Mac
+	os.execute("c:\\xcas\\rxvt.exe c:/xcas/icas.exe giac.in")
+end
+io.input("giac.out")
+return(io.read("*all"))
+end ]==]--
+
+function Giac(programme,instruction,latex)
+-- exécute le programme sans conserver le retour
+-- puis exécute l'instruction en renvoyant le résultat
+-- conversion en latex selon le booléen latex (pas de conversion pour les tableaux de variations/signes
+local prg=[[
+unarchive("giac.sav"):;
+Sortie:=fopen("giac.out");
+]]..programme..[[
+purge(Resultat);
+if(sommet(quote(]]..instruction..[[))=='sto'){
+  ]]..instruction..[[;
+  Resultat:='""'} else {
+  Resultat:=(]]..instruction..[[)};
+if(Resultat=='Resultat'){
+  Resultat:="Erreur Xcas"};
+if(]]..latex..[[){
+  fprint(Sortie,Unquoted,latex(Resultat));
+} else {
+  fprint(Sortie,Unquoted,Resultat);
+};
+fclose(Sortie);
+archive("giac.sav"):;
 ]]
 local f,err = io.open("giac.in","w")
 if not f then return print(err) end
@@ -838,6 +962,7 @@ io.input("giac.out")
 return(io.read("*all"))
 end
 
+
 function QuelOs()
 local conf=package.config
 if string.sub(conf,1,1)=='/' then 
@@ -847,12 +972,21 @@ else
 end
 end
 
+
 -- Pour debug --
+function taille(t)
+	if type(t)=='table' then
+		return taille(t[1])
+	else
+		return string.len(t)
+	end
+end
+
 function AfficheArbre(t,n)    
    for key,value in pairs(t) do
 	   if type(t[key])=='table' then
 			write(" {")
-			AfficheArbre(t[key],n+string.len(t[key][1])+1)
+			AfficheArbre(t[key],n+taille(t[key][1])+1)
 			write("}\n")
 			for i=1,n+1 do write (" ") end
 	   else 
@@ -893,11 +1027,14 @@ function Cmath2LaTeX(formule)
 		return("Erreur de syntaxe : ".. formule)
 	else
 		-- Construction de la formule
-		return(Tree2Latex(Arbre))
+		Formule=Tree2Latex(Arbre)
+		-- tex.print n'accepte qu'une seule ligne
+		Formule=string.gsub(Formule, "\n", " ")
+		return(Formule)
 	end
 end
 
--- Fonction appelée depuis TexWorks
+-- Fonction appelée depuis TexWorks (F9 et Shift+F9)
 function Cmath2TW(formule)
 	-- Construction de l'arbre de la formule
 	Arbre=match(Cmath2Tree,formule)
@@ -908,3 +1045,678 @@ function Cmath2TW(formule)
 		return(Tree2TW(Arbre))
 	end
 end
+
+-- Fonction appelée depuis TexWorks (Ctrl+F9 et Shift+Ctrl+F9)
+function Cmath2LaTeXinTW(formule)
+	-- Construction de l'arbre de la formule
+	Arbre=match(Cmath2Tree,formule)
+	if not Arbre then 
+		return("Erreur de syntaxe : ".. formule)
+	else
+		-- Construction de la formule
+		Formule=Tree2Latex(Arbre)
+		return(Formule)
+	end
+end
+
+XCAS_Tableaux=[[
+initCas():={
+  complex_mode:=0;
+  complex_variables:=0;
+  angle_radian:=1;
+  all_trig_solutions:=1;
+  reset_solve_counter(-1,-1);
+  with_sqrt(1);
+}:;
+
+trigo(expression):={
+// renvoie vrai si l'expression dépend d'un paramètre n_1 (solutions d'une équation trigo dans xcas)  
+  if (subst(expression,n_1=0)==expression)
+    return faux;
+  else
+    return vrai;
+}:;
+
+debutTableau(colonne,hauteurLigne,valX):={
+// colonne est la liste des lignes de la première colonne
+// hauteurLigne est la liste des hauteurs des lignes
+// valX est la liste des valeurs de x à inscrire dans la première ligne
+// renvoie la chaine définissant la première partie du tableau  
+  local k,s;
+  s:="\\begin{tikzpicture}\n";
+  s:=s+"\\tkzTabInit[lgt=2,espcl=2,deltacl=0.5]\n";
+  s:=s+"{";
+  for(k:=0;k<size(colonne);k++){
+    if (k>0){s:=s+","};
+    s:=s+colonne[k]+" / "+hauteurLigne[k];
+  }  
+  s:=s+"}\n{";
+  for(k:=0;k<size(valX);k++){
+    if (k>0){s:=s+","};
+    s:=s+"$"+latex(valX[k])+"$";
+  }
+  s:=s+"}\n";
+  return(s);
+}:;
+
+trouveVI(IE,f):={
+  local k,s,o,n,listeVI:=[];
+  s:=sommet(f);
+  o:=op(f);
+  if (s=='inv') {
+    return(solve(o=0,x));
+  } else {
+  if (s=='*'){
+    n:=size(o);
+    for(k:=0;k<n;k++)
+        listeVI:=concat(listeVI,trouveVI(IE,o[k]));
+    return(Elague(IE,listeVI));
+  } else {
+  if (s=='^'){
+    if(evalf(abs(o[1])<1)){
+      return(Elague(IE,solve(o[0]=0,x)))
+    } else {
+      return([]);
+    }
+  } else {
+  if (s=='ln'){
+    return(Elague(IE,solve(o=0,x)));
+  } else {
+  if (s=='id'){
+      return([]);
+  } else {
+  if (type(o)==DOM_LIST){
+    for(k:=0;k<size(o);k++)
+        listeVI:=concat(listeVI,trouveVI(IE,o[k]));
+    return(Elague(IE,listeVI));}
+  else {
+    return(trouveVI(IE,o));
+  }
+  }}}}}
+}:;
+
+Elague(IE,liste):={
+  local nliste,nIE,k,listeelaguee,expression,m,mini,maxi;
+  listeelaguee:=[];
+  nliste:=size(liste);
+  nIE:=size(IE);
+  mini:=IE[0];maxi:=IE[nIE-1];
+  for(k:=0;k<nliste;k++){
+    expression:=liste[k];
+    if (trigo(expression)) {
+      m:=0;
+      while(subst(expression,n_1=m)<=maxi) {
+        listeelaguee:=concat(listeelaguee,simplify(subst(expression,n_1=m)));
+        m:=m+1;
+      };
+      m:=-1;
+      while(subst(expression,n_1=m)>=mini) {
+        listeelaguee:=concat(listeelaguee,simplify(subst(expression,n_1=m)));
+        m:=m-1;
+      }
+    } else {
+      if(expression>mini and expression<maxi){
+        listeelaguee:=concat(listeelaguee,expression);
+      }
+    }
+    
+  }
+  return(sort(listeelaguee));
+}:;
+
+trouveZeros(IE,f):={
+  local n:=size(IE);
+  local Z,err;
+  try {Z:=solve(factor(simplify(f(x)=0)),x);}
+  catch(err){Z:=fsolve(f(x)=0,x,IE[0]..IE[n-1]);};
+  Z:=Elague(IE,Z);  
+  return(Z);
+}:;
+
+insereValeurs(l1,l2):={
+  // insère les valeurs de l2 dans l1 puis trie
+  // l2 est supposée appartenir à [min(l1),max(l1)] puisque l2 provient
+  // de la fonction Elague qui ne garde que les valeurs dans IE
+  local k,l:=l1;
+  local n2:=size(l2);
+  for(k:=0;k<n2;k++){
+    if (not(member(l2[k],l1))){
+        l:=append(l,l2[k]);        
+        }
+    }
+  return(sort(l));
+}:;
+
+estDefinie(f,x):={
+  local y;
+  if (abs(x)==+infinity){return(faux)}
+  y:=f(x);
+  if (y==undef){return(faux)}
+  if (abs(y)==+infinity){return(faux)}
+  if (im(evalf(y))!=0){return(faux)}
+  return(vrai);
+}:;
+
+tabSignes(IE,f,g):={
+// f est la fonction dont on étudie le signe
+// g est une fonction qui doit exister au point testé pour valider le signe
+  local k,x,nIE,a,xi;
+  local signes:=[];
+  nIE:=size(IE);
+  for(k:=0;k<=nIE-2;k++){
+    if(estDefinie(f,IE[k]) and estDefinie(g,IE[k])){
+      signes:=append(signes,simplifier(f(IE[k])));
+      } else {
+      if(abs(IE[k])==+infinity){
+        signes:=append(signes," ");
+      } else {
+        signes:=append(signes,"d");
+      }
+    }
+    xi:=x_milieu(IE[k],IE[k+1]);
+    if(estDefinie(f,xi) and estDefinie(g,xi)){
+      if(f(xi)>0){
+        signes:=append(signes,"+");
+      } else {
+        signes:=append(signes,"-");
+      }
+    } else {
+      signes:=append(signes,"h");
+    }
+  }
+  if(estDefinie(f,IE[nIE-1]) and estDefinie(g,IE[nIE-1])){
+    signes:=append(signes,simplifier(f(IE[nIE-1])));
+    } else {
+      if(abs(IE[nIE-1])==+infinity){
+        signes:=append(signes," ");
+      } else {
+        signes:=append(signes,"d");
+      }
+    }
+  return(signes);
+}:;
+
+calculeImages(IE,f):={
+  local k;
+  local images;
+  local nIE:=size(IE);
+  images:=[ [infinity,simplifier(limite(f(x),x,IE[0],1))] ];
+  for(k:=1;k<=nIE-2;k++){
+    images:=append(images,[simplifier(limite(f(x),x,IE[k],-1)),simplifier(limite(f(x),x,IE[k],1))]);
+    }
+  images:=append(images,[simplifier(limite(f(x),x,IE[nIE-1],-1)),infinity]);
+  return(images);
+}:;
+
+calculePosition(IE,VI,f,images):={
+  // crée une liste avec la position des images, les double-barres, les zones interdites.
+  local k,sg,sd,symb,xi;
+  local pos:=[];
+  local sg:="";
+  local nIE:=size(IE);
+  for(k:=0;k<=nIE-2;k++){
+    symb:=sg;
+    if(member(IE[k],VI) or not(estDefinie(f,IE[k]))){
+      // chercher prolongement par continuité
+      if (abs(images[k][0])!=+infinity and images[k][0]==images[k][1]){
+        symb:="R";        
+      } else {
+      if(abs(IE[k])!=+infinity){symb:=symb+"D";}
+      xi:=x_milieu(IE[k],IE[k+1]);
+      if(not(estDefinie(f,xi))){
+        if (k==0){// impossible de mettre DH en première colonne
+          symb:="-D"};
+        symb:=symb+"H";sg:="";} else {
+      if(images[k][1]<=images[k+1][0]){
+        symb:=symb+"-";
+        sg:="+";
+      } else {
+        symb:=symb+"+";    
+        sg:="-";
+      }}
+      }
+    } else {
+      if(images[k][1]<=images[k+1][0]){
+        symb:=symb+"-";
+        sg:="+";        
+      } else {
+        symb:=symb+"+";
+        sg:="-";
+      }
+      if(symb=="++"){symb:="+"}
+      else {if(symb=="--"){symb:="-"}
+        else {if(k>0){symb:="R"}}}}
+    pos:=append(pos,symb);
+  }    
+  // dernier point
+  symb:=sg;
+  if(member(IE[nIE-1],VI) or not(estDefinie(f,IE[nIE-1]))){
+      if(abs(IE[k])!=+infinity){
+        symb:=symb+"D";
+        if (sg==""){// impossible de mettre D
+          symb:=symb+"+"};
+      }
+  }
+  return(pos:=append(pos,symb));
+}:;
+
+noeudsNonExtrema(pos):={
+  // renvoie une liste contenant les noeuds des images à calculer dans le tableau
+  local k;
+  local npos:=size(pos);
+  local noeuds:=[0];
+  for(k:=1;k<=npos-2;k++){
+    if (pos[k]=="R"){
+      local nmin,nmax;
+      nmin:=k-1;
+      nmax:=k+1;
+      while(pos[nmin]=="R"){nmin--;}
+      while(pos[nmax]=="R"){nmax++;}
+      noeuds:=append(noeuds,[nmin+1,nmax+1,k+1]);
+    } else {
+      noeuds:=append(noeuds,0);
+    }
+  }
+  noeuds:=append(noeuds,0);
+}:;
+
+ligneSignes(signes):={
+  local n,sTkzTabLine,j,k;
+  
+  n:=size(signes);
+
+sTkzTabLine:="\\tkzTabLine {";
+for(k:=0;k<n;k++){
+  j:=type(signes[k]);
+  if(type(signes[k])==12){ //DOM_STRING bug
+    sTkzTabLine+=signes[k];    
+    } else {
+    if (signes[k]==0){
+      sTkzTabLine+="z";
+      } else {
+      sTkzTabLine+="t";      
+      }
+    }
+    if (k<n-1){
+      sTkzTabLine+=",";
+    }
+  }
+  sTkzTabLine+="}\n";
+  return(sTkzTabLine);
+}:;
+
+
+
+ligneVariations(positions,images):={
+local n,sTkzTabVar,pos,k;
+n:=size(positions);
+sTkzTabVar:="\\tkzTabVar {";
+for(k:=0;k<n;k++){
+  pos:=positions[k];
+  sTkzTabVar:=sTkzTabVar+pos;
+  if (pos!="R"){
+    if(pos=="+" or pos=="-"){
+      if(k==0){
+        sTkzTabVar:=sTkzTabVar+" / $"+latex(images[0][1])+"$";        
+      } else {
+        sTkzTabVar:=sTkzTabVar+" / $"+latex(images[k][0])+"$";      
+      }
+    } else {
+    if(left(pos,1)=="-" or left(pos,1)=="+"){
+      if(k==0){
+        sTkzTabVar:=sTkzTabVar+"/ ";        
+      } else {
+       sTkzTabVar:=sTkzTabVar+" / $"+latex(images[k][0])+"$";      
+      }
+    };
+    if(right(pos,1)=="-" or right(pos,1)=="+"){
+      if(k==n-1){
+        sTkzTabVar:=sTkzTabVar+"/ ";        
+      } else {
+        sTkzTabVar:=sTkzTabVar+" / $"+latex(images[k][1])+"$";      
+      }
+    }
+  }   
+  };
+  if (k<n-1){
+    sTkzTabVar+=",";
+  }
+}
+sTkzTabVar+="}\n";
+return(sTkzTabVar);
+}:;
+
+
+lignesImages(noeuds,images):={
+  local k,n;
+  local sTkzTabIma:="";
+  n:=size(noeuds);
+  for(k:=0;k<n;k++){
+    if(size(noeuds[k])==3){
+      sTkzTabIma:=sTkzTabIma+"\\tkzTabIma{"+noeuds[k][0]+"}";
+      sTkzTabIma:=sTkzTabIma+"{"+noeuds[k][1]+"}";
+      sTkzTabIma:=sTkzTabIma+"{"+noeuds[k][2]+"}";
+      sTkzTabIma:=sTkzTabIma+"{$"+latex(images[k][0])+"$}\n";
+    }
+  }
+  return(sTkzTabIma);
+}:;
+
+x_milieu(x1,x2):={
+  if(x1==-infinity and abs(x2)==+infinity){return(0)};
+  if(x1==-infinity){return(x2-1)}
+  if(abs(x2)==+infinity){return(x1+1)}  
+  return((x1+x2)/2);
+}:;
+
+sontDefinies(f,liste_zeros):={
+  local k,n,liste:=[];
+  n:=size(liste_zeros);
+  for(k:=0;k<n;k++){
+    if(estDefinie(f,liste_zeros[k])){
+      liste:=append(liste,liste_zeros[k]);
+    }
+  }
+  return(liste);
+}:;
+
+identifier(expression):={
+  //renvoie [fonction, [nom variable,nom variable latex], [nom fonction, nom fonction latex],
+  // [nom dérivée, nom dérivée latex] ] au format LaTeX
+  local x,membres,g,d,fonc,var,commande;
+  if (sommet(expression)=='='){
+    membres:=op(expression);
+    g:=membres[0];
+    d:=membres[1];
+    fonc:=op(g)[0];
+    var:=op(g)[1];
+    commande:="unapply(d,"+var+")";
+    return([execute(commande),[var,latex(var)],[fonc,latex(fonc)],[fonc+"'",latex(fonc)+"'"] ]);
+  } else {
+  return([unapply(expression,x),["x","x"],["x->"+expression,"x\\mapsto "+latex(expression)],["(x->"+expression+")'","\\left( x\\mapsto "+latex(expression)+"\\right) '"] ])
+  }
+}:;
+
+listeFacteurs(expression):={
+  local k,s,o;
+  local numerateur;
+  local denominateur:=[];
+  o:=[op(expression)];
+  s:=sommet(expression);
+  if (s=='*'){
+    numerateur:=o;
+  } else {
+    numerateur:=[expression];
+  }
+  // extraire le dénominateur et regrouper les facteurs constants
+  for(k:=0;k<size(numerateur);k++){
+    if(sommet(numerateur[k])=='inv'){
+      if(sommet(op(numerateur[k]))=='*'){
+        denominateur:=append(denominateur,op(op(numerateur[k])));
+      } else {
+        denominateur:=append(denominateur,op(numerateur[k]));
+      }
+      //execute("numerateur:=subsop(numerateur,'"+string(k)+"=NULL')");
+      numerateur:=suppress(numerateur,k);
+      k--;
+    };
+    if(k<size(numerateur)-1){
+      if(type(evalf(numerateur[k]))==DOM_FLOAT and sommet(numerateur[k+1])!='inv'){
+        numerateur[k+1]:=numerateur[k]*numerateur[k+1];
+        //execute("numerateur:=subsop(numerateur,"+string(k+1)+"="+string(numerateur[k]*numerateur[k+1])+")");
+        //execute("numerateur:=subsop(numerateur,'"+string(k)+"=NULL')");
+        numerateur:=suppress(numerateur,k);
+        k--;
+      }
+    }
+  };
+  for(k:=0;k<size(denominateur);k++){
+    if(type(evalf(denominateur[k]))==DOM_FLOAT){
+      if(k<size(denominateur)-1){
+        denominateur[k+1]:=denominateur[k]*denominateur[k+1];
+        //execute("denominateur:=subsop(denominateur,"+string(k+1)+"="+string(denominateur[k]*denominateur[k+1])+")");
+        //execute("denominateur:=subsop(denominateur,'"+string(k)+"=NULL')");
+        denominateur:=suppress(denominateur,k);
+        k--;
+      }
+    }
+  };
+  return(numerateur,denominateur);
+}:;
+
+ligneSignesTVP(signes):={
+  local n,sTkzTabLine,j,k;
+  
+  n:=size(signes);
+
+sTkzTabLine:="\\tkzTabLine {";
+for(k:=0;k<n;k++){
+  j:=type(signes[k]);
+  if(type(signes[k])==12){ //DOM_STRING bug
+    sTkzTabLine+=signes[k];    
+    } else {
+    if (signes[k]==0){
+      sTkzTabLine+="z";
+      } else {
+      sTkzTabLine:=sTkzTabLine+latex(signes[k]);      
+      }
+    }
+    if (k<n-1){
+      sTkzTabLine+=",";
+    }
+  }
+  sTkzTabLine+="}\n";
+  return(sTkzTabLine);
+}:;
+
+TV(IE,f):={
+// IE=intervalle d'étude
+// f=fonction
+local VI; // liste des valeurs interdites de f
+local fp; // f'
+local Zeros_fp; // liste des racines de f'
+local ValeursX; // liste des valeurs de x à faire apparaître dnas la 1ère ligne
+local sTkzTab; // ce qui sera renvoyé vers LuaTeX
+local Signes_fp; // liste des signes de f'
+local sTkzTabLine; // ligne des signes de f'
+local Variations_f; // liste des variations de f
+local sTkzTabVar; // ligne des variations de f
+local Images_f; // liste des images de f
+local NoeudsNonExtrema_f; // liste des images de f qui ne sont pas des extrema
+local sTkzTabIma; // lignes des images de f
+local k,n,j;
+local id_fonction, nom_variable, nom_fonction, nom_derivee;
+local a;
+initCas();
+id_fonction:=identifier(f);
+f:=id_fonction[0];
+nom_variable:=id_fonction[1][1];
+nom_fonction:=id_fonction[2][1];
+nom_derivee:=id_fonction[3][1];
+//unapply(f,x);
+fp:=function_diff(f);
+IE:=sort(IE);
+VI:=trouveVI(IE,f(x));
+ValeursX:=insereValeurs(IE,VI);
+Zeros_fp:=trouveZeros(IE,fp);
+Zeros_fp:=sontDefinies(f,Zeros_fp);
+ValeursX:=insereValeurs(ValeursX,Zeros_fp);
+ValeursX:=sort([op(set[op(ValeursX)])]);
+ValeursX:=simplifier(ValeursX);
+// construction de la structure du tableau
+sTkzTab:=debutTableau(["$"+nom_variable+"$","$"+nom_derivee+"("+nom_variable+")"+"$","$"+nom_fonction+"$"],[1,1,2],ValeursX);
+// construction du signe de f'
+Signes_fp:=tabSignes(ValeursX,fp,f);
+sTkzTabLine:=ligneSignes(Signes_fp);
+sTkzTab+=sTkzTabLine;
+// construction des variations de f
+//sTkzTabVar:="\\tkzTabVar {"
+Images_f:=calculeImages(ValeursX,f);
+Variations_f:=calculePosition(ValeursX,VI,f,Images_f);
+sTkzTabVar:=ligneVariations(Variations_f,Images_f);
+sTkzTab+=sTkzTabVar;
+// construction des images de f
+NoeudsNonExtrema_f:=noeudsNonExtrema(Variations_f);
+sTkzTabIma:=lignesImages(NoeudsNonExtrema_f,Images_f);
+sTkzTab+=sTkzTabIma;
+sTkzTab+="\\end{tikzpicture}\n";
+return(sTkzTab);
+}:;
+
+TS(IE,f):={
+// IE=intervalle d'étude
+// f=fonction
+local VI; // liste des valeurs interdites de f
+local Zeros_f; // liste des racines de f
+local ValeursX; // liste des valeurs de x à faire apparaître dnas la 1ère ligne
+local sTkzTab; // ce qui sera renvoyé vers LuaTeX
+local Signes; // liste des signes des facteurs de f
+local sTkzTabLine; // lignes des signes des facteurs de f
+local Images_f; // liste des images de f
+local facteur, facteurs; // de f
+local colonne; // contenu de la première colonne
+local hauteurs_lignes;
+local id_fonction, nom_variable, nom_fonction;
+local k;
+local denominateur;
+
+initCas();
+id_fonction:=identifier(f);
+f:=id_fonction[0];
+nom_variable:=id_fonction[1][0];
+nom_fonction:=id_fonction[2][0];
+IE:=sort(IE);
+VI:=trouveVI(IE,f(x));
+ValeursX:=insereValeurs(IE,VI);
+Zeros_f:=trouveZeros(IE,f);
+ValeursX:=insereValeurs(ValeursX,Zeros_f);
+ValeursX:=simplifier(ValeursX);
+facteurs:=execute("listeFacteurs(f("+nom_variable+"))");
+if (size(facteurs[1])>0){
+  // il y a un dénominteur, augmenter la hauteur de la dernière ligne
+  denominateur:=true;
+} else {
+  denominateur:=false;
+}
+facteurs:=op(facteurs[0]),op(facteurs[1]);
+if (size(facteurs)==1){ facteurs:=NULL };
+// construction de la structure du tableau
+colonne:=append([nom_variable],facteurs);
+if(type(nom_fonction)==12){ //DOM_STRING=12
+  colonne:=append(colonne,"$"+latex(f(x))+"$");
+} else {
+  colonne:=append(colonne,"$"+id_fonction[2][1]+"("+id_fonction[1][1]+")$");
+}
+for(k:=0;k<size(colonne)-1;k++)
+  colonne[k]:="$"+latex(colonne[k])+"$";
+hauteurs_lignes:=makelist(1,1,size(colonne)-1);
+if (denominateur){
+  hauteurs_lignes:=append(hauteurs_lignes,2);
+} else {
+  hauteurs_lignes:=append(hauteurs_lignes,1);
+}
+sTkzTab:=debutTableau(colonne,hauteurs_lignes,ValeursX);
+// construction du signe des facteurs
+for(k:=0;k<size(facteurs);k++){
+  facteur:=execute("unapply(facteurs[k],"+nom_variable+")");
+  Signes:=tabSignes(ValeursX,facteur,x->1);
+  sTkzTabLine:=ligneSignes(Signes);
+  sTkzTab+=sTkzTabLine;
+}
+// construction du signe de f s'il y a au moins 2 facteurs
+Signes:=tabSignes(ValeursX,f,x->1);
+sTkzTabLine:=ligneSignes(Signes);
+sTkzTab+=sTkzTabLine;
+sTkzTab+="\\end{tikzpicture}\n";
+return(sTkzTab);
+}:;
+
+TVP(IE,f,g):={
+// IE=intervalle d'étude
+// f=fonction
+local VI_f; // liste des valeurs interdites de f
+local VI_g; // liste des valeurs interdites de g
+local fp; // f'
+local gp; // g'
+local Zeros_fp; // liste des racines de f'
+local Zeros_gp; // liste des racines de g'
+local ValeursX; // liste des valeurs de x à faire apparaître dnas la 1ère ligne
+local sTkzTab; // ce qui sera renvoyé vers LuaTeX
+local Signes_fp; // liste des signes de f'
+local Signes_gp; // liste des signes de g'
+local Variations_f; // liste des variations de f
+local Variations_g; // liste des variations de g
+local Images_f; // liste des images de f
+local Images_g; // liste des images de g
+local NoeudsNonExtrema_f; // liste des images de f qui ne sont pas des extrema
+local NoeudsNonExtrema_g; // liste des images de g qui ne sont pas des extrema
+local sTkzTabLine; // ligne des signes de f' ou g'
+local sTkzTabVar; // ligne des variations de f ou g
+local sTkzTabIma; // lignes des images de f ou g
+local k,n,j;
+local id_fonction_f, nom_variable_f, nom_fonction_f, nom_derivee_f;
+local id_fonction_g, nom_variable_g, nom_fonction_g, nom_derivee_g;
+
+initCas();
+id_fonction_f:=identifier(f);
+f:=id_fonction_f[0];
+nom_variable_f:=id_fonction_f[1][1];
+nom_fonction_f:=id_fonction_f[2][1];
+nom_derivee_f:=id_fonction_f[3][1];
+id_fonction_g:=identifier(g);
+g:=id_fonction_g[0];
+nom_variable_g:=id_fonction_g[1][1];
+nom_fonction_g:=id_fonction_g[2][1];
+nom_derivee_g:=id_fonction_g[3][1];
+fp:=function_diff(f);
+gp:=function_diff(g);
+IE:=sort(IE);
+VI_f:=trouveVI(IE,f(x));
+ValeursX:=insereValeurs(IE,VI_f);
+VI_g:=trouveVI(IE,g(x));
+ValeursX:=insereValeurs(ValeursX,VI_g);
+Zeros_fp:=trouveZeros(IE,fp);
+Zeros_fp:=sontDefinies(f,Zeros_fp);
+ValeursX:=insereValeurs(ValeursX,Zeros_fp);
+Zeros_gp:=trouveZeros(IE,gp);
+Zeros_gp:=sontDefinies(g,Zeros_gp);
+ValeursX:=insereValeurs(ValeursX,Zeros_gp);
+ValeursX:=sort([op(set[op(ValeursX)])]);
+ValeursX:=simplifier(ValeursX);
+// construction de la structure du tableau
+sTkzTab:=debutTableau(["$"+nom_variable_f+"$",
+      "$"+nom_derivee_f+"("+nom_variable_f+")"+"$","$"+nom_fonction_f+"$",
+      "$"+nom_fonction_g+"$","$"+nom_derivee_g+"("+nom_variable_g+")"+"$"],
+      [1,1,2,2,1],ValeursX);
+// construction du signe de f'
+Signes_fp:=tabSignes(ValeursX,fp,f);
+sTkzTabLine:=ligneSignesTVP(Signes_fp);
+sTkzTab+=sTkzTabLine;
+// construction des variations de f
+Images_f:=calculeImages(ValeursX,f);
+Variations_f:=calculePosition(ValeursX,VI_f,f,Images_f);
+sTkzTabVar:=ligneVariations(Variations_f,Images_f);
+sTkzTab+=sTkzTabVar;
+// construction des images de f
+NoeudsNonExtrema_f:=noeudsNonExtrema(Variations_f);
+sTkzTabIma:=lignesImages(NoeudsNonExtrema_f,Images_f);
+sTkzTab+=sTkzTabIma;
+// construction des variations de g
+Images_g:=calculeImages(ValeursX,g);
+Variations_g:=calculePosition(ValeursX,VI_g,g,Images_g);
+sTkzTabVar:=ligneVariations(Variations_g,Images_g);
+sTkzTab+=sTkzTabVar;
+// construction des images de g
+NoeudsNonExtrema_g:=noeudsNonExtrema(Variations_g);
+sTkzTabIma:=lignesImages(NoeudsNonExtrema_g,Images_g);
+sTkzTab+=sTkzTabIma;
+// construction du signe de g'
+Signes_gp:=tabSignes(ValeursX,gp,g);
+sTkzTabLine:=ligneSignesTVP(Signes_gp);
+sTkzTab+=sTkzTabLine;
+sTkzTab+="\\end{tikzpicture}\n";
+return(sTkzTab);
+}:;
+
+purge(x);
+]]
