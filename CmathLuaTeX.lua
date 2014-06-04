@@ -1,11 +1,9 @@
--- Cmath pour LuaTeX
--- version 2014.05.09
--- Christophe Devalland
--- christophe.devalland@ac-rouen.fr
--- http://cdeval.free.fr
--- Packages nécessaires au bon fonctionnement :
--- \usepackage[e]{esvect} %Typesetting vectors with beautiful arrow
-
+--[[ Cmath pour LuaTeX, version 2014.06.04
+Christophe Devalland (christophe.devalland@ac-rouen.fr)
+http://cdeval.free.fr
+Ce programme est libre, vous pouvez le redistribuer et/ou le modifier selon les termes de la Licence Publique Générale GNU telle que publié par la Free Software Foundation ; soit la version 2 de cette licence, soit toute autre version ultérieure.
+Ce programme est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE, ni explicite ni implicite, y compris les garanties de commercialisation ou d'adaptation dans un but spécifique. Prenez connaissance de la Licence Publique Générale GNU pour plus de détails.
+--]]
 
 local lpeg = require "lpeg"
 -- local table = require "table"
@@ -20,244 +18,244 @@ local Guillemet=P('"')
 local Guillemet=P('"')
 local SepListe=C(S(',;'))
 local Operateur=C(	P('<=>')+P('<=')+P('>=')+P('<>')+P('->')+S('=><')
-				+	P(':en')+P('≈')
-				+	P(':as')+P('⟼')
-				+	P(':ap')+P('∈')
-				+	P('...')
-				+	P('|')
-				+	P('⟶')
-				+	P(':un')+P('∪')
-				+	P(':it')+P('∩')
-				+	P(':ro')+P('∘')
-				+	P(':eq')+P('~')
-				+	P(':co')+P('≡')
-				+	P(':pp')+P('∨')
-				+	P(':pg')+P('∧')
-				+	P(':ve')+P('∧')
-				+	P(':pe')+P('⊥')
-				+	P(':sd')+P('⊕')
-				+	P(':np')+P('∉')
-				+	P(':im')+P('⇒')
-				+	P(':ev')+P('⟺')
-				+	P(':rc')+P('⇐')
-				+	P(':ic')+P('⊂')
-				+	P(':ni')+P('⊄')
-				+	P('⩽')+P('⩾')
-				+	P('≠ ')
-				) * Espace
+		+	P(':en')+P('≈')
+		+	P(':as')+P('⟼')
+		+	P(':ap')+P('∈')
+		+	P('...')
+		+	P('|')
+		+	P('⟶')
+		+	P(':un')+P('∪')
+		+	P(':it')+P('∩')
+		+	P(':ro')+P('∘')
+		+	P(':eq')+P('~')
+		+	P(':co')+P('≡')
+		+	P(':pp')+P('∨')
+		+	P(':pg')+P('∧')
+		+	P(':ve')+P('∧')
+		+	P(':pe')+P('⊥')
+		+	P(':sd')+P('⊕')
+		+	P(':np')+P('∉')
+		+	P(':im')+P('⇒')
+		+	P(':ev')+P('⟺')
+		+	P(':rc')+P('⇐')
+		+	P(':ic')+P('⊂')
+		+	P(':ni')+P('⊄')
+		+	P('⩽')+P('⩾')
+		+	P('≠ ')
+		) * Espace
 				
 local TSubstOperateurLaTeX = {	['<=>']='\\Leftrightarrow ', 
-							['<=']='\\leqslant ',['⩽']='\\leqslant ',
-							['>=']='\\geqslant ',['⩾']='\\geqslant ',
-							['<>']='\\\neq ', ['≠']='\\neq ',
-							['<']=' < ',
-							['>']=' > ',
-							['=']=' = ',
-							[':en']='\\approx ', ['≈']='\\approx ',
-							[':ap']='\\in ', ['∈']='\\in ',
-							[':as']='\\longmapsto ', ['⟼']='\\longmapsto ',
-							['->']='\\to ',	['⟶']='\\to ',
-							['...']='\\dots ',
-							['|']='|',
-							[':un']='\\cup ', ['∪']='\\cup ',
-							[':it']='\\cap ', ['∩']='\\cap ',
-							[':ro']='\\circ ', ['∘']='\\circ ',
-							[':eq']='\\sim ', ['~']='\\sim ',
-							[':co']='\\equiv ', ['≡']='\\equiv ',
-							[':pp']='\\vee ', ['∨']='\\vee ',
-							[':pg']='\\wedge ', ['∧']='\\wedge ', [':ve']='\\wedge ',
-							[':pe']='\\perp ', ['⊥']='\\perp ',
-							[':sd']='\\oplus ', ['⊕']='\\oplus ',
-							[':np']='\\notin ', ['∉']='\\notin ',
-							[':im']='\\Rightarrow ',	['⇒']='\\Rightarrow ',
-							[':ev']='\\Leftrightarrow ',	['⟺']='\\Leftrightarrow ',
-							[':rc']='\\Leftarrow ', ['⇐']='\\Leftarrow ',
-							[':ic']='\\subset ', ['⊂']='\\subset ',
-							[':ni']='\\subsetneq ', ['⊄']='\\subsetneq '
-						  }
+		['<=']='\\leqslant ',['⩽']='\\leqslant ',
+		['>=']='\\geqslant ',['⩾']='\\geqslant ',
+		['<>']='\\\neq ', ['≠']='\\neq ',
+		['<']=' < ',
+		['>']=' > ',
+		['=']=' = ',
+		[':en']='\\approx ', ['≈']='\\approx ',
+		[':ap']='\\in ', ['∈']='\\in ',
+		[':as']='\\longmapsto ', ['⟼']='\\longmapsto ',
+		['->']='\\to ',	['⟶']='\\to ',
+		['...']='\\dots ',
+		['|']='|',
+		[':un']='\\cup ', ['∪']='\\cup ',
+		[':it']='\\cap ', ['∩']='\\cap ',
+		[':ro']='\\circ ', ['∘']='\\circ ',
+		[':eq']='\\sim ', ['~']='\\sim ',
+		[':co']='\\equiv ', ['≡']='\\equiv ',
+		[':pp']='\\vee ', ['∨']='\\vee ',
+		[':pg']='\\wedge ', ['∧']='\\wedge ', [':ve']='\\wedge ',
+		[':pe']='\\perp ', ['⊥']='\\perp ',
+		[':sd']='\\oplus ', ['⊕']='\\oplus ',
+		[':np']='\\notin ', ['∉']='\\notin ',
+		[':im']='\\Rightarrow ',	['⇒']='\\Rightarrow ',
+		[':ev']='\\Leftrightarrow ',	['⟺']='\\Leftrightarrow ',
+		[':rc']='\\Leftarrow ', ['⇐']='\\Leftarrow ',
+		[':ic']='\\subset ', ['⊂']='\\subset ',
+		[':ni']='\\subsetneq ', ['⊄']='\\subsetneq '
+		}
 local TSubstOperateurTW = {	['<=>']='⟺', 
-							['<=']='⩽',
-							['>=']='⩾',
-							['<>']='≠',
-							[':en']='≈',
-							[':ap']='∈',
-							[':as']='⟼',
-							['->']='⟶',
-							[':un']='∪',
-							[':it']='∩',
-							[':ro']='∘',
-							[':eq']='~',
-							[':co']='≡',
-							[':pp']='∨',
-							[':pg']='∧', [':ve']='∧',
-							[':pe']='⊥',
-							[':sd']='⊕',
-							[':np']='∉',
-							[':im']='⇒',
-							[':ev']='⟺',
-							[':rc']='⇐',
-							[':ic']='⊂',
-							[':ni']='⊄'
-						  }	
+		['<=']='⩽',
+		['>=']='⩾',
+		['<>']='≠',
+		[':en']='≈',
+		[':ap']='∈',
+		[':as']='⟼',
+		['->']='⟶',
+		[':un']='∪',
+		[':it']='∩',
+		[':ro']='∘',
+		[':eq']='~',
+		[':co']='≡',
+		[':pp']='∨',
+		[':pg']='∧', [':ve']='∧',
+		[':pe']='⊥',
+		[':sd']='⊕',
+		[':np']='∉',
+		[':im']='⇒',
+		[':ev']='⟺',
+		[':rc']='⇐',
+		[':ic']='⊂',
+		[':ni']='⊄'
+		}	
 						  					  
 local Chiffre=R("09")
 local Partie_Entiere=Chiffre^1
 local Partie_Decimale=(P(".")/",")*(Chiffre^1)
 local Nombre = C(Partie_Entiere*Partie_Decimale^-1) * Espace
 local Raccourci = 	C((P':al'+P'α')
-					+ 	(P':be'+P'β')
-					+	(P':ga'+P'γ') + (P':GA'+P'Γ')
-					+	(P':de'+P'δ') + (P':DE'+P'Δ')
-					+	(P':ep'+P'ε')
-					+ 	(P':ze'+P'ζ')
-					+ 	(P':et'+P'η')
-					+	(P':th'+P'θ') +	(P':TH'+P'Θ')
-					+	(P':io'+P'ι')
-					+ 	(P':ka'+P'κ')
-					+ 	(P':la'+P'λ') + (P':LA'+P'Λ')
-					+ 	(P':mu'+P'μ')
-					+	(P':nu'+P'ν')
-					+ 	(P':xi'+P'ξ') +	(P':Xi'+P'Ξ')
-					+ 	(P':pi'+P'π') + (P':PI'+P'Π')
-					+ 	(P':rh'+P'ρ')
-					+	(P':si'+P'σ') +	(P':SI'+P'Σ')
-					+ 	(P':ta'+P'τ')
-					+	(P':up'+P'υ') + (P':UP'+P'Υ')
-					+ 	(P':ph'+P'φ') + (P':PH'+P'Φ')
-					+	(P':ch'+P'χ') 
-					+ 	(P':ps'+P'ψ') + (P':PS'+P'Ψ')
-					+	(P':om'+P'ω') + (P':OM'+P'Ω')
-					+	(P':in'+P'∞')
-					+	(P':ll'+P'ℓ')
-					+	(P':pm'+P'±')
-					+	(P':dr'+P'∂')
-					+	(P':vi'+P'∅')
-					+	(P':ex'+P'∃')
-					+	(P':qs'+P'∀')
-					+	P':oijk'
-					+	P':oij'
-					+	P':ouv'
-					+	(P':Rpe'+P'ℝpe')
-					+	(P':Rme'+P'ℝme')
-					+	(P':Rp'+P'ℝp')
-					+	(P':Rm'+P'ℝm')
-					+	(P':Re'+P'ℝe')
-					+	(P':R'+P'ℝ')
-					+	(P':Ne'+P'ℕe')
-					+	(P':N'+P'ℕ')
-					+	(P':Ze'+P'ℤe')
-					+	(P':Z'+P'ℤ')
-					+	(P':Ce'+P'ℂe')
-					+	(P':C'+P'ℂ')
-					+	(P':Qe'+P'ℚe')
-					+	(P':Q'+P'ℚ')
-					+	(P':K'+P'𝕂')
-					+	(P':e'+P'е')
-					+	(P':i'+P'і')
-					+	P':d'
-					- 	Operateur) * Espace
+		+ 	(P':be'+P'β')
+		+	(P':ga'+P'γ') + (P':GA'+P'Γ')
+		+	(P':de'+P'δ') + (P':DE'+P'Δ')
+		+	(P':ep'+P'ε')
+		+ 	(P':ze'+P'ζ')
+		+ 	(P':et'+P'η')
+		+	(P':th'+P'θ') +	(P':TH'+P'Θ')
+		+	(P':io'+P'ι')
+		+ 	(P':ka'+P'κ')
+		+ 	(P':la'+P'λ') + (P':LA'+P'Λ')
+		+ 	(P':mu'+P'μ')
+		+	(P':nu'+P'ν')
+		+ 	(P':xi'+P'ξ') +	(P':Xi'+P'Ξ')
+		+ 	(P':pi'+P'π') + (P':PI'+P'Π')
+		+ 	(P':rh'+P'ρ')
+		+	(P':si'+P'σ') +	(P':SI'+P'Σ')
+		+ 	(P':ta'+P'τ')
+		+	(P':up'+P'υ') + (P':UP'+P'Υ')
+		+ 	(P':ph'+P'φ') + (P':PH'+P'Φ')
+		+	(P':ch'+P'χ') 
+		+ 	(P':ps'+P'ψ') + (P':PS'+P'Ψ')
+		+	(P':om'+P'ω') + (P':OM'+P'Ω')
+		+	(P':in'+P'∞')
+		+	(P':ll'+P'ℓ')
+		+	(P':pm'+P'±')
+		+	(P':dr'+P'∂')
+		+	(P':vi'+P'∅')
+		+	(P':ex'+P'∃')
+		+	(P':qs'+P'∀')
+		+	P':oijk'
+		+	P':oij'
+		+	P':ouv'
+		+	(P':Rpe'+P'ℝpe')
+		+	(P':Rme'+P'ℝme')
+		+	(P':Rp'+P'ℝp')
+		+	(P':Rm'+P'ℝm')
+		+	(P':Re'+P'ℝe')
+		+	(P':R'+P'ℝ')
+		+	(P':Ne'+P'ℕe')
+		+	(P':N'+P'ℕ')
+		+	(P':Ze'+P'ℤe')
+		+	(P':Z'+P'ℤ')
+		+	(P':Ce'+P'ℂe')
+		+	(P':C'+P'ℂ')
+		+	(P':Qe'+P'ℚe')
+		+	(P':Q'+P'ℚ')
+		+	(P':K'+P'𝕂')
+		+	(P':e'+P'е')
+		+	(P':i'+P'і')
+		+	P':d'
+		- 	Operateur) * Espace
 
 local TSubstRaccourciLaTeX = {	[':al']='\\alpha ', ['α']='\\alpha ',
-					[':be']='\\beta ', ['β']='\\beta ',
-					[':ga']='\\gamma ', ['γ']='\\gamma ', [':GA']='\\Gamma ', ['Γ']='\\Gamma ', 
-					[':de']='\\delta ', ['δ']='\\delta ',[':DE']='\\Delta ', ['Δ']='\\Delta ',
-					[':ep']='\\varepsilon ', ['ε']='\\varepsilon ',
-					[':ze']='\\zeta ', ['ζ']='\\zeta ',
-					[':et']='\\eta ', ['η']='\\eta ',
-					[':th']='\\theta ', ['θ']='\\theta ',[':TH']='\\Theta ', ['Θ']='\\Theta ',
-					[':io']='\\iota ', ['ι']='\\iota ',
-					[':ka']='\\varkappa ', ['κ']='\\varkappa ',
-					[':la']='\\lambda ', ['λ']='\\lambda ',[':LA']='\\Lambda ', ['Λ']='\\Lambda ',
-					[':mu']='\\mu ', ['μ']='\\mu ',
-					[':nu']='\\nu ', ['ν']='\\nu ',
-					[':xi']='\\xi ', ['ξ']='\\xi ',[':Xi']='\\Xi ', ['Ξ']='\\Xi ',
-					[':pi']='\\pi ', ['π']='\\pi ',[':PI']='\\Pi ', ['Π']='\\Pi ',
-					[':rh']='\\rho ', ['ρ']='\\rho ',
-					[':si']='\\sigma ', ['σ']='\\sigma ',[':SI']='\\Sigma ', ['Σ']='\\Sigma ',
-					[':ta']='\\tau ', ['τ']='\\tau ',
-					[':up']='\\upsilon ', ['υ']='\\upsilon ',[':UP']='\\Upsilon ', ['Υ']='\\Upsilon ',
-					[':ph']='\\varphi ', ['φ']='\\varphi ',[':PH']='\\Phi ', ['Φ']='\\Phi ',
-					[':ch']='\\chi ', ['χ']='\\chi ',
-					[':ps']='\\psi ', ['ψ']='\\psi ',[':PS']='\\Psi ', ['Ψ']='\\Psi ',
-					[':om']='\\omega ', ['ω']='\\omega ',[':OM']='\\Omega ', ['Ω']='\\Omega ',
-					[':in']='\\infty ', ['∞']='\\infty ',
-					[':ll']='\\ell ', ['ℓ']='\\ell ',
-					[':pm']='\\pm ', ['±']='\\pm ',
-					[':dr']='\\partial ', ['∂']='\\partial ',
-					[':vi']='\\varnothing ', ['∅']='\\varnothing ',
-					[':ex']='\\exists ', ['∃']='\\exists ',
-					[':qs']='\\forall ', ['∀']='\\forall ',
-					[':oijk']='\\left(O\\,{;}\\,\\vv{\\imath}{,}\\,\\vv{\\jmath}\\,\\vv{k} \\right) ',
-					[':oij']='\\left(O\\,{;}\\,\\vv{\\imath}{,}\\,\\vv{\\jmath} \\right) ',
-					[':ouv']='\\left(O\\,{;}\\,\\vv{u}{,}\\,\\vv{v} \\right) ',
-					[':Rpe']='\\mathbb{R}_{+}^{*} ', ['ℝpe']='\\mathbb{R}_{+}^{*} ',
-					[':Rme']='\\mathbb{R}_{-}^{*} ', ['ℝme']='\\mathbb{R}_{-}^{*} ',
-					[':Rp']='\\mathbb{R}^{+} ', ['ℝp']='\\mathbb{R}^{+} ',
-					[':Rm']='\\mathbb{R}^{-} ', ['ℝm']='\\mathbb{R}^{-} ',
-					[':Re']='\\mathbb{R}^{*} ', ['ℝe']='\\mathbb{R}^{*} ',
-					[':R']='\\mathbb{R} ', ['ℝ']='\\mathbb{R} ',
-					[':Ne']='\\mathbb{N}^{*} ', ['ℕe']='\\mathbb{N}^{*} ',
-					[':N']='\\mathbb{N} ', ['ℕ']='\\mathbb{N} ',
-					[':Ze']='\\mathbb{Z}^{*} ', ['ℤe']='\\mathbb{Z}^{*} ',
-					[':Z']='\\mathbb{Z} ', ['ℤ']='\\mathbb{Z} ',
-					[':Ce']='\\mathbb{C}^{*} ', ['ℂe']='\\mathbb{C}^{*} ',
-					[':C']='\\mathbb{C} ', ['ℂ']='\\mathbb{C} ',
-					[':Qe']='\\mathbb{Q}^{*} ', ['ℚe']='\\mathbb{Q}^{*} ',
-					[':Q']='\\mathbb{Q} ', ['ℚ']='\\mathbb{Q} ',
-					[':K']='\\mathbb{K} ', ['𝕂']='\\mathbb{K} ',
-					[':e']='\\mathrm{e} ', ['е']='\\mathrm{e} ',
-					[':i']='\\ ', ['і']='\\mathrm{i} ',
-					[':d']='{\\mathop{}\\mathopen{}\\mathrm{d}}'
-					}
+		[':be']='\\beta ', ['β']='\\beta ',
+		[':ga']='\\gamma ', ['γ']='\\gamma ', [':GA']='\\Gamma ', ['Γ']='\\Gamma ', 
+		[':de']='\\delta ', ['δ']='\\delta ',[':DE']='\\Delta ', ['Δ']='\\Delta ',
+		[':ep']='\\varepsilon ', ['ε']='\\varepsilon ',
+		[':ze']='\\zeta ', ['ζ']='\\zeta ',
+		[':et']='\\eta ', ['η']='\\eta ',
+		[':th']='\\theta ', ['θ']='\\theta ',[':TH']='\\Theta ', ['Θ']='\\Theta ',
+		[':io']='\\iota ', ['ι']='\\iota ',
+		[':ka']='\\varkappa ', ['κ']='\\varkappa ',
+		[':la']='\\lambda ', ['λ']='\\lambda ',[':LA']='\\Lambda ', ['Λ']='\\Lambda ',
+		[':mu']='\\mu ', ['μ']='\\mu ',
+		[':nu']='\\nu ', ['ν']='\\nu ',
+		[':xi']='\\xi ', ['ξ']='\\xi ',[':Xi']='\\Xi ', ['Ξ']='\\Xi ',
+		[':pi']='\\pi ', ['π']='\\pi ',[':PI']='\\Pi ', ['Π']='\\Pi ',
+		[':rh']='\\rho ', ['ρ']='\\rho ',
+		[':si']='\\sigma ', ['σ']='\\sigma ',[':SI']='\\Sigma ', ['Σ']='\\Sigma ',
+		[':ta']='\\tau ', ['τ']='\\tau ',
+		[':up']='\\upsilon ', ['υ']='\\upsilon ',[':UP']='\\Upsilon ', ['Υ']='\\Upsilon ',
+		[':ph']='\\varphi ', ['φ']='\\varphi ',[':PH']='\\Phi ', ['Φ']='\\Phi ',
+		[':ch']='\\chi ', ['χ']='\\chi ',
+		[':ps']='\\psi ', ['ψ']='\\psi ',[':PS']='\\Psi ', ['Ψ']='\\Psi ',
+		[':om']='\\omega ', ['ω']='\\omega ',[':OM']='\\Omega ', ['Ω']='\\Omega ',
+		[':in']='\\infty ', ['∞']='\\infty ',
+		[':ll']='\\ell ', ['ℓ']='\\ell ',
+		[':pm']='\\pm ', ['±']='\\pm ',
+		[':dr']='\\partial ', ['∂']='\\partial ',
+		[':vi']='\\varnothing ', ['∅']='\\varnothing ',
+		[':ex']='\\exists ', ['∃']='\\exists ',
+		[':qs']='\\forall ', ['∀']='\\forall ',
+		[':oijk']='\\left(O\\,{;}\\,\\vv{\\imath}{,}\\,\\vv{\\jmath}\\,\\vv{k} \\right) ',
+		[':oij']='\\left(O\\,{;}\\,\\vv{\\imath}{,}\\,\\vv{\\jmath} \\right) ',
+		[':ouv']='\\left(O\\,{;}\\,\\vv{u}{,}\\,\\vv{v} \\right) ',
+		[':Rpe']='\\mathbb{R}_{+}^{*} ', ['ℝpe']='\\mathbb{R}_{+}^{*} ',
+		[':Rme']='\\mathbb{R}_{-}^{*} ', ['ℝme']='\\mathbb{R}_{-}^{*} ',
+		[':Rp']='\\mathbb{R}^{+} ', ['ℝp']='\\mathbb{R}^{+} ',
+		[':Rm']='\\mathbb{R}^{-} ', ['ℝm']='\\mathbb{R}^{-} ',
+		[':Re']='\\mathbb{R}^{*} ', ['ℝe']='\\mathbb{R}^{*} ',
+		[':R']='\\mathbb{R} ', ['ℝ']='\\mathbb{R} ',
+		[':Ne']='\\mathbb{N}^{*} ', ['ℕe']='\\mathbb{N}^{*} ',
+		[':N']='\\mathbb{N} ', ['ℕ']='\\mathbb{N} ',
+		[':Ze']='\\mathbb{Z}^{*} ', ['ℤe']='\\mathbb{Z}^{*} ',
+		[':Z']='\\mathbb{Z} ', ['ℤ']='\\mathbb{Z} ',
+		[':Ce']='\\mathbb{C}^{*} ', ['ℂe']='\\mathbb{C}^{*} ',
+		[':C']='\\mathbb{C} ', ['ℂ']='\\mathbb{C} ',
+		[':Qe']='\\mathbb{Q}^{*} ', ['ℚe']='\\mathbb{Q}^{*} ',
+		[':Q']='\\mathbb{Q} ', ['ℚ']='\\mathbb{Q} ',
+		[':K']='\\mathbb{K} ', ['𝕂']='\\mathbb{K} ',
+		[':e']='\\mathrm{e} ', ['е']='\\mathrm{e} ',
+		[':i']='\\ ', ['і']='\\mathrm{i} ',
+		[':d']='{\\mathop{}\\mathopen{}\\mathrm{d}}'
+		}
 
 local TSubstRaccourciTW = {	[':al']='α',
-					[':be']='β',
-					[':ga']='γ', [':GA']='Γ', 
-					[':de']='δ', [':DE']='Δ',
-					[':ep']='ε',
-					[':ze']='ζ',
-					[':et']='η',
-					[':th']='θ', [':TH']='Θ',
-					[':io']='ι',
-					[':ka']='κ',
-					[':la']='λ',[':LA']='Λ',
-					[':mu']='μ',   
-					[':nu']='ν',
-					[':xi']='ξ',[':Xi']='Ξ',
-					[':pi']='π',[':PI']='Π',
-					[':rh']='ρ',
-					[':si']='σ',[':SI']='Σ',
-					[':ta']='τ',
-					[':up']='υ',[':UP']='Υ',
-					[':ph']='φ',[':PH']='Φ',
-					[':ch']='χ',
-					[':ps']='ψ',[':PS']='Ψ',
-					[':om']='ω',[':OM']='Ω',
-					[':in']='∞',
-					[':ll']='ℓ',
-					[':pm']='±',
-					[':dr']='∂',
-					[':vi']='∅',
-					[':ex']='∃',
-					[':qs']='∀',
-					[':Rpe']='ℝpe',
-					[':Rme']='ℝme',
-					[':Rp']='ℝp',
-					[':Rm']='ℝm',
-					[':Re']='ℝe',
-					[':R']='ℝ',
-					[':Ne']='ℕe',
-					[':N']='ℕ',
-					[':Ze']='ℤe',
-					[':Z']='ℤ',
-					[':Ce']='ℂe',
-					[':C']='ℂ',
-					[':Qe']='ℚe',
-					[':Q']='ℚ',
-					[':K']='𝕂',
-					[':e']='е',
-					[':i']='і'
-					}
+		[':be']='β',
+		[':ga']='γ', [':GA']='Γ', 
+		[':de']='δ', [':DE']='Δ',
+		[':ep']='ε',
+		[':ze']='ζ',
+		[':et']='η',
+		[':th']='θ', [':TH']='Θ',
+		[':io']='ι',
+		[':ka']='κ',
+		[':la']='λ',[':LA']='Λ',
+		[':mu']='μ',   
+		[':nu']='ν',
+		[':xi']='ξ',[':Xi']='Ξ',
+		[':pi']='π',[':PI']='Π',
+		[':rh']='ρ',
+		[':si']='σ',[':SI']='Σ',
+		[':ta']='τ',
+		[':up']='υ',[':UP']='Υ',
+		[':ph']='φ',[':PH']='Φ',
+		[':ch']='χ',
+		[':ps']='ψ',[':PS']='Ψ',
+		[':om']='ω',[':OM']='Ω',
+		[':in']='∞',
+		[':ll']='ℓ',
+		[':pm']='±',
+		[':dr']='∂',
+		[':vi']='∅',
+		[':ex']='∃',
+		[':qs']='∀',
+		[':Rpe']='ℝpe',
+		[':Rme']='ℝme',
+		[':Rp']='ℝp',
+		[':Rm']='ℝm',
+		[':Re']='ℝe',
+		[':R']='ℝ',
+		[':Ne']='ℕe',
+		[':N']='ℕ',
+		[':Ze']='ℤe',
+		[':Z']='ℤ',
+		[':Ce']='ℂe',
+		[':C']='ℂ',
+		[':Qe']='ℚe',
+		[':Q']='ℚ',
+		[':K']='𝕂',
+		[':e']='е',
+		[':i']='і'
+		}
 
 local Lettre = R("az")+R("AZ")+P("'")+P("!")					
 local Mot=C(Lettre^1+P('∭')+P('∬')+P('∫')+P('√')) - Guillemet
@@ -279,31 +277,31 @@ local CaractereSansParentheses=(1-S"()")
 
 -- Substitutions 
 local TSubstCmath =		P'arcsin'/'\\arcsin '
-					+	P'arccos'/'\\arccos '
-					+	P'arctan'/'\\arctan '
-					+	P'argch'/'\\argch '
-					+	P'argsh'/'\\argsh '
-					+	P'argth'/'\\argth '
-					+	P'ppcm'/'\\ppcm '
-					+	P'vect'/'\\vect '
-					+	P'pgcd'/'\\pgcd '
-					+	P'sin'/'\\sin '
-					+	P'cos'/'\\cos '
-					+	P'tan'/'\\tan '
-					+	P'exp'/'\\exp '
-					+	P'ima'/'\\Ima '
-					+	P'arg'/'\\arg '
-					+	P'ker'/'\\Ker '
-					+	P'dim'/'\\dim '
-					+	P'deg'/'\\deg '
-					+	P'log'/'\\log '
-					+	P'inf'/'\\inf '
-					+	P'ln'/'\\ln '
-					+	P'ch'/'\\ch '
-					+	P'sh'/'\\sh '
-					+	P'th'/'\\th '
-					+	P'card'/'\\card '
-					+	1
+		+	P'arccos'/'\\arccos '
+		+	P'arctan'/'\\arctan '
+		+	P'argch'/'\\argch '
+		+	P'argsh'/'\\argsh '
+		+	P'argth'/'\\argth '
+		+	P'ppcm'/'\\ppcm '
+		+	P'vect'/'\\vect '
+		+	P'pgcd'/'\\pgcd '
+		+	P'sin'/'\\sin '
+		+	P'cos'/'\\cos '
+		+	P'tan'/'\\tan '
+		+	P'exp'/'\\exp '
+		+	P'ima'/'\\Ima '
+		+	P'arg'/'\\arg '
+		+	P'ker'/'\\Ker '
+		+	P'dim'/'\\dim '
+		+	P'deg'/'\\deg '
+		+	P'log'/'\\log '
+		+	P'inf'/'\\inf '
+		+	P'ln'/'\\ln '
+		+	P'ch'/'\\ch '
+		+	P'sh'/'\\sh '
+		+	P'th'/'\\th '
+		+	P'card'/'\\card '
+		+	1
 
 function fOperateur(arg1,op,arg2)
 	return {'op_binaire',op,arg1,arg2}
@@ -395,38 +393,38 @@ end
 
 
 local FonctionsCmath = 	P('abs')+ 			-- valeur absolue
-						P('iiint')+P('∭')+	-- intégrale triple
-						P('iint')+P('∬')+	-- intégrale double
-						P('int')+P('∫')+	-- intégrale
-						P('rac')+P('√')+	-- racine
-						P('vec')+			-- vecteur ou coordonnées de vecteurs si liste
-						P('cal')+P('scr')+P('frak')+P('pzc')+ -- polices
-						P('ang')+
-						P('til')+
-						P('bar')+
-						P('sou')+
-						P('nor')+
-						P('acc')+
-						P('som')+
-						P('pro')+
-						P('uni')+
-						P('ite')+
-						P('psc')+
-						P('acs')+
-						P('aci')+
-						P('cnp')+
-						P('aut')+
-						P('bif')+
-						P('sys')+
-						P('mat')+
-						P('det')+
-						P('tab')+
-						P('tor')+
-						P('cro')+
-						P('ds')+
-						P('ts')+
-						P('im')+
-						P('re')
+		P('iiint')+P('∭')+	-- intégrale triple
+		P('iint')+P('∬')+	-- intégrale double
+		P('int')+P('∫')+	-- intégrale
+		P('rac')+P('√')+	-- racine
+		P('vec')+			-- vecteur ou coordonnées de vecteurs si liste
+		P('cal')+P('scr')+P('frak')+P('pzc')+ -- polices
+		P('ang')+
+		P('til')+
+		P('bar')+
+		P('sou')+
+		P('nor')+
+		P('acc')+
+		P('som')+
+		P('pro')+
+		P('uni')+
+		P('ite')+
+		P('psc')+
+		P('acs')+
+		P('aci')+
+		P('cnp')+
+		P('aut')+
+		P('bif')+
+		P('sys')+
+		P('mat')+
+		P('det')+
+		P('tab')+
+		P('tor')+
+		P('cro')+
+		P('ds')+
+		P('ts')+
+		P('im')+
+		P('re')
 												
 function construitMatrix(arbre,typeMatrice)
 local s='\\begin{'..typeMatrice..'}\n'
@@ -882,54 +880,10 @@ else
 end
 end
 
-
---[==[function Giac(formule)
--- Formule doit être au format "instruction 1","instruction 2",...
--- Seule la dernière instruction renvoie un résultat vers Luatex
-local prg=[[
-unarchive("giac.sav"):;
-Sortie:=fopen("giac.out");
-Resultat:=(instructions)->{
-  local j,n;
-  if (type(instructions)==DOM_LIST){
-    n:=dim(instructions);
-    for(j:=0;j<=n-2;j++)
-      execute(instructions[j]);
-	if (sommet(expr(instructions[n-1],quote))=='sto') {
-		latex(execute(instructions[n-1]));
-		return '""';}
-	else
-		return(latex(eval(execute(instructions[n-1]))));
-    }
-  else {
-	if (sommet(expr(instructions,quote))=='sto') {
-		latex(execute(instructions));
-		return '""';}
-	else
-		return(latex(execute(instructions)));
-  }
-}(]]..formule..[[);
-fprint(Sortie,Unquoted,Resultat);
-fclose(Sortie);
-archive("giac.sav"):;
-]]
-local f,err = io.open("giac.in","w")
-if not f then return print(err) end
-f:write(prg)
-f:close()
-if QuelOs()=='linux' then
-	os.execute("icas giac.in")
-else --windows, à modifier pour identifier un Mac
-	os.execute("c:\\xcas\\rxvt.exe c:/xcas/icas.exe giac.in")
-end
-io.input("giac.out")
-return(io.read("*all"))
-end ]==]--
-
 function Giac(programme,instruction,latex)
 -- exécute le programme sans conserver le retour
 -- puis exécute l'instruction en renvoyant le résultat
--- conversion en latex selon le booléen latex (pas de conversion pour les tableaux de variations/signes
+-- conversion en latex selon le booléen latex (pas de conversion pour les tableaux de variations/signes)
 local prg=[[
 unarchive("giac.sav"):;
 Sortie:=fopen("giac.out");
