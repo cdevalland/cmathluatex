@@ -6,7 +6,6 @@ Ce programme est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GAR
 --]]
 
 local lpeg = require "lpeg"
--- local table = require "table"
 local write = io.write
 match = lpeg.match
 local C, P, R, S, V = lpeg.C, lpeg.P, lpeg.R, lpeg.S, lpeg.V
@@ -52,7 +51,7 @@ local TSubstOperateurLaTeX = {	['<=>']='\\Leftrightarrow ',
 		['=']=' = ',
 		[':en']='\\approx ', ['≈']='\\approx ',
 		[':ap']='\\in ', ['∈']='\\in ',
-		[':as']='\\longmapsto ', ['⟼']='\\longmapsto ',
+		[':as']='\\mapsto ', ['⟼']='\\mapsto ',
 		['->']='\\to ',	['⟶']='\\to ',
 		['...']='\\dots ',
 		['|']='|',
@@ -114,7 +113,7 @@ local Raccourci = 	C((P':al'+P'α')
 		+ 	(P':la'+P'λ') + (P':LA'+P'Λ')
 		+ 	(P':mu'+P'μ')
 		+	(P':nu'+P'ν')
-		+ 	(P':xi'+P'ξ') +	(P':Xi'+P'Ξ')
+		+ 	(P':xi'+P'ξ') +	(P':XI'+P'Ξ')
 		+ 	(P':pi'+P'π') + (P':PI'+P'Π')
 		+ 	(P':rh'+P'ρ')
 		+	(P':si'+P'σ') +	(P':SI'+P'Σ')
@@ -294,7 +293,6 @@ local TSubstCmath =		P'arcsin'/'\\arcsin '
 		+	P'dim'/'\\dim '
 		+	P'deg'/'\\deg '
 		+	P'log'/'\\log '
-		+	P'inf'/'\\inf '
 		+	P'ln'/'\\ln '
 		+	P'ch'/'\\ch '
 		+	P'sh'/'\\sh '
@@ -328,7 +326,11 @@ function fFactor(arg1,op,arg2)
 end
 
 function fDivise(arg1,op,arg2)
-	return {op,arg1,arg2}
+	if string.sub(arg1[1],1,5)=='signe' then
+		return {arg1[1],{op,arg1[2],arg2}}
+	else
+		return {op,arg1,arg2}
+	end
 end
 
 function fPuissance(arg1,op,arg2)
@@ -359,7 +361,6 @@ function fListe(arg1,op,arg2)
 		table.insert(arg1,arg2)
 		return arg1
 	else
-		--print(arg1..op)
 		if arg1=='' then arg1={''} end
 		return {'liste '..op,arg1,arg2}
 	end
@@ -378,7 +379,7 @@ function fCrochets(arg1,arg2,arg3)
 end
 
 function fRaccourcis(arg1)
-	return {'raccourci',arg1} --match(Cs(Raccourci),arg1)
+	return {'raccourci',arg1}
 end
 
 function fFormule_signee(arg1,arg2)
@@ -391,13 +392,14 @@ function fIntervalle_Entier(arg1)
 end
 
 
-local FonctionsCmath = 	P('abs')+ 			-- valeur absolue
-		P('iiint')+P('∭')+	-- intégrale triple
-		P('iint')+P('∬')+	-- intégrale double
-		P('int')+P('∫')+	-- intégrale
-		P('rac')+P('√')+	-- racine
-		P('vec')+			-- vecteur ou coordonnées de vecteurs si liste
+local FonctionsCmath = 	P('abs')+ 	-- valeur absolue
+		P('iiint')+P('∭')+			-- intégrale triple
+		P('iint')+P('∬')+			-- intégrale double
+		P('int')+P('∫')+			-- intégrale
+		P('rac')+P('√')+			-- racine
+		P('vec')+					-- vecteur ou coordonnées de vecteurs si liste
 		P('cal')+P('scr')+P('frak')+P('pzc')+ -- polices
+		P('gra')+					-- gras
 		P('ang')+
 		P('til')+
 		P('bar')+
@@ -421,6 +423,21 @@ local FonctionsCmath = 	P('abs')+ 			-- valeur absolue
 		P('tor')+
 		P('cro')+
 		P('lim')+
+		P('min')+
+		P('max')+
+		P('sup')+
+		P('inf')+
+		P('enc')+
+		P('equ')+
+		P('ten')+
+		P('acd')+
+		P('sui')+
+		P('ser')+
+		P('pto')+
+		P('gro')+
+		P('derp')+		
+		P('der')+
+		P('res')+		
 		P('ds')+
 		P('ts')+
 		P('im')+
@@ -442,6 +459,17 @@ s=s..Tree2Latex(arbre[n])..'\n\\end{'..typeMatrice..'}'
 return s
 end
 
+function construitLimite(arbre,typeLimite)
+	local n = nbArg(arbre)
+	local s='\\'..typeLimite..' _{'
+	if n==2 then
+		s=s..Tree2Latex(arbre[1])..'} {'..Tree2Latex(arbre[2])..'} '
+	else
+		s=s..'\\substack{'..Tree2Latex(arbre[1])..'\\\\ '..Tree2Latex(arbre[2])..'}} {'..Tree2Latex(arbre[3])..'} '
+	end
+	return s
+end
+
 local TraitementFonctionsCmath = 
 { 	['abs']=
 	function(arbre) 
@@ -450,7 +478,18 @@ local TraitementFonctionsCmath =
 
 	['vec']=
 	function(arbre) 
-		return '\\vv{'..Tree2Latex(arbre)..'}' 
+		if (arbre[1]=='liste ,' or arbre[1]=='liste ;') then
+			local s='\\begin{pmatrix}\n'
+			local n = nbArg(arbre)
+			local nb_col = tonumber(Tree2Latex(arbre[1]))
+			for i=1,n-1 do 
+				s=s..Tree2Latex(arbre[i])..' \\\\\n'
+			end
+			s=s..Tree2Latex(arbre[n])..'\n\\end{pmatrix}'
+			return s
+		else
+			return '\\vv{'..Tree2Latex(arbre)..'}' 
+		end
 	end,
 	
 	['rac']=
@@ -571,6 +610,11 @@ local TraitementFonctionsCmath =
 		return '\\mathpzc{'..Tree2Latex(arbre)..'}' 
 	end,
 	
+	['gra']=
+	function(arbre) 
+		return '\\bm{'..Tree2Latex(arbre)..'}' 
+	end,
+
 	['ang']=
 	function(arbre) 
 		return '\\widehat{'..Tree2Latex(arbre)..'}' 
@@ -581,6 +625,119 @@ local TraitementFonctionsCmath =
 		return '\\widetilde{'..Tree2Latex(arbre)..'}' 
 	end,
 
+	['enc']=
+	function(arbre) 
+		return '\\boxed{'..Tree2Latex(arbre)..'}' 
+	end,
+
+	['ten']=
+	function(arbre) 
+		local n = nbArg(arbre)
+		return Tree2Latex(arbre[1])..' \\xrightarrow['..Tree2Latex(arbre[2])..']{} '..Tree2Latex(arbre[3])
+	end,
+
+	['equ']=
+	function(arbre) 
+		local n = nbArg(arbre)
+		return Tree2Latex(arbre[1])..' \\underset{'..Tree2Latex(arbre[2])..'}{\\sim} '..Tree2Latex(arbre[3])
+	end,
+
+	['sui']=
+	function(arbre) 
+		local n,nom_var
+		if (arbre[1]=='liste ,' or arbre[1]=='liste ;') then
+			n = nbArg(arbre)
+			if arbre[2][1]=='op_binaire' then
+				nom_var=Tree2Latex(arbre[2][3])
+				return '\\left( '..Tree2Latex(arbre[1])..'_{'..nom_var..'} \\right) _{'..Tree2Latex(arbre[2])..'}'
+			else
+				nom_var=Tree2Latex(arbre[2])
+				return '\\left( '..Tree2Latex(arbre[1])..'_{'..nom_var..'} \\right) _{'..nom_var..'\\in \\mathbb{N}}'
+			end
+		else
+			return '\\left( '..Tree2Latex(arbre)..'_{n} \\right) _{n\\in \\mathbb{N}}'	
+		end
+	end,
+
+	['ser']=
+	function(arbre) 
+		local n,nom_var
+		if (arbre[1]=='liste ,' or arbre[1]=='liste ;') then
+			n = nbArg(arbre)
+			if arbre[2][1]=='op_binaire' then
+				nom_var=Tree2Latex(arbre[2][3])
+				return '\\sum \\left( '..Tree2Latex(arbre[1])..'_{'..nom_var..'} \\right) _{'..Tree2Latex(arbre[2])..'}'
+			else
+				nom_var=Tree2Latex(arbre[2])
+				return '\\sum '..Tree2Latex(arbre[1])..'_{'..nom_var..'}'
+			end
+		else
+			return '\\sum '..Tree2Latex(arbre)..'_{n}'	
+		end
+	end,
+	
+	['pto']=
+	function(arbre) 
+		local n = nbArg(arbre)
+		return 'o_{'..Tree2Latex(arbre[1])..'} \\left( '..Tree2Latex(arbre[2])..'\\right) '
+	end,
+
+	['gro']=
+	function(arbre) 
+		local n = nbArg(arbre)
+		return 'O_{'..Tree2Latex(arbre[1])..'} \\left( '..Tree2Latex(arbre[2])..'\\right) '
+	end,
+	
+	['der']=
+	function(arbre) 
+		local n = nbArg(arbre)
+		if n==3 then
+			return '\\frac{\\textrm{d}^{'..Tree2Latex(arbre[3])..'}'..Tree2Latex(arbre[1])..'}{\\textrm{d}'..Tree2Latex(arbre[2])..'^{'..Tree2Latex(arbre[3])..'}}'
+		else
+			return '\\frac{\\textrm{d}'..Tree2Latex(arbre[1])..'}{\\textrm{d}'..Tree2Latex(arbre[2])..'}'
+		end
+	end,
+
+	['derp']=
+	function(arbre) 
+		local n = nbArg(arbre)
+		local noms_var={}
+		local ordres_partiels={}
+		local ordre=0
+		local i,j=1,1
+		local s
+		arg2=arbre[2][1]
+		while i<=string.len(arg2) do
+			table.insert(noms_var,string.sub(arg2,i,i))
+			j=1
+			i=i+1
+			while(i<=string.len(arg2) and string.sub(arg2,i,i)==string.sub(arg2,i-1,i-1)) do
+				i=i+1
+				j=j+1
+			end
+			ordre=ordre+j
+			table.insert(ordres_partiels,j)
+		end
+		s='\\frac{\\partial ^{'..tostring(ordre)..'}'..Tree2Latex(arbre[1])..'}{'
+		i=1
+		while(noms_var[i]~=nil) do -- table.getn ne marche pas dans LuaTeX
+			s=s..'\\partial '..noms_var[i]
+			if ordres_partiels[i]~=1 then
+				s=s..'^'..tostring(ordres_partiels[i])
+			end
+			s=s..' '
+			i=i+1
+		end
+		s=s..'}'
+		return s
+	end,
+	
+	['res']=
+	function(arbre) 
+		local n = nbArg(arbre)
+		return Tree2Latex(arbre[1])..'_{|'..Tree2Latex(arbre[2])..'}'
+	end,
+	
 	['bar']=
 	function(arbre) 
 		return '\\overline{'..Tree2Latex(arbre)..'}' 
@@ -671,6 +828,18 @@ local TraitementFonctionsCmath =
 		s=s..'\n\\end{cases}'
 		return s
 	end,
+
+	['acd']=
+	function(arbre)
+		local s='\\left.\n\\begin{array}{r}\n'
+		local n = nbArg(arbre)
+		s=s..Tree2Latex(arbre[1])
+		for i=2,n do 
+			s=s..' \\\\\n'..Tree2Latex(arbre[i])
+		end	
+		s=s..'\n\\end{array}\n\\right\\}'
+		return s
+	end,
 	
 	['mat']=
 	function(arbre)
@@ -699,16 +868,28 @@ local TraitementFonctionsCmath =
 	
 	['lim']=
 	function(arbre)
-		local n = nbArg(arbre)
-		local s='\\lim _{'
-		if n==2 then
-			s=s..Tree2Latex(arbre[1])..'} {'..Tree2Latex(arbre[2])..'} '
-		else
-			s=s..'\\substack{'..Tree2Latex(arbre[1])..'\\\\ '..Tree2Latex(arbre[2])..'}} {'..Tree2Latex(arbre[3])..'} '
-		end
-		return s
+		return construitLimite(arbre,'lim')
 	end,
 
+	['min']=
+	function(arbre)
+		return construitLimite(arbre,'min')
+	end,
+
+	['max']=
+	function(arbre)
+		return construitLimite(arbre,'max')
+	end,
+
+	['inf']=
+	function(arbre)
+		return construitLimite(arbre,'inf')
+	end,
+
+	['sup']=
+	function(arbre)
+		return construitLimite(arbre,'sup')
+	end,
 	
 	['im']=
 	function(arbre) 
@@ -748,11 +929,11 @@ function fCommandes(arg1,arg2,arg3)
 	return arg1..','..arg2
 end
 
-function fExpressionsXcas(arg1,arg2,arg3) --arg3 à supprimer
+function fExpressionsXcas(arg1,arg2)
 	return string.sub(arg1,1,arg1:len()-1)..string.sub(arg2,2)
 end
 
-function fFacteursXcas(arg1,arg2) --arg2 à supprimer
+function fFacteursXcas(arg1)
 	return '"'..arg1..'"'
 end
 
@@ -799,7 +980,16 @@ elseif (op=='{}') then
 	return '{'..Tree2Latex(Arbre[2])..'}'
 elseif (op=='/') then
 	return '\\frac{'..Tree2Latex(Parentheses_inutiles(Arbre[2]))..'}{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
-elseif (op=='^' or op=='_') then
+elseif (op=='^') then
+	arg1=Tree2Latex(Arbre[2])
+	if arg1=='\\sin ' or arg1=='\\cos ' or arg1=='\\tan ' or arg1=='\\sh '
+		or arg1=='\\ch ' or arg1=='\\th ' or arg1=='\\ln ' or arg1=='\\log 'then 
+		if Arbre[3][1]=='imp*' and Arbre[3][3][1]=='()' then
+			return arg1..op..'{'..Tree2Latex(Parentheses_inutiles(Arbre[3][2]))..'} '..Tree2Latex((Arbre[3][3][2]))
+		end
+	end
+	return Tree2Latex(Arbre[2])..op..'{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
+elseif (op=='_') then	
 	return Tree2Latex(Arbre[2])..op..'{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
 elseif (op=='text') then
 	return '\\textrm{'..Arbre[2]..'}'
@@ -828,14 +1018,11 @@ elseif (op=='⟦⟧') then
 	return  '\\llbracket '..Tree2Latex(Arbre[2])..' \\rrbracket '
 elseif (string.sub(op,1,5)=='signe') then
 	return string.sub(op,7)..Tree2Latex(Arbre[2])
---elseif (match(Operateur,op)) then
---	return Tree2Latex(Arbre[2])..TSubstOperateur[op]..Tree2Latex(Arbre[3])
 elseif (op=='raccourci') then
 	return TSubstRaccourciLaTeX[Arbre[2]]
 else
 	-- Repérer les fonctions usuelles
 	return match(Cs(TSubstCmath^1),op)
-	-- return op
 end
 end
 
@@ -865,7 +1052,7 @@ elseif (op=='{}') then
 elseif (op=='^' or op=='_' or op=='/' or op=='..' or op=='+' or op=='-' or op=='*' or op==' ') then
 	return Tree2TW(Arbre[2])..op..Tree2TW((Arbre[3]))
 elseif (op=='text') then
-	return Arbre[2]
+	return '"'..Arbre[2]..'"'
 elseif (op=='no_eval') then
 		return Arbre[2]..'('..Arbre[3]..')'
 elseif (op=='latex') then
@@ -881,14 +1068,11 @@ elseif (op=='⟦⟧') then
 	return  '⟦'..Tree2TW(Arbre[2])..'⟧'
 elseif (string.sub(op,1,5)=='signe') then
 	return string.sub(op,7)..Tree2TW(Arbre[2])
---elseif (match(Operateur,op)) then
---	return Tree2Latex(Arbre[2])..TSubstOperateur[op]..Tree2Latex(Arbre[3])
 elseif (op=='raccourci') then
 	arg2=TSubstRaccourciTW[Arbre[2]]
 	if arg2==nil then arg2=Arbre[2] end
 	return arg2
 else
-	--return match(Cs(TSubstCmath^1),op)
 	return op
 end
 end
@@ -921,9 +1105,9 @@ if not f then return print(err) end
 f:write(prg)
 f:close()
 if QuelOs()=='linux' then
-	os.execute("icas giac.in")
+	os.execute('icas giac.in')
 else --windows, à modifier pour identifier un Mac
-	os.execute("c:\\xcas\\rxvt.exe c:/xcas/icas.exe giac.in")
+	os.execute('c:\\xcas\\rxvt.exe c:/xcas/icas.exe giac.in')
 end
 io.input("giac.out")
 return(io.read("*all"))
