@@ -1,8 +1,19 @@
---[[ Cmath pour LuaTeX, version 2014.06.04
-Christophe Devalland (christophe.devalland@ac-rouen.fr)
-http://cdeval.free.fr
-Ce programme est libre, vous pouvez le redistribuer et/ou le modifier selon les termes de la Licence Publique Générale GNU telle que publié par la Free Software Foundation ; soit la version 2 de cette licence, soit toute autre version ultérieure.
-Ce programme est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE, ni explicite ni implicite, y compris les garanties de commercialisation ou d'adaptation dans un but spécifique. Prenez connaissance de la Licence Publique Générale GNU pour plus de détails.
+--[[
+Cmath pour LuaTeX, version 2014.06.04
+    Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --]]
 
 local lpeg = require "lpeg"
