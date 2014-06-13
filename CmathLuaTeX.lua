@@ -281,7 +281,7 @@ local Accolade_Fermee = P("}") * Espace
 local Crochet = C(S("[]")) * Espace
 local Intervalle_Entier_Ouvert = P("[[")+P("⟦")
 local Intervalle_Entier_Ferme = P("]]")+P("⟧")
-local Fonction_sans_eval = P("xcas")+P("TVP")+P("TV")+P("TS")
+local Fonction_sans_eval = P("xcas")+P("TVarP")+P("TVar")+P("TSig")+P("TVal")
 local CaractereSansParentheses=(1-S"()")
 
 -- Substitutions 
@@ -1007,12 +1007,14 @@ elseif (op=='text') then
 elseif (op=='no_eval') then
 	if Arbre[2]=='xcas' then
 		return Giac("",Arbre[3],"true")
-	elseif Arbre[2]=='TV' then
-		return Giac(XCAS_Tableaux,'TV('..Arbre[3]..')',"false")
-	elseif Arbre[2]=='TS' then
-		return Giac(XCAS_Tableaux,'TS('..Arbre[3]..')',"false")	
-	elseif Arbre[2]=='TVP' then
-		return Giac(XCAS_Tableaux,'TVP('..Arbre[3]..')',"false")
+	elseif Arbre[2]=='TVar' then
+		return Giac(XCAS_Tableaux,'TVar('..Arbre[3]..')',"false")
+	elseif Arbre[2]=='TSig' then
+		return Giac(XCAS_Tableaux,'TSig('..Arbre[3]..')',"false")	
+	elseif Arbre[2]=='TVarP' then
+		return Giac(XCAS_Tableaux,'TVarP('..Arbre[3]..')',"false")
+	elseif Arbre[2]=='TVal' then
+		return Giac(XCAS_Tableaux,'TVal('..Arbre[3]..')',"false")
 	else	
 		return Arbre[2]..'("'..Arbre[3]..'")'
 	end
@@ -1097,7 +1099,8 @@ unarchive("giac.sav"):;
 Sortie:=fopen("giac.out");
 ]]..programme..[[
 purge(Resultat);
-if(sommet(quote(]]..instruction..[[))=='sto'){
+som:=sommet(quote(]]..instruction..[[));
+if(som=='sto' or som=='supposons'){
   ]]..instruction..[[;
   Resultat:='""'} else {
   Resultat:=(]]..instruction..[[)};
@@ -1351,11 +1354,11 @@ insereValeurs(l1,l2):={
 
 estDefinie(f,x):={
   local y;
-  if (abs(x)==+infinity){return(faux)}
-  y:=f(x);
-  if (y==undef){return(faux)}
-  if (abs(y)==+infinity){return(faux)}
-  if (im(evalf(y))!=0){return(faux)}
+  if (abs(x)==+infinity){return(faux)};
+  y:=simplifier(f(x));
+  if (y==undef){return(faux)};
+  if (abs(y)==+infinity){return(faux)};
+  if (im(evalf(y))!=0){return(faux)};
   return(vrai);
 }:;
 
@@ -1398,17 +1401,33 @@ tabSignes(IE,f,g):={
   return(signes);
 }:;
 
-calculeImages(IE,f):={
+calculeImages(IE,f,nb_decimales):={
   local k;
   local images;
   local nIE:=size(IE);
-  images:=[ [infinity,simplifier(limite(f(x),x,IE[0],1))] ];
+  if(type(nb_decimales)!=DOM_INT){
+    images:=[ [infinity,simplifier(limite(f(x),x,IE[0],1))] ];
+  } else {
+    images:=[ [infinity,evalf(limite(f(x),x,IE[0],1),nb_decimales)] ];
+  }
+
   for(k:=1;k<=nIE-2;k++){
-    images:=append(images,[simplifier(limite(f(x),x,IE[k],-1)),simplifier(limite(f(x),x,IE[k],1))]);
+    if(type(nb_decimales)!=DOM_INT){
+      images:=append(images,[simplifier(limite(f(x),x,IE[k],-1)),simplifier(limite(f(x),x,IE[k],1))]);
+    } else {
+      images:=append(images,[evalf(limite(f(x),x,IE[k],-1),nb_decimales),evalf(limite(f(x),x,IE[k],1),nb_decimales)]);
     }
-  images:=append(images,[simplifier(limite(f(x),x,IE[nIE-1],-1)),infinity]);
+  }
+  
+  if(type(nb_decimales)!=DOM_INT){
+    images:=append(images,[simplifier(limite(f(x),x,IE[nIE-1],-1)),infinity]);
+  } else {
+    images:=append(images,[evalf(limite(f(x),x,IE[nIE-1],-1),nb_decimales),infinity]);
+  }
   return(images);
 }:;
+
+
 
 calculePosition(IE,VI,f,images):={
   // crée une liste avec la position des images, les double-barres, les zones interdites.
@@ -1418,24 +1437,38 @@ calculePosition(IE,VI,f,images):={
   local nIE:=size(IE);
   for(k:=0;k<=nIE-2;k++){
     symb:=sg;
+    xi:=x_milieu(IE[k],IE[k+1]);
     if(member(IE[k],VI) or not(estDefinie(f,IE[k]))){
       // chercher prolongement par continuité
-      if (abs(images[k][0])!=+infinity and images[k][0]==images[k][1]){
-        symb:="R";        
+      if (abs(images[k][0])!=+infinity and images[k][0]==images[k][1] and k!=0 and estDefinie(f,xi)){
+        // s'il y a une ZI avant ne pas mettre R
+        if(right(pos[k-1],1)=="H"){
+          if(images[k][1]<=images[k+1][0]){
+            symb:=symb+"-";
+            sg:="+";
+          } else {
+            symb:=symb+"+";    
+            sg:="-";
+          }
+        } else {
+          symb:="R";
+        }
       } else {
-      if(abs(IE[k])!=+infinity){symb:=symb+"D";}
-      xi:=x_milieu(IE[k],IE[k+1]);
-      if(not(estDefinie(f,xi))){
-        if (k==0){// impossible de mettre DH en première colonne
-          symb:="-D"};
-        symb:=symb+"H";sg:="";} else {
-      if(images[k][1]<=images[k+1][0]){
-        symb:=symb+"-";
-        sg:="+";
-      } else {
-        symb:=symb+"+";    
-        sg:="-";
-      }}
+        if(abs(IE[k])!=+infinity and not(estDefinie(f,IE[k]))){symb:=symb+"D";}
+        if(not(estDefinie(f,xi))){
+          if (k==0){// impossible de mettre DH en première colonne
+            symb:="-"+symb;
+          };
+          symb:=symb+"H";sg:="";
+        } else {
+          if(images[k][1]<=images[k+1][0]){
+            symb:=symb+"-";
+            sg:="+";
+          } else {
+            symb:=symb+"+";    
+            sg:="-";
+          }
+        }
       }
     } else {
       if(images[k][1]<=images[k+1][0]){
@@ -1447,7 +1480,9 @@ calculePosition(IE,VI,f,images):={
       }
       if(symb=="++"){symb:="+"}
       else {if(symb=="--"){symb:="-"}
-        else {if(k>0){symb:="R"}}}}
+        else {if(k>0){symb:="R"}}
+      }
+    }
     pos:=append(pos,symb);
   }    
   // dernier point
@@ -1461,6 +1496,8 @@ calculePosition(IE,VI,f,images):={
   }
   return(pos:=append(pos,symb));
 }:;
+
+
 
 noeudsNonExtrema(pos):={
   // renvoie une liste contenant les noeuds des images à calculer dans le tableau
@@ -1671,9 +1708,7 @@ for(k:=0;k<n;k++){
   return(sTkzTabLine);
 }:;
 
-TV(IE,f):={
-// IE=intervalle d'étude
-// f=fonction
+TVar(arguments):={
 local VI; // liste des valeurs interdites de f
 local fp; // f'
 local Zeros_fp; // liste des racines de f'
@@ -1689,6 +1724,14 @@ local sTkzTabIma; // lignes des images de f
 local k,n,j;
 local id_fonction, nom_variable, nom_fonction, nom_derivee;
 local a;
+local IE:=arguments[0];
+local f:=arguments[1];
+local nb_decimales;
+if (size(arguments)==3){
+  nb_decimales:=arguments[2];
+} else {
+  nb_decimales:="";
+}
 initCas();
 id_fonction:=identifier(f);
 f:=id_fonction[0];
@@ -1697,13 +1740,13 @@ nom_fonction:=id_fonction[2][1];
 nom_derivee:=id_fonction[3][1];
 //unapply(f,x);
 fp:=function_diff(f);
-IE:=sort(IE);
+IE:=trier(IE);
 VI:=trouveVI(IE,f(x));
 ValeursX:=insereValeurs(IE,VI);
 Zeros_fp:=trouveZeros(IE,fp);
 Zeros_fp:=sontDefinies(f,Zeros_fp);
 ValeursX:=insereValeurs(ValeursX,Zeros_fp);
-ValeursX:=sort([op(set[op(ValeursX)])]);
+ValeursX:=trier([op(set[op(ValeursX)])]);
 ValeursX:=simplifier(ValeursX);
 // construction de la structure du tableau
 sTkzTab:=debutTableau(["$"+nom_variable+"$","$"+nom_derivee+"("+nom_variable+")"+"$","$"+nom_fonction+"$"],[1,1,2],ValeursX);
@@ -1712,8 +1755,7 @@ Signes_fp:=tabSignes(ValeursX,fp,f);
 sTkzTabLine:=ligneSignes(Signes_fp);
 sTkzTab+=sTkzTabLine;
 // construction des variations de f
-//sTkzTabVar:="\\tkzTabVar {"
-Images_f:=calculeImages(ValeursX,f);
+Images_f:=calculeImages(ValeursX,f,nb_decimales);
 Variations_f:=calculePosition(ValeursX,VI,f,Images_f);
 sTkzTabVar:=ligneVariations(Variations_f,Images_f);
 sTkzTab+=sTkzTabVar;
@@ -1725,7 +1767,7 @@ sTkzTab+="\\end{tikzpicture}\n";
 return(sTkzTab);
 }:;
 
-TS(IE,f):={
+TSig(IE,f):={
 // IE=intervalle d'étude
 // f=fonction
 local VI; // liste des valeurs interdites de f
@@ -1747,7 +1789,7 @@ id_fonction:=identifier(f);
 f:=id_fonction[0];
 nom_variable:=id_fonction[1][0];
 nom_fonction:=id_fonction[2][0];
-IE:=sort(IE);
+IE:=trier(IE);
 VI:=trouveVI(IE,f(x));
 ValeursX:=insereValeurs(IE,VI);
 Zeros_f:=trouveZeros(IE,f);
@@ -1756,16 +1798,16 @@ ValeursX:=simplifier(ValeursX);
 facteurs:=execute("listeFacteurs(f("+nom_variable+"))");
 if (size(facteurs[1])>0){
   // il y a un dénominteur, augmenter la hauteur de la dernière ligne
-  denominateur:=true;
+  denominateur:=vrai;
 } else {
-  denominateur:=false;
+  denominateur:=faux;
 }
 facteurs:=op(facteurs[0]),op(facteurs[1]);
 if (size(facteurs)==1){ facteurs:=NULL };
 // construction de la structure du tableau
 colonne:=append([nom_variable],facteurs);
 if(type(nom_fonction)==12){ //DOM_STRING=12
-  colonne:=append(colonne,"$"+latex(f(x))+"$");
+  colonne:=append(colonne,"$\\displaystyle "+latex(f(x))+"$");
 } else {
   colonne:=append(colonne,"$"+id_fonction[2][1]+"("+id_fonction[1][1]+")$");
 }
@@ -1793,7 +1835,7 @@ sTkzTab+="\\end{tikzpicture}\n";
 return(sTkzTab);
 }:;
 
-TVP(IE,f,g):={
+TVarP(arguments):={
 // IE=intervalle d'étude
 // f=fonction
 local VI_f; // liste des valeurs interdites de f
@@ -1819,6 +1861,17 @@ local k,n,j;
 local id_fonction_f, nom_variable_f, nom_fonction_f, nom_derivee_f;
 local id_fonction_g, nom_variable_g, nom_fonction_g, nom_derivee_g;
 
+local IE:=arguments[0];
+local f:=arguments[1];
+local g:=arguments[2];
+local nb_decimales;
+if (size(arguments)==4){
+  nb_decimales:=arguments[3];
+} else {
+  nb_decimales:="";
+}
+
+
 initCas();
 id_fonction_f:=identifier(f);
 f:=id_fonction_f[0];
@@ -1832,7 +1885,7 @@ nom_fonction_g:=id_fonction_g[2][1];
 nom_derivee_g:=id_fonction_g[3][1];
 fp:=function_diff(f);
 gp:=function_diff(g);
-IE:=sort(IE);
+IE:=trier(IE);
 VI_f:=trouveVI(IE,f(x));
 ValeursX:=insereValeurs(IE,VI_f);
 VI_g:=trouveVI(IE,g(x));
@@ -1843,7 +1896,7 @@ ValeursX:=insereValeurs(ValeursX,Zeros_fp);
 Zeros_gp:=trouveZeros(IE,gp);
 Zeros_gp:=sontDefinies(g,Zeros_gp);
 ValeursX:=insereValeurs(ValeursX,Zeros_gp);
-ValeursX:=sort([op(set[op(ValeursX)])]);
+ValeursX:=trier([op(set[op(ValeursX)])]);
 ValeursX:=simplifier(ValeursX);
 // construction de la structure du tableau
 sTkzTab:=debutTableau(["$"+nom_variable_f+"$",
@@ -1855,7 +1908,7 @@ Signes_fp:=tabSignes(ValeursX,fp,f);
 sTkzTabLine:=ligneSignesTVP(Signes_fp);
 sTkzTab+=sTkzTabLine;
 // construction des variations de f
-Images_f:=calculeImages(ValeursX,f);
+Images_f:=calculeImages(ValeursX,f,nb_decimales);
 Variations_f:=calculePosition(ValeursX,VI_f,f,Images_f);
 sTkzTabVar:=ligneVariations(Variations_f,Images_f);
 sTkzTab+=sTkzTabVar;
@@ -1864,7 +1917,7 @@ NoeudsNonExtrema_f:=noeudsNonExtrema(Variations_f);
 sTkzTabIma:=lignesImages(NoeudsNonExtrema_f,Images_f);
 sTkzTab+=sTkzTabIma;
 // construction des variations de g
-Images_g:=calculeImages(ValeursX,g);
+Images_g:=calculeImages(ValeursX,g,nb_decimales);
 Variations_g:=calculePosition(ValeursX,VI_g,g,Images_g);
 sTkzTabVar:=ligneVariations(Variations_g,Images_g);
 sTkzTab+=sTkzTabVar;
@@ -1878,6 +1931,52 @@ sTkzTabLine:=ligneSignesTVP(Signes_gp);
 sTkzTab+=sTkzTabLine;
 sTkzTab+="\\end{tikzpicture}\n";
 return(sTkzTab);
+}:;
+
+TVal(arguments):={
+// IE=intervalle d'étude
+// f=fonction
+// nombre de décimales souhaitées. Si 0 alors valeurs exactes
+local k,n,j,s;
+local id_fonction_f, nom_variable_f, nom_fonction_f, nom_derivee_f;
+local IE:=arguments[0];
+local f:=arguments[1];
+local nb_decimales;
+if (size(arguments)==3){
+  nb_decimales:=arguments[2];
+} else {
+  nb_decimales:=NULL;
+}
+s:="{\\renewcommand{\\arraystretch}{1.5}\n\\newcolumntype{C}[1]{S{>{\\centering \\arraybackslash}m{#1}}}\n\\setlength{\\cellspacetoplimit}{4pt}\n\\setlength{\\cellspacebottomlimit}{4pt}\n\\begin{tabular}{|C{1.5cm}|*{";
+initCas();
+id_fonction_f:=identifier(f);
+f:=id_fonction_f[0];
+nom_variable_f:=id_fonction_f[1][0];
+nom_fonction_f:=id_fonction_f[2][0];
+n:=size(IE);
+s:=s+string(n)+"}{C{1cm}|}}\n\\hline $"+nom_variable_f+"$ & ";
+for(k:=0;k<n-1;k++){
+  s:=s+"$\\displaystyle "+latex(simplifier(IE[k]))+"$ &";
+}
+s:=s+"$\\displaystyle "+latex(simplifier(IE[k]))+"$ \\\\\n\\hline $"
+if(type(nom_fonction_f)==12){ //DOM_STRING=12
+  s:=s+"\\displaystyle "+latex(f(x))+"$ & ";
+} else {
+  s:=s+id_fonction_f[2][1]+"("+id_fonction_f[1][1]+")$ & ";
+}
+for(k:=0;k<n-1;k++){
+  if(type(nb_decimales)!=DOM_INT){
+    s:=s+"$\\displaystyle "+latex(simplifier(f(IE[k])))+"$ &";
+  } else {
+    s:=s+"$\\displaystyle "+latex(format(f(IE[k]),"f"+string(nb_decimales)))+"$ &";
+  }
+}
+if(type(nb_decimales)!=DOM_INT){
+  s:=s+"$\\displaystyle "+latex(simplifier(f(IE[k])))+"$ \\\\\n\\hline\n\\end{tabular}}";
+} else {
+  s:=s+"$\\displaystyle "+latex(format(f(IE[k]),"f"+string(nb_decimales)))+"$ \\\\\n\\hline\n\\end{tabular}}";
+}
+return(s);
 }:;
 
 purge(x);
