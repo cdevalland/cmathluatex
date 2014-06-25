@@ -25,18 +25,17 @@ local Carg, Cc, Cp, Ct, Cs, Cg, Cf = lpeg.Carg, lpeg.Cc, lpeg.Cp, lpeg.Ct, lpeg.
 -- Syntaxe Cmath
 local Espace = S(" \n\t")^0
 local Guillemet=P('"')
-local SepListe=C(S(',;'))
+local SepListe=C(S(',;'))* Espace
 local Operateur=C(	P('<=>')+P('<=')+P('>=')+P('<>')+P('->')+S('=><')
 		+	P(':en')+P('≈')
 		+	P(':as')+P('⟼')
 		+	P(':ap')+P('∈')
-		+	P('...')
 		+	P('|')
 		+	P('⟶')
 		+	P(':un')+P('∪')
 		+	P(':it')+P('∩')
 		+	P(':ro')+P('∘')
-		+	P(':eq')+P('~')
+		+	P(':eq')--+P('~')
 		+	P(':co')+P('≡')
 		+	P(':pp')+P('∨')
 		+	P(':pg')+P('∧')
@@ -50,7 +49,7 @@ local Operateur=C(	P('<=>')+P('<=')+P('>=')+P('<>')+P('->')+S('=><')
 		+	P(':ic')+P('⊂')
 		+	P(':ni')+P('⊄')
 		+	P('⩽')+P('⩾')
-		+	P('≠ ')
+		+	P('≠')
 		) * Espace
 				
 local TSubstOperateurLaTeX = {	['<=>']='\\Leftrightarrow ', 
@@ -64,12 +63,11 @@ local TSubstOperateurLaTeX = {	['<=>']='\\Leftrightarrow ',
 		[':ap']='\\in ', ['∈']='\\in ',
 		[':as']='\\mapsto ', ['⟼']='\\mapsto ',
 		['->']='\\to ',	['⟶']='\\to ',
-		['...']='\\dots ',
 		['|']='|',
 		[':un']='\\cup ', ['∪']='\\cup ',
 		[':it']='\\cap ', ['∩']='\\cap ',
 		[':ro']='\\circ ', ['∘']='\\circ ',
-		[':eq']='\\sim ', ['~']='\\sim ',
+		[':eq']='\\sim ',
 		[':co']='\\equiv ', ['≡']='\\equiv ',
 		[':pp']='\\vee ', ['∨']='\\vee ',
 		[':pg']='\\wedge ', ['∧']='\\wedge ', [':ve']='\\wedge ',
@@ -80,9 +78,9 @@ local TSubstOperateurLaTeX = {	['<=>']='\\Leftrightarrow ',
 		[':ev']='\\Leftrightarrow ',	['⟺']='\\Leftrightarrow ',
 		[':rc']='\\Leftarrow ', ['⇐']='\\Leftarrow ',
 		[':ic']='\\subset ', ['⊂']='\\subset ',
-		[':ni']='\\subsetneq ', ['⊄']='\\subsetneq '
+		[':ni']='\\not\\subset ', ['⊄']='\\not\\subset '
 		}
-local TSubstOperateurTW = {	['<=>']='⟺', 
+local TSubstOperateurTW = {	['<=>']='⟺',
 		['<=']='⩽',
 		['>=']='⩾',
 		['<>']='≠',
@@ -93,7 +91,7 @@ local TSubstOperateurTW = {	['<=>']='⟺',
 		[':un']='∪',
 		[':it']='∩',
 		[':ro']='∘',
-		[':eq']='~',
+		--[':eq']='~',
 		[':co']='≡',
 		[':pp']='∨',
 		[':pg']='∧', [':ve']='∧',
@@ -111,7 +109,8 @@ local Chiffre=R("09")
 local Partie_Entiere=Chiffre^1
 local Partie_Decimale=(P(".")/",")*(Chiffre^1)
 local Nombre = C(Partie_Entiere*Partie_Decimale^-1) * Espace
-local Raccourci = 	C((P':al'+P'α')
+local Raccourci = 	C( P'...'
+		+ 	(P':al'+P'α')
 		+ 	(P':be'+P'β')
 		+	(P':ga'+P'γ') + (P':GA'+P'Γ')
 		+	(P':de'+P'δ') + (P':DE'+P'Δ')
@@ -164,7 +163,8 @@ local Raccourci = 	C((P':al'+P'α')
 		+	P':d'
 		- 	Operateur) * Espace
 
-local TSubstRaccourciLaTeX = {	[':al']='\\alpha ', ['α']='\\alpha ',
+local TSubstRaccourciLaTeX = {	['...']='\\dots ',
+		[':al']='\\alpha ', ['α']='\\alpha ',
 		[':be']='\\beta ', ['β']='\\beta ',
 		[':ga']='\\gamma ', ['γ']='\\gamma ', [':GA']='\\Gamma ', ['Γ']='\\Gamma ', 
 		[':de']='\\delta ', ['δ']='\\delta ',[':DE']='\\Delta ', ['Δ']='\\Delta ',
@@ -194,7 +194,7 @@ local TSubstRaccourciLaTeX = {	[':al']='\\alpha ', ['α']='\\alpha ',
 		[':vi']='\\varnothing ', ['∅']='\\varnothing ',
 		[':ex']='\\exists ', ['∃']='\\exists ',
 		[':qs']='\\forall ', ['∀']='\\forall ',
-		[':oijk']='\\left(O\\,{;}\\,\\vv{\\imath}{,}\\,\\vv{\\jmath}\\,\\vv{k} \\right) ',
+		[':oijk']='(O\\,{;}\\,\\vv{\\imath}{,}\\,\\vv{\\jmath}{,}\\,\\vv{k} ) ',
 		[':oij']='\\left(O\\,{;}\\,\\vv{\\imath}{,}\\,\\vv{\\jmath} \\right) ',
 		[':ouv']='\\left(O\\,{;}\\,\\vv{u}{,}\\,\\vv{v} \\right) ',
 		[':Rpe']='\\mathbb{R}_{+}^{*} ', ['ℝpe']='\\mathbb{R}_{+}^{*} ',
@@ -213,7 +213,7 @@ local TSubstRaccourciLaTeX = {	[':al']='\\alpha ', ['α']='\\alpha ',
 		[':Q']='\\mathbb{Q} ', ['ℚ']='\\mathbb{Q} ',
 		[':K']='\\mathbb{K} ', ['𝕂']='\\mathbb{K} ',
 		[':e']='\\mathrm{e} ', ['е']='\\mathrm{e} ',
-		[':i']='\\ ', ['і']='\\mathrm{i} ',
+		[':i']='\\mathrm{i} ', ['і']='\\mathrm{i} ',
 		[':d']='{\\mathop{}\\mathopen{}\\mathrm{d}}'
 		}
 
@@ -272,8 +272,8 @@ local Op_LaTeX = C(P("\\")*Lettre^1) * Espace
 local TermOp = C(S("+-")) * Espace
 local FactorOp = C(P("**")+S("* ")+P("×")+P("..")) * Espace
 local DiviseOp = C(P("//")+P("/")+P("÷")) * Espace
-local PuissanceOp = C(S("^")) * Espace
-local IndiceOp = C(S("_")) * Espace
+local PuissanceOp = C(P("^^")+P("^")) * Espace
+local IndiceOp = C(P("__")+P("_")) * Espace
 local Parenthese_Ouverte = P("(") * Espace
 local Parenthese_Fermee = P(")") * Espace
 local Accolade_Ouverte = P("{") * Espace
@@ -349,8 +349,10 @@ function fPuissance(arg1,op,arg2)
 end
 
 function fMultImplicite(arg1,arg2)
-	if string.sub(arg1[1],1,5)=='signe' then
+	if string.sub(arg1[1],1,5)=='signe' then -- ramener le signe devant la fraction
 		return {arg1[1],{'imp*',arg1[2],arg2}}
+	elseif arg1[1]=='imp*' and arg1[2][1]=='√' then -- rétablir la multiplication implicite pour la racine carrée
+		return {'imp*',arg1[2],{'imp*',arg1[3],arg2}}
 	else
 		return {'imp*',arg1,arg2}
 	end
@@ -403,7 +405,7 @@ function fIntervalle_Entier(arg1)
 end
 
 
-local FonctionsCmath = 	P('abs')+ 	-- valeur absolue
+local FonctionsCmath = 	P('abs')+	-- valeur absolue
 		P('iiint')+P('∭')+			-- intégrale triple
 		P('iint')+P('∬')+			-- intégrale double
 		P('int')+P('∫')+			-- intégrale
@@ -411,48 +413,48 @@ local FonctionsCmath = 	P('abs')+ 	-- valeur absolue
 		P('vec')+					-- vecteur ou coordonnées de vecteurs si liste
 		P('cal')+P('scr')+P('frak')+P('pzc')+ -- polices
 		P('gra')+					-- gras
-		P('ang')+
-		P('til')+
-		P('bar')+
-		P('sou')+
-		P('nor')+
-		P('acc')+
-		P('som')+
-		P('pro')+
-		P('uni')+
-		P('ite')+
-		P('psc')+
-		P('acs')+
-		P('aci')+
-		P('cnp')+
-		P('aut')+
-		P('bif')+
-		P('sys')+
-		P('mat')+
-		P('det')+
-		P('tab')+
-		P('tor')+
-		P('cro')+
-		P('lim')+
-		P('min')+
-		P('max')+
-		P('sup')+
-		P('inf')+
-		P('enc')+
-		P('equ')+
-		P('ten')+
-		P('acd')+
-		P('sui')+
-		P('ser')+
-		P('pto')+
-		P('gro')+
-		P('derp')+		
-		P('der')+
-		P('res')+		
-		P('ds')+
-		P('ts')+
-		P('im')+
-		P('re')
+		P('ang')+					-- angle
+		P('til')+					-- tilde
+		P('bar')+					-- barre
+		P('sou')+					-- souligné
+		P('nor')+					-- norme
+		P('acc')+					-- accolades
+		P('som')+					-- sommes
+		P('pro')+					-- produit
+		P('uni')+					-- union
+		P('ite')+					-- intersection
+		P('psc')+					-- produit scalaire
+		P('acs')+					-- accolade supérieure
+		P('aci')+					-- accolade inférieure
+		P('cnp')+					-- Cnp
+		P('aut')+					-- autour
+		P('bif')+					-- biffer
+		P('sys')+					-- système
+		P('mat')+					-- matrice
+		P('det')+					-- déterminant
+		P('tab')+					-- tableau
+		P('tor')+					-- torseur
+		P('cro')+					-- crochet
+		P('lim')+					-- limite
+		P('min')+					-- min
+		P('max')+					-- max
+		P('sup')+					-- sup
+		P('inf')+					-- inf
+		P('enc')+					-- encadré
+		P('equ')+					-- équivalent à
+		P('ten')+					-- tend vers
+		P('acd')+					-- accolade droite
+		P('sui')+					-- suite
+		P('ser')+					-- série
+		P('pto')+					-- petit o
+		P('gro')+					-- grand o
+		P('derp')+					-- dérivée partielle
+		P('der')+					-- dérivée physicienne
+		P('res')+					-- restreint à
+		P('ds')+					-- mode display
+		P('ts')+					-- mode text
+		P('im')+					-- partie imaginaire
+		P('re')						-- partie réelle
 												
 function construitMatrix(arbre,typeMatrice)
 local s='\\begin{'..typeMatrice..'}\n'
@@ -820,7 +822,7 @@ local TraitementFonctionsCmath =
 	function(arbre)
 		local n = nbArg(arbre)
 		for i=n+1,5 do arbre[i]={''} end
-		return '\\prescript{'..Tree2Latex(arbre[4])..'}{'..Tree2Latex(arbre[5])..'}{'..Tree2Latex(arbre[1])..'}_{'..Tree2Latex(arbre[2])..'}^{'..Tree2Latex(arbre[3])..'}'
+		return '{\\prescript{'..Tree2Latex(arbre[4])..'}{'..Tree2Latex(arbre[5])..'}{'..Tree2Latex(arbre[1])..'}}_{'..Tree2Latex(arbre[2])..'}^{'..Tree2Latex(arbre[3])..'}'
 	end,
 	
 	['bif']=
@@ -975,7 +977,9 @@ elseif (op=='×' or op=='**') then
 	return Tree2Latex(Arbre[2])..'\\times '..Tree2Latex(Arbre[3])
 elseif (op=='..') then
 	return Tree2Latex(Arbre[2])..'\\cdot '..Tree2Latex(Arbre[3])
-elseif (op=='//' or op=='÷') then
+elseif (op=='//') then
+	return Tree2Latex(Arbre[2])..'/'..Tree2Latex(Arbre[3])		
+elseif (op=='÷') then
 	return Tree2Latex(Arbre[2])..'\\div '..Tree2Latex(Arbre[3])		
 elseif (op=='imp*') then
 	arg1=Tree2Latex(Arbre[2])
@@ -991,17 +995,29 @@ elseif (op=='{}') then
 	return '{'..Tree2Latex(Arbre[2])..'}'
 elseif (op=='/') then
 	return '\\frac{'..Tree2Latex(Parentheses_inutiles(Arbre[2]))..'}{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
+elseif (op=='^^') then
+	return '\\prescript{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}{}{'..Tree2Latex(Arbre[2])..'}{}{}'
+elseif (op=='__') then
+	return '\\prescript{}{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}{'..Tree2Latex(Arbre[2])..'}{}{}'
 elseif (op=='^') then
 	arg1=Tree2Latex(Arbre[2])
 	if arg1=='\\sin ' or arg1=='\\cos ' or arg1=='\\tan ' or arg1=='\\sh '
 		or arg1=='\\ch ' or arg1=='\\th ' or arg1=='\\ln ' or arg1=='\\log 'then 
 		if Arbre[3][1]=='imp*' and Arbre[3][3][1]=='()' then
-			return arg1..op..'{'..Tree2Latex(Parentheses_inutiles(Arbre[3][2]))..'} '..Tree2Latex((Arbre[3][3][2]))
+			return arg1..'^{'..Tree2Latex(Parentheses_inutiles(Arbre[3][2]))..'} '..Tree2Latex((Arbre[3][3][2]))
 		end
 	end
-	return Tree2Latex(Arbre[2])..op..'{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
-elseif (op=='_') then	
-	return Tree2Latex(Arbre[2])..op..'{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
+	if Arbre[2][1]=='^' then
+		return '{'..Tree2Latex(Arbre[2])..'}^{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
+	else
+		return Tree2Latex(Arbre[2])..'^{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
+	end
+elseif (op=='_') then
+	if Arbre[2][1]=='_' then
+		return '{'..Tree2Latex(Arbre[2])..'}_{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
+	else
+		return Tree2Latex(Arbre[2])..'_{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'	
+	end
 elseif (op=='text') then
 	return '\\textrm{'..Arbre[2]..'}'
 elseif (op=='no_eval') then
@@ -1050,8 +1066,10 @@ if (op=='op_binaire') then
 	return Tree2TW(Arbre[3])..arg2..Tree2TW(Arbre[4])
 elseif (op=='×' or op=='**') then
 	return Tree2TW(Arbre[2])..'×'..Tree2TW(Arbre[3])
-elseif (op=='//' or op=='÷') then
+elseif (op=='÷') then
 	return Tree2TW(Arbre[2])..'÷'..Tree2TW(Arbre[3])		
+elseif (op=='//') then
+	return Tree2TW(Arbre[2])..'//'..Tree2TW(Arbre[3])		
 elseif (op=='imp*') then
 	if Arbre[2][1]=='iiint' then Arbre[2]={'∭'} end
 	if Arbre[2][1]=='iint' then Arbre[2]={'∬'} end
@@ -1062,7 +1080,7 @@ elseif (op=='()') then
 	return '('..Tree2TW(Arbre[2])..')'
 elseif (op=='{}') then
 	return '{'..Tree2TW(Arbre[2])..'}'
-elseif (op=='^' or op=='_' or op=='/' or op=='..' or op=='+' or op=='-' or op=='*' or op==' ') then
+elseif (op=='^^' or op=='__' or op=='^' or op=='_' or op=='/' or op=='..' or op=='+' or op=='-' or op=='*' or op==' ') then
 	return Tree2TW(Arbre[2])..op..Tree2TW((Arbre[3]))
 elseif (op=='text') then
 	return '"'..Arbre[2]..'"'
@@ -1096,7 +1114,6 @@ function Giac(programme,instruction,latex)
 -- conversion en latex selon le booléen latex (pas de conversion pour les tableaux de variations/signes)
 local prg=[[
 unarchive("giac.sav"):;
-Sortie:=fopen("giac.out");
 ]]..programme..[[
 purge(Resultat);
 som:=sommet(quote(]]..instruction..[[));
@@ -1106,6 +1123,7 @@ if(som=='sto' or som=='supposons'){
   Resultat:=(]]..instruction..[[)};
 if(Resultat=='Resultat'){
   Resultat:="Erreur Xcas"};
+Sortie:=fopen("giac.out");
 if(]]..latex..[[){
   fprint(Sortie,Unquoted,latex(Resultat));
 } else {
@@ -1120,8 +1138,9 @@ f:write(prg)
 f:close()
 if QuelOs()=='linux' then
 	os.execute('icas giac.in')
-else --windows, à modifier pour identifier un Mac
-	os.execute('c:\\xcas\\rxvt.exe c:/xcas/icas.exe giac.in')
+else 
+	-- c'est windows, à compléter pour identifier un Mac
+	os.execute('c:\\xcas\\bash.exe -c "export LANG=fr_FR.UTF-8 ; C:/xcas/icas.exe giac.in"')
 end
 io.input("giac.out")
 return(io.read("*all"))
@@ -1349,7 +1368,7 @@ insereValeurs(l1,l2):={
         l:=append(l,l2[k]);        
         }
     }
-  return(sort(l));
+  return(trier(l));
 }:;
 
 estDefinie(f,x):={
@@ -1427,8 +1446,6 @@ calculeImages(IE,f,nb_decimales):={
   return(images);
 }:;
 
-
-
 calculePosition(IE,VI,f,images):={
   // crée une liste avec la position des images, les double-barres, les zones interdites.
   local k,sg,sd,symb,xi;
@@ -1497,8 +1514,6 @@ calculePosition(IE,VI,f,images):={
   return(pos:=append(pos,symb));
 }:;
 
-
-
 noeudsNonExtrema(pos):={
   // renvoie une liste contenant les noeuds des images à calculer dans le tableau
   local k;
@@ -1520,14 +1535,12 @@ noeudsNonExtrema(pos):={
 }:;
 
 ligneSignes(signes):={
-  local n,sTkzTabLine,j,k;
-  
-  n:=size(signes);
-
+local n,sTkzTabLine,j,k;
+n:=size(signes);
 sTkzTabLine:="\\tkzTabLine {";
 for(k:=0;k<n;k++){
   j:=type(signes[k]);
-  if(type(signes[k])==12){ //DOM_STRING bug
+  if(type(signes[k])==DOM_STRING){
     sTkzTabLine+=signes[k];    
     } else {
     if (signes[k]==0){
@@ -1543,8 +1556,6 @@ for(k:=0;k<n;k++){
   sTkzTabLine+="}\n";
   return(sTkzTabLine);
 }:;
-
-
 
 ligneVariations(positions,images):={
 local n,sTkzTabVar,pos,k;
@@ -1684,14 +1695,12 @@ listeFacteurs(expression):={
 }:;
 
 ligneSignesTVP(signes):={
-  local n,sTkzTabLine,j,k;
-  
-  n:=size(signes);
-
+local n,sTkzTabLine,j,k;
+n:=size(signes);
 sTkzTabLine:="\\tkzTabLine {";
 for(k:=0;k<n;k++){
   j:=type(signes[k]);
-  if(type(signes[k])==12){ //DOM_STRING bug
+  if(type(signes[k])==DOM_STRING){
     sTkzTabLine+=signes[k];    
     } else {
     if (signes[k]==0){
@@ -1707,6 +1716,8 @@ for(k:=0;k<n;k++){
   sTkzTabLine+="}\n";
   return(sTkzTabLine);
 }:;
+
+
 
 TVar(arguments):={
 local VI; // liste des valeurs interdites de f
@@ -1806,7 +1817,7 @@ facteurs:=op(facteurs[0]),op(facteurs[1]);
 if (size(facteurs)==1){ facteurs:=NULL };
 // construction de la structure du tableau
 colonne:=append([nom_variable],facteurs);
-if(type(nom_fonction)==12){ //DOM_STRING=12
+if(type(nom_fonction)==DOM_STRING){
   colonne:=append(colonne,"$\\displaystyle "+latex(f(x))+"$");
 } else {
   colonne:=append(colonne,"$"+id_fonction[2][1]+"("+id_fonction[1][1]+")$");
@@ -1945,7 +1956,7 @@ local nb_decimales;
 if (size(arguments)==3){
   nb_decimales:=arguments[2];
 } else {
-  nb_decimales:=NULL;
+  nb_decimales:="";
 }
 s:="{\\renewcommand{\\arraystretch}{1.5}\n\\newcolumntype{C}[1]{S{>{\\centering \\arraybackslash}m{#1}}}\n\\setlength{\\cellspacetoplimit}{4pt}\n\\setlength{\\cellspacebottomlimit}{4pt}\n\\begin{tabular}{|C{1.5cm}|*{";
 initCas();
@@ -1959,7 +1970,7 @@ for(k:=0;k<n-1;k++){
   s:=s+"$\\displaystyle "+latex(simplifier(IE[k]))+"$ &";
 }
 s:=s+"$\\displaystyle "+latex(simplifier(IE[k]))+"$ \\\\\n\\hline $"
-if(type(nom_fonction_f)==12){ //DOM_STRING=12
+if(type(nom_fonction_f)==DOM_STRING){
   s:=s+"\\displaystyle "+latex(f(x))+"$ & ";
 } else {
   s:=s+id_fonction_f[2][1]+"("+id_fonction_f[1][1]+")$ & ";
