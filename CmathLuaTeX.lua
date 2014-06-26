@@ -40,7 +40,7 @@ local Operateur=C(	P('<=>')+P('<=')+P('>=')+P('<>')+P('->')+S('=><')
 		+	P(':pp')+P('∨')
 		+	P(':pg')+P('∧')
 		+	P(':ve')+P('∧')
-		+	P(':pe')+P('⊥')
+  +	P(':pe')+P('⊥')
 		+	P(':sd')+P('⊕')
 		+	P(':np')+P('∉')
 		+	P(':im')+P('⇒')
@@ -1022,8 +1022,12 @@ elseif (op=='text') then
 	return '\\textrm{'..Arbre[2]..'}'
 elseif (op=='no_eval') then
 	if Arbre[2]=='xcas' then
-		return Giac("",Arbre[3],"true")
-	elseif Arbre[2]=='TVar' then
+	 	if Arbre[3]=='restart' then
+			return Giac("restart;",'""',"false")
+		else
+			return Giac("",Arbre[3],"true")
+		end
+  elseif Arbre[2]=='TVar' then
 		return Giac(XCAS_Tableaux,'TVar('..Arbre[3]..')',"false")
 	elseif Arbre[2]=='TSig' then
 		return Giac(XCAS_Tableaux,'TSig('..Arbre[3]..')',"false")	
