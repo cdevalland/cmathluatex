@@ -40,7 +40,7 @@ local Operateur=C(	P('<=>')+P('<=')+P('>=')+P('<>')+P('->')+S('=><')
 		+	P(':pp')+P('∨')
 		+	P(':pg')+P('∧')
 		+	P(':ve')+P('∧')
-  +	P(':pe')+P('⊥')
+		+	P(':pe')+P('⊥')
 		+	P(':sd')+P('⊕')
 		+	P(':np')+P('∉')
 		+	P(':im')+P('⇒')
@@ -337,7 +337,7 @@ function fFactor(arg1,op,arg2)
 end
 
 function fDivise(arg1,op,arg2)
-	if string.sub(arg1[1],1,5)=='signe' then
+	if string.sub(arg1[1],1,5)=='signe' then -- ramener le signe devant la fraction
 		return {arg1[1],{op,arg1[2],arg2}}
 	else
 		return {op,arg1,arg2}
@@ -349,7 +349,7 @@ function fPuissance(arg1,op,arg2)
 end
 
 function fMultImplicite(arg1,arg2)
-	if string.sub(arg1[1],1,5)=='signe' then -- ramener le signe devant la fraction
+	if string.sub(arg1[1],1,5)=='signe' then
 		return {arg1[1],{'imp*',arg1[2],arg2}}
 	elseif arg1[1]=='imp*' and arg1[2][1]=='√' then -- rétablir la multiplication implicite pour la racine carrée
 		return {'imp*',arg1[2],{'imp*',arg1[3],arg2}}
@@ -1022,12 +1022,12 @@ elseif (op=='text') then
 	return '\\textrm{'..Arbre[2]..'}'
 elseif (op=='no_eval') then
 	if Arbre[2]=='xcas' then
-	 	if Arbre[3]=='restart' then
+		if Arbre[3]=='restart' then
 			return Giac("restart;",'""',"false")
 		else
 			return Giac("",Arbre[3],"true")
 		end
-  elseif Arbre[2]=='TVar' then
+	elseif Arbre[2]=='TVar' then
 		return Giac(XCAS_Tableaux,'TVar('..Arbre[3]..')',"false")
 	elseif Arbre[2]=='TSig' then
 		return Giac(XCAS_Tableaux,'TSig('..Arbre[3]..')',"false")	
