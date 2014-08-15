@@ -1,5 +1,5 @@
 --[[
-Cmath pour LuaTeX, version 2014.06.04
+Cmath pour LuaTeX, version 2014.08.15
     Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
 
     This program is free software: you can redistribute it and/or modify
@@ -263,10 +263,10 @@ local TSubstRaccourciTW = {	[':al']='α',
 		[':Q']='ℚ',
 		[':K']='𝕂',
 		[':e']='е',
-		[':i']='і'
+		[':i']='і'	
 		}
 
-local Lettre = R("az")+R("AZ")+P("'")+P("!")					
+local Lettre = R("az")+R("AZ")+P("!")+S("'′")
 local Mot=C(Lettre^1+P('∭')+P('∬')+P('∫')+P('√')) - Guillemet
 local Op_LaTeX = C(P("\\")*Lettre^1) * Espace
 local TermOp = C(S("+-")) * Espace
@@ -284,8 +284,8 @@ local Intervalle_Entier_Ferme = P("]]")+P("⟧")
 local Fonction_sans_eval = P("xcas")+P("TVarP")+P("TVar")+P("TSig")+P("TVal")
 local CaractereSansParentheses=(1-S"()")
 
--- Substitutions 
-local TSubstCmath =		P'arcsin'/'\\arcsin '
+-- Substitutions dans les Mots
+local TSubstCmathLaTeX =	P'arcsin'/'\\arcsin '
 		+	P'arccos'/'\\arccos '
 		+	P'arctan'/'\\arctan '
 		+	P'argch'/'\\argch '
@@ -309,7 +309,10 @@ local TSubstCmath =		P'arcsin'/'\\arcsin '
 		+	P'sh'/'\\sh '
 		+	P'th'/'\\th '
 		+	P'card'/'\\card '
+		+	P'′'/"'"
 		+	1
+
+local TSubstCmathTW =	P"'"/'′' + 1	-- le symbole de la dérivation ne soit pas interférer avec l'indicateur de fin de chaîne
 
 function fOperateur(arg1,op,arg2)
 	return {'op_binaire',op,arg1,arg2}
@@ -1055,7 +1058,7 @@ elseif (op=='raccourci') then
 	return TSubstRaccourciLaTeX[Arbre[2]]
 else
 	-- Repérer les fonctions usuelles
-	return match(Cs(TSubstCmath^1),op)
+	return match(Cs(TSubstCmathLaTeX^1),op)
 end
 end
 
@@ -1108,7 +1111,7 @@ elseif (op=='raccourci') then
 	if arg2==nil then arg2=Arbre[2] end
 	return arg2
 else
-	return op
+	return match(Cs(TSubstCmathTW^1),op)
 end
 end
 
