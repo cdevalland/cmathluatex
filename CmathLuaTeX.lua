@@ -266,7 +266,7 @@ local TSubstRaccourciTW = {	[':al']='α',
 		[':i']='і'	
 		}
 
-local Lettre = R("az")+R("AZ")+P("!")+S("'′")
+local Lettre = R("az")+R("AZ")+P("!")+P("'")+P("′")
 local Mot=C(Lettre^1+P('∭')+P('∬')+P('∫')+P('√')) - Guillemet
 local Op_LaTeX = C(P("\\")*Lettre^1) * Espace
 local TermOp = C(S("+-")) * Espace
