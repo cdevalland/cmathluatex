@@ -1,5 +1,5 @@
 --[[
-Cmath pour LuaTeX, version 2014.08.15
+Cmath pour LuaTeX, version 2014.08.20
     Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
 
     This program is free software: you can redistribute it and/or modify
@@ -1268,7 +1268,7 @@ trigo(expression):={
     return vrai;
 }:;
 
-debutTableau(colonne,hauteurLigne,valX):={
+debutTableau(colonne,hauteurLigne,valX,nb_decimales):={
 // colonne est la liste des lignes de la première colonne
 // hauteurLigne est la liste des hauteurs des lignes
 // valX est la liste des valeurs de x à inscrire dans la première ligne
@@ -1284,7 +1284,11 @@ debutTableau(colonne,hauteurLigne,valX):={
   s:=s+"}\n{";
   for(k:=0;k<size(valX);k++){
     if (k>0){s:=s+","};
-    s:=s+"$"+latex(valX[k])+"$";
+      if(type(nb_decimales)==DOM_INT and type(valX[k])==DOM_FLOAT){
+        s:=s+"$"+latex(evalf(valX[k],nb_decimales))+"$";
+      } else {
+        s:=s+"$"+latex(valX[k])+"$";
+      }
   }
   s:=s+"}\n";
   return(s);
@@ -1336,12 +1340,12 @@ Elague(IE,liste):={
     expression:=liste[k];
     if (trigo(expression)) {
       m:=0;
-      while(subst(expression,n_1=m)<=maxi) {
+      while(subst(expression,n_1=m)<=maxi and subst(expression,n_1=m)>=mini) {
         listeelaguee:=concat(listeelaguee,simplify(subst(expression,n_1=m)));
         m:=m+1;
       };
       m:=-1;
-      while(subst(expression,n_1=m)>=mini) {
+      while(subst(expression,n_1=m)<=maxi and subst(expression,n_1=m)>=mini) {
         listeelaguee:=concat(listeelaguee,simplify(subst(expression,n_1=m)));
         m:=m-1;
       }
@@ -1352,14 +1356,27 @@ Elague(IE,liste):={
     }
     
   }
-  return(sort(listeelaguee));
+  return(trier(listeelaguee));
 }:;
 
 trouveZeros(IE,f):={
   local n:=size(IE);
-  local Z,err;
+  local Z,err,k;
   try {Z:=solve(factor(simplify(f(x)=0)),x);}
-  catch(err){Z:=fsolve(f(x)=0,x,IE[0]..IE[n-1]);};
+  catch(err){
+    local xmin:=IE[0];
+    local xmax;
+    xmax:=IE[n-1];
+    if(xmin==-infinity){xmin:=-100}; // garde-fou, en attendant mieux...
+    if(xmax==+infinity){xmax:=100};
+    Z:=resoudre_numerique(f(x)=0,x,xmin..xmax);
+    if(Z==[]){
+      // pas de zéro trouvé avec la méthode de l'intervalle, on teste avec une valeur "Guest"
+      Z:=append(Z,resoudre_numerique(f(x)=0,x,(xmin+xmax)/2));
+    }      
+    // ne garder que 3 décimales dans le tableau
+    // Z:=evalf(Z,3);
+  }
   Z:=Elague(IE,Z);  
   return(Z);
 }:;
@@ -1383,8 +1400,8 @@ estDefinie(f,x):={
   if (abs(x)==+infinity){return(faux)};
   y:=simplifier(f(x));
   if (y==undef){return(faux)};
-  if (abs(y)==+infinity){return(faux)};
-  if (im(evalf(y))!=0){return(faux)};
+  if (abs(y)==+infinity) {return(faux)};
+  if (im(evalf(f(x)))!=0) {return(faux)};
   return(vrai);
 }:;
 
@@ -1396,8 +1413,12 @@ tabSignes(IE,f,g):={
   nIE:=size(IE);
   for(k:=0;k<=nIE-2;k++){
     if(estDefinie(f,IE[k]) and estDefinie(g,IE[k])){
-      signes:=append(signes,simplifier(f(IE[k])));
+      if(abs(f(IE[k]))<1e-10){
+        signes:=append(signes,0);
       } else {
+        signes:=append(signes,simplifier(f(IE[k])));
+      }
+    } else {
       if(abs(IE[k])==+infinity){
         signes:=append(signes," ");
       } else {
@@ -1416,14 +1437,18 @@ tabSignes(IE,f,g):={
     }
   }
   if(estDefinie(f,IE[nIE-1]) and estDefinie(g,IE[nIE-1])){
-    signes:=append(signes,simplifier(f(IE[nIE-1])));
+    if(abs(f(IE[nIE-1]))<1e-10){
+      signes:=append(signes,0);
     } else {
-      if(abs(IE[nIE-1])==+infinity){
-        signes:=append(signes," ");
-      } else {
-        signes:=append(signes,"d");
-      }
+      signes:=append(signes,simplifier(f(IE[nIE-1])));
     }
+  } else {
+    if(abs(IE[nIE-1])==+infinity){
+      signes:=append(signes," ");
+    } else {
+      signes:=append(signes,"d");
+    }
+  }
   return(signes);
 }:;
 
@@ -1475,7 +1500,17 @@ calculePosition(IE,VI,f,images):={
             sg:="-";
           }
         } else {
-          symb:="R";
+          if(images[k][1]<=images[k+1][0]){
+            symb:=symb+"-";
+            sg:="+";        
+          } else {
+            symb:=symb+"+";
+            sg:="-";
+          }
+          if(symb=="++"){symb:="+"}
+          else {if(symb=="--"){symb:="-"}
+            else {if(k>0){symb:="R"}}
+          }
         }
       } else {
         if(abs(IE[k])!=+infinity and not(estDefinie(f,IE[k]))){symb:=symb+"D";}
@@ -1701,7 +1736,7 @@ listeFacteurs(expression):={
   return(numerateur,denominateur);
 }:;
 
-ligneSignesTVP(signes):={
+ligneSignesTVP(signes,nb_decimales):={
 local n,sTkzTabLine,j,k;
 n:=size(signes);
 sTkzTabLine:="\\tkzTabLine {";
@@ -1713,7 +1748,11 @@ for(k:=0;k<n;k++){
     if (signes[k]==0){
       sTkzTabLine+="z";
       } else {
-      sTkzTabLine:=sTkzTabLine+latex(signes[k]);      
+        if(type(nb_decimales)==DOM_STRING) {
+          sTkzTabLine:=sTkzTabLine+latex(signes[k]);
+        } else {
+          sTkzTabLine:=sTkzTabLine+latex(evalf(signes[k],nb_decimales));
+        }
       }
     }
     if (k<n-1){
@@ -1723,8 +1762,6 @@ for(k:=0;k<n;k++){
   sTkzTabLine+="}\n";
   return(sTkzTabLine);
 }:;
-
-
 
 TVar(arguments):={
 local VI; // liste des valeurs interdites de f
@@ -1767,7 +1804,7 @@ ValeursX:=insereValeurs(ValeursX,Zeros_fp);
 ValeursX:=trier([op(set[op(ValeursX)])]);
 ValeursX:=simplifier(ValeursX);
 // construction de la structure du tableau
-sTkzTab:=debutTableau(["$"+nom_variable+"$","$"+nom_derivee+"("+nom_variable+")"+"$","$"+nom_fonction+"$"],[1,1,2],ValeursX);
+sTkzTab:=debutTableau(["$"+nom_variable+"$","$"+nom_derivee+"("+nom_variable+")"+"$","$"+nom_fonction+"$"],[1,1,2],ValeursX,nb_decimales);
 // construction du signe de f'
 Signes_fp:=tabSignes(ValeursX,fp,f);
 sTkzTabLine:=ligneSignes(Signes_fp);
@@ -1775,6 +1812,7 @@ sTkzTab+=sTkzTabLine;
 // construction des variations de f
 Images_f:=calculeImages(ValeursX,f,nb_decimales);
 Variations_f:=calculePosition(ValeursX,VI,f,Images_f);
+print(ValeursX,VI,f,Images_f);
 sTkzTabVar:=ligneVariations(Variations_f,Images_f);
 sTkzTab+=sTkzTabVar;
 // construction des images de f
@@ -1837,7 +1875,7 @@ if (denominateur){
 } else {
   hauteurs_lignes:=append(hauteurs_lignes,1);
 }
-sTkzTab:=debutTableau(colonne,hauteurs_lignes,ValeursX);
+sTkzTab:=debutTableau(colonne,hauteurs_lignes,ValeursX,"");
 // construction du signe des facteurs
 for(k:=0;k<size(facteurs);k++){
   facteur:=execute("unapply(facteurs[k],"+nom_variable+")");
@@ -1888,8 +1926,6 @@ if (size(arguments)==4){
 } else {
   nb_decimales:="";
 }
-
-
 initCas();
 id_fonction_f:=identifier(f);
 f:=id_fonction_f[0];
@@ -1920,10 +1956,10 @@ ValeursX:=simplifier(ValeursX);
 sTkzTab:=debutTableau(["$"+nom_variable_f+"$",
       "$"+nom_derivee_f+"("+nom_variable_f+")"+"$","$"+nom_fonction_f+"$",
       "$"+nom_fonction_g+"$","$"+nom_derivee_g+"("+nom_variable_g+")"+"$"],
-      [1,1,2,2,1],ValeursX);
+      [1,1,2,2,1],ValeursX,nb_decimales);
 // construction du signe de f'
 Signes_fp:=tabSignes(ValeursX,fp,f);
-sTkzTabLine:=ligneSignesTVP(Signes_fp);
+sTkzTabLine:=ligneSignesTVP(Signes_fp,nb_decimales);
 sTkzTab+=sTkzTabLine;
 // construction des variations de f
 Images_f:=calculeImages(ValeursX,f,nb_decimales);
@@ -1945,7 +1981,7 @@ sTkzTabIma:=lignesImages(NoeudsNonExtrema_g,Images_g);
 sTkzTab+=sTkzTabIma;
 // construction du signe de g'
 Signes_gp:=tabSignes(ValeursX,gp,g);
-sTkzTabLine:=ligneSignesTVP(Signes_gp);
+sTkzTabLine:=ligneSignesTVP(Signes_gp,nb_decimales);
 sTkzTab+=sTkzTabLine;
 sTkzTab+="\\end{tikzpicture}\n";
 return(sTkzTab);
