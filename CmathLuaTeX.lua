@@ -1,5 +1,5 @@
 --[[
-Cmath pour LuaTeX, version 2014.08.20
+Cmath pour LuaTeX, version 2015.01.03
     Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
 
     This program is free software: you can redistribute it and/or modify
@@ -909,12 +909,12 @@ local TraitementFonctionsCmath =
 	
 	['im']=
 	function(arbre) 
-		return '\\Im{'..Tree2Latex(arbre)..'}' 
+		return '\\mathfrak{Im}\\,{'..Tree2Latex(arbre)..'}' 
 	end,
 
 	['re']=
 	function(arbre) 
-		return '\\Re{'..Tree2Latex(arbre)..'}' 
+		return '\\mathfrak{Re}\\,{'..Tree2Latex(arbre)..'}' 
 	end,
 
 	['ts']=
@@ -1011,9 +1011,9 @@ elseif (op=='^') then
 		end
 	end
 	if Arbre[2][1]=='^' then
-		return '{'..Tree2Latex(Arbre[2])..'}^{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
+		return '{'..arg1..'}^{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
 	else
-		return Tree2Latex(Arbre[2])..'^{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
+		return arg1..'^{'..Tree2Latex(Parentheses_inutiles(Arbre[3]))..'}'
 	end
 elseif (op=='_') then
 	if Arbre[2][1]=='_' then
@@ -1147,7 +1147,7 @@ if QuelOs()=='linux' then
 	os.execute('icas giac.in')
 else 
 	-- c'est windows, à compléter pour identifier un Mac
-	os.execute('c:\\xcas\\bash.exe -c "export LANG=fr_FR.UTF-8 ; C:/xcas/icas.exe giac.in"')
+	os.execute('\\xcas\\bash.exe -c "export LANG=fr_FR.UTF-8 ; /xcas/icas.exe giac.in"')
 end
 io.input("giac.out")
 return(io.read("*all"))
@@ -1356,7 +1356,7 @@ Elague(IE,liste):={
     }
     
   }
-  return(trier(listeelaguee));
+  return(sort(listeelaguee));
 }:;
 
 trouveZeros(IE,f):={
@@ -1373,9 +1373,10 @@ trouveZeros(IE,f):={
     if(Z==[]){
       // pas de zéro trouvé avec la méthode de l'intervalle, on teste avec une valeur "Guest"
       Z:=append(Z,resoudre_numerique(f(x)=0,x,(xmin+xmax)/2));
+      if(Z==[undef]){
+        Z:=[]
+      }
     }      
-    // ne garder que 3 décimales dans le tableau
-    // Z:=evalf(Z,3);
   }
   Z:=Elague(IE,Z);  
   return(Z);
