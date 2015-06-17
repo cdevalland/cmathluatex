@@ -1,5 +1,5 @@
 --[[
-Cmath pour LuaTeX, version 2015.01.03
+Cmath pour LuaTeX, version 2015.06.17
     Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
 
     This program is free software: you can redistribute it and/or modify
@@ -48,6 +48,7 @@ local Operateur=C(	P('<=>')+P('<=')+P('>=')+P('<>')+P('->')+S('=><')
 		+	P(':rc')+P('⇐')
 		+	P(':ic')+P('⊂')
 		+	P(':ni')+P('⊄')
+		+	P(':re')+P('⟵')
 		+	P('⩽')+P('⩾')
 		+	P('≠')
 		) * Espace
@@ -78,7 +79,8 @@ local TSubstOperateurLaTeX = {	['<=>']='\\Leftrightarrow ',
 		[':ev']='\\Leftrightarrow ',	['⟺']='\\Leftrightarrow ',
 		[':rc']='\\Leftarrow ', ['⇐']='\\Leftarrow ',
 		[':ic']='\\subset ', ['⊂']='\\subset ',
-		[':ni']='\\not\\subset ', ['⊄']='\\not\\subset '
+		[':ni']='\\not\\subset ', ['⊄']='\\not\\subset ',
+		[':re']='\\leftarrow ',['⟵']='\\leftarrow '
 		}
 local TSubstOperateurTW = {	['<=>']='⟺',
 		['<=']='⩽',
@@ -102,7 +104,8 @@ local TSubstOperateurTW = {	['<=>']='⟺',
 		[':ev']='⟺',
 		[':rc']='⇐',
 		[':ic']='⊂',
-		[':ni']='⊄'
+		[':ni']='⊄',
+		[':re']='⟵'
 		}	
 						  					  
 local Chiffre=R("09")
@@ -649,13 +652,21 @@ local TraitementFonctionsCmath =
 	['ten']=
 	function(arbre) 
 		local n = nbArg(arbre)
-		return Tree2Latex(arbre[1])..' \\xrightarrow['..Tree2Latex(arbre[2])..']{} '..Tree2Latex(arbre[3])
+		if n==3 then
+			return Tree2Latex(arbre[1])..' \\xrightarrow['..Tree2Latex(arbre[2])..']{} '..Tree2Latex(arbre[3])
+		else
+			return Tree2Latex(arbre[1])..' \\xrightarrow[]{} '..Tree2Latex(arbre[2])
+		end
 	end,
 
 	['equ']=
 	function(arbre) 
 		local n = nbArg(arbre)
-		return Tree2Latex(arbre[1])..' \\underset{'..Tree2Latex(arbre[2])..'}{\\sim} '..Tree2Latex(arbre[3])
+		if n==3 then
+			return Tree2Latex(arbre[1])..' \\underset{'..Tree2Latex(arbre[2])..'}{\\sim} '..Tree2Latex(arbre[3])
+		else
+			return Tree2Latex(arbre[1])..' \\sim '..Tree2Latex(arbre[2])
+		end
 	end,
 
 	['sui']=
@@ -693,15 +704,25 @@ local TraitementFonctionsCmath =
 	end,
 	
 	['pto']=
-	function(arbre) 
-		local n = nbArg(arbre)
-		return 'o_{'..Tree2Latex(arbre[1])..'} \\left( '..Tree2Latex(arbre[2])..'\\right) '
+	function(arbre)
+		local n
+		if (arbre[1]=='liste ,' or arbre[1]=='liste ;') then
+			n = nbArg(arbre)
+			return 'o_{'..Tree2Latex(arbre[1])..'} \\left( '..Tree2Latex(arbre[2])..'\\right) '
+		else
+			return 'o\\left( '..Tree2Latex(arbre)..'\\right) '
+		end
 	end,
 
 	['gro']=
 	function(arbre) 
-		local n = nbArg(arbre)
-		return 'O_{'..Tree2Latex(arbre[1])..'} \\left( '..Tree2Latex(arbre[2])..'\\right) '
+		local n
+		if (arbre[1]=='liste ,' or arbre[1]=='liste ;') then
+			n = nbArg(arbre)
+			return 'O_{'..Tree2Latex(arbre[1])..'} \\left( '..Tree2Latex(arbre[2])..'\\right) '
+		else
+			return 'O \\left( '..Tree2Latex(arbre)..'\\right) '
+		end
 	end,
 	
 	['der']=
@@ -734,7 +755,11 @@ local TraitementFonctionsCmath =
 			ordre=ordre+j
 			table.insert(ordres_partiels,j)
 		end
-		s='\\frac{\\partial ^{'..tostring(ordre)..'}'..Tree2Latex(arbre[1])..'}{'
+		if ordre~=1 then
+			s='\\frac{\\partial ^{'..tostring(ordre)..'}'..Tree2Latex(arbre[1])..'}{'
+		else
+			s='\\frac{\\partial '..Tree2Latex(arbre[1])..'}{'
+		end
 		i=1
 		while(noms_var[i]~=nil) do -- table.getn ne marche pas dans LuaTeX
 			s=s..'\\partial '..noms_var[i]
@@ -1676,15 +1701,15 @@ sontDefinies(f,liste_zeros):={
 identifier(expression):={
   //renvoie [fonction, [nom variable,nom variable latex], [nom fonction, nom fonction latex],
   // [nom dérivée, nom dérivée latex] ] au format LaTeX
-  local x,membres,g,d,fonc,var,commande;
+  local x,membres,g,d,fonc,variable,commande;
   if (sommet(expression)=='='){
     membres:=op(expression);
     g:=membres[0];
     d:=membres[1];
     fonc:=op(g)[0];
-    var:=op(g)[1];
-    commande:="unapply(d,"+var+")";
-    return([execute(commande),[var,latex(var)],[fonc,latex(fonc)],[fonc+"'",latex(fonc)+"'"] ]);
+    variable:=op(g)[1];
+    commande:="unapply(d,"+variable+")";
+    return([execute(commande),[variable,latex(variable)],[fonc,latex(fonc)],[fonc+"'",latex(fonc)+"'"] ]);
   } else {
   return([unapply(expression,x),["x","x"],["x->"+expression,"x\\mapsto "+latex(expression)],["(x->"+expression+")'","\\left( x\\mapsto "+latex(expression)+"\\right) '"] ])
   }
