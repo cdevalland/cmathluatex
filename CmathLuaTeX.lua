@@ -1,5 +1,5 @@
 --[[
-    Cmath pour LuaTeX, version 2015.07.06
+	Cmath pour LuaTeX, version 2015.07.06
     Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
 
     This program is free software: you can redistribute it and/or modify
@@ -315,7 +315,7 @@ local TSubstCmathLaTeX =	P'arcsin'/'\\arcsin '
 		+	P'′'/"'"
 		+	1
 
-local TSubstCmathTW =	P"'"/'′' + 1	-- le symbole de la dérivation ne soit pas interférer avec l'indicateur de fin de chaîne
+local TSubstCmathTW =	P"'"/'′' + 1	-- le symbole de la dérivation ne doit pas interférer avec l'indicateur de fin de chaîne
 
 function fOperateur(arg1,op,arg2)
 	return {'op_binaire',op,arg1,arg2}
@@ -357,7 +357,7 @@ end
 function fMultImplicite(arg1,arg2)
 	if string.sub(arg1[1],1,5)=='signe' then
 		return {arg1[1],{'imp*',arg1[2],arg2}}
-	elseif arg1[1]=='imp*' and arg1[2][1]=='√' then -- rétablir la multiplication implicite pour la racine carrée
+	elseif arg1[1]=='imp*' and (arg1[3][1]=='√' or arg1[2][1]=='√') then -- rétablir la multiplication implicite pour la racine carrée (ex 2√3 ou √3x). Revoir la grammaire de la racine car ne fonctionne pas pour 2√3x.
 		return {'imp*',arg1[2],{'imp*',arg1[3],arg2}}
 	else
 		return {'imp*',arg1,arg2}
