@@ -1,5 +1,5 @@
 --[[
-Cmath pour LuaTeX, version 2015.06.17
+    Cmath pour LuaTeX, version 2015.07.06
     Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
 
     This program is free software: you can redistribute it and/or modify
@@ -1144,8 +1144,21 @@ function Giac(programme,instruction,latex)
 -- exécute le programme sans conserver le retour
 -- puis exécute l'instruction en renvoyant le résultat
 -- conversion en latex selon le booléen latex (pas de conversion pour les tableaux de variations/signes)
+local repTMP, giacIn, giacSav, giacOut, commande
+if QuelOs()=='linux' then
+	repTMP=RepertoireTMP()
+	giacIn=repTMP..'giac.in'
+	giacSav=repTMP..'giac.sav'
+	giacOut=repTMP..'giac.out'
+	commande='icas '..giacIn
+else -- c'est windows, à compléter pour identifier un Mac
+	giacIn='giac.in'
+	giacSav='giac.sav'
+	giacOut='giac.out'
+	commande='\\xcas\\bash.exe -c "export LANG=fr_FR.UTF-8 ; /xcas/icas.exe '..giacIn..'"'
+end
 local prg=[[
-unarchive("giac.sav"):;
+unarchive("]]..giacSav..[["):;
 ]]..programme..[[
 purge(Resultat);
 som:=sommet(quote(]]..instruction..[[));
@@ -1155,29 +1168,36 @@ if(som=='sto' or som=='supposons'){
   Resultat:=(]]..instruction..[[)};
 if(Resultat=='Resultat'){
   Resultat:="Erreur Xcas"};
-Sortie:=fopen("giac.out");
+Sortie:=fopen("]]..giacOut..[[");
 if(]]..latex..[[){
   fprint(Sortie,Unquoted,latex(Resultat));
 } else {
   fprint(Sortie,Unquoted,Resultat);
 };
 fclose(Sortie);
-archive("giac.sav"):;
+archive("]]..giacSav..[["):;
 ]]
-local f,err = io.open("giac.in","w")
-if not f then return print(err) end
+local f,err = io.open(giacIn,"w")
+if not f then return err end
 f:write(prg)
 f:close()
-if QuelOs()=='linux' then
-	os.execute('icas giac.in')
-else 
-	-- c'est windows, à compléter pour identifier un Mac
-	os.execute('\\xcas\\bash.exe -c "export LANG=fr_FR.UTF-8 ; /xcas/icas.exe giac.in"')
-end
-io.input("giac.out")
+os.execute(commande)
+io.input(giacOut)
 return(io.read("*all"))
 end
 
+function RepertoireTMP()
+-- renvoie le chemin vers un répertoire temporaire accessible en lecture/écriture
+local tmpFile=os.tmpname()
+local tmpDir=tmpFile
+local i=-1
+while(string.sub(tmpDir,i,i)~='/') do
+	i=i-1
+end
+tmpDir=(string.sub(tmpDir,1,string.len(tmpDir)+i+1))
+os.remove(tmpFile)
+return tmpDir
+end
 
 function QuelOs()
 local conf=package.config
