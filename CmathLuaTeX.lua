@@ -1,5 +1,5 @@
 --[[
-	Cmath pour LuaTeX, version 2015.07.06
+	Cmath pour LuaTeX, version 2015.12.12
     Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
 
     This program is free software: you can redistribute it and/or modify
@@ -216,7 +216,7 @@ local TSubstRaccourciLaTeX = {	['...']='\\dots ',
 		[':Q']='\\mathbb{Q} ', ['ℚ']='\\mathbb{Q} ',
 		[':K']='\\mathbb{K} ', ['𝕂']='\\mathbb{K} ',
 		[':e']='\\mathrm{e} ', ['е']='\\mathrm{e} ',
-		[':i']='\\mathrm{i} ', ['і']='\\mathrm{i} ',
+		[':i']='\\mspace{1 mu}\\mathrm{i} ', ['і']='\\mspace{1 mu}\\mathrm{i} ',
 		[':d']='{\\mathop{}\\mathopen{}\\mathrm{d}}'
 		}
 
@@ -312,7 +312,8 @@ local TSubstCmathLaTeX =	P'arcsin'/'\\arcsin '
 		+	P'sh'/'\\sh '
 		+	P'th'/'\\th '
 		+	P'card'/'\\card '
-		+	P'′'/"'"
+		+	P'′'/"\\mspace{2 mu}'\\mspace{-3 mu}"
+		+	P'!'/'\\mspace{2 mu}!'
 		+	1
 
 local TSubstCmathTW =	P"'"/'′' + 1	-- le symbole de la dérivation ne doit pas interférer avec l'indicateur de fin de chaîne
