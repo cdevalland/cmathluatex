@@ -1,0 +1,350 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{fontspec}
+%\newfontfamily\mono{DejaVu Sans Mono}
+%\makeatletter
+%\def\verbatim@font{\mono\small}
+%\makeatother
+\usepackage[table]{xcolor}
+%%%%%%%%%%%% Packages nécessaires à CmathLuaTeX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amsmath,amssymb,mathrsfs,mathtools}
+\usepackage[e]{esvect} % pour de jolis vecteurs
+\usepackage{stmaryrd} % pour les intervalles d'entiers
+\usepackage{cancel} % pour biffer
+\usepackage{tikz} % figures géométriques (nécessaire pour les tableaux de variations et de signes)
+\usepackage{tkz-tab} % pour les tableaux de variations et de signes
+\usepackage{array,cellspace} % pour les tableaux de valeurs
+\newcommand{\bmmax}{2} % Évite de dépasser la limite TeX des 16 polices simultanées. Doit être chargée avant bm.
+\usepackage{bm} % pour les formules en gras
+%%%%%%%%%%%% Packages facultatifs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{metalogo} % pour écrire un joli \LuaTeX ou \LuaLaTeX
+\usepackage[scr=boondoxo,scrscaled=1]{mathalfa} % police mathscr moins penchée. \newcommand{\bmmax}{2} peut être effacé si ce package n'est pas utilisé.
+%%%%%%%%%%%% Adobe Zapf Chancery font
+\DeclareFontFamily{OT1}{pzc}{}
+\DeclareFontShape{OT1}{pzc}{m}{it}{<-> s * [1.2] pzcmi7t}{}
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it} % pour la police Zapf Chancery
+%%%%%%%%%%%% Opérateurs
+\DeclareMathOperator{\ch}{ch}
+\DeclareMathOperator{\sh}{sh}
+\renewcommand{\th}{\operatorname{th}}
+\DeclareMathOperator{\argch}{argch}
+\DeclareMathOperator{\argsh}{argsh}
+\DeclareMathOperator{\argth}{argth}
+\DeclareMathOperator{\Ima}{Im}
+\DeclareMathOperator{\Ker}{Ker}
+\renewcommand{\Im}{\operatorname{\mathfrak{Im}}}
+\renewcommand{\Re}{\operatorname{\mathfrak{Re}}}
+\DeclareMathOperator{\vect}{Vect}
+\DeclareMathOperator{\pgcd}{pgcd}
+\DeclareMathOperator{\ppcm}{ppcm}
+%%%%%%%%%%%% CmathLuaTeX
+\directlua{dofile('CmathLuaTeX.lua')}
+\newcommand\Cmath[1]{\directlua{tex.print(Cmath2LaTeX('\detokenize{#1}'))}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[margin=3cm]{geometry}
+\usepackage{hyperref}
+\usepackage{multirow}
+
+\setlength{\parindent}{0cm}
+\setlength{\cellspacetoplimit}{4pt}
+\setlength{\cellspacebottomlimit}{4pt}
+
+\definecolor{gris}{gray}{0.9}
+
+\begin{document}
+
+\begin{center}
+
+{\Large Memento Cmath\LuaTeX}
+
+{\large
+\url{https://github.com/cdevalland/cmathluatex}
+
+\href{mailto:christophe.devalland@ac-rouen.fr}{christophe.devalland@ac-rouen.fr}
+
+29 décembre 2014}
+\end{center}
+
+-- \textbf{Raccourcis TeXworks}
+
+Le confort d'utilisation de CmathLuaTeX sera optimale avec l'excellent éditeur TeXworks. Son apparence est rudimentaire mais il est d'une efficacité redoutable une fois qu'on a pris le temps de le personnaliser.
+
+Les combinaisons de touches disponibles dans TeXworks sont :
+
+\begin{tabular}{c p{12cm}}
+Touches 	& Action \\
+\hline
+\verb?F9? 	&Compose la formule tapée juste avant le curseur avec la fonction \verb?$\Cmath{}$?. Action réversible en retapant F9.\\
+\verb?Maj+F9? 	&Compose la formule tapée juste avant le curseur avec la fonction \verb?\[\Cmath{}\]?. Action réversible.\\
+\verb?Alt+F9? 	&Compose la formule tapée juste avant le curseur avec la fonction \verb?\Cmath{}?. Action réversible.\\
+\verb?Ctrl+F9? &	Traduit en LaTeX la formule tapée juste avant le curseur, en mode texte.\\
+\verb?Ctrl+Maj+F9? &	Traduit en LaTeX la formule tapée juste avant le curseur, en mode hors-texte.\\
+\verb?Ctrl+*? 	&Affiche le symbole ×\\
+\verb?Ctrl+/? 	&Affiche le symbole ÷\\
+\verb?Ctrl+=? 	&Affiche le symbole environ égal\\
+\verb?Ctrl+R? 	&Affiche le symbole √\\
+\end{tabular}
+
+Pour configurer TeXworks, voir là : \url{https://code.google.com/p/cmathluatex/}.
+\vskip 1em
+
+-- \textbf{Les symboles}
+
+Les symboles suivants sont obtenus en tapant \verb?:? suivi du raccourci correspondant. Je n'indique pas les lettres grecques dans ce tableau ; elles sont toutes disponibles. Par exemple \verb?:de? donne $\Cmath{δ}$. On obtient la version majuscule en tapant le raccourci en majuscule. $\Cmath{Δ}$ est obtenu avec \verb?:DE?.
+
+\begin{tabular}{c c| c c| c c| c c}
+Raccourci & Symbole & Raccourci & Symbole & Raccourci & Symbole & Raccourci & Symbole\\
+\hline
+\verb?:in? & $\Cmath{∞}$ & \verb?:ll? & $\Cmath{ℓ}$ & \verb?:pm? & $\Cmath{±}$ & \verb?:dr? & $\Cmath{∂}$\\
+\verb?:vi? & $\Cmath{∅}$ & \verb?:ex? & $\Cmath{∃}$ & \verb?:qs? & $\Cmath{∀}$ & \verb?:e? & $\Cmath{е}$\\
+\verb?:i? & $\Cmath{і}$ & \verb?:d? & $\Cmath{:d}$ & \verb?:K? & $\Cmath{𝕂}$ & \verb?:N? & $\Cmath{ℕ}$\\
+\verb?:Z? & $\Cmath{ℤ}$ & \verb?:Q? & $\Cmath{ℚ}$ & \verb?:R? & $\Cmath{ℝ}$ & \verb?:C? & $\Cmath{ℂ}$\\
+\verb?:Ne? & $\Cmath{ℕe}$ & \verb?:Z? & $\Cmath{ℤe}$ & \verb?:Qe? & $\Cmath{ℚe}$ & \verb?:Re? & $\Cmath{ℝe}$\\
+\verb?:Ce? & $\Cmath{ℂe}$ & \verb?:Rm? & $\Cmath{ℝm}$ & \verb?:Rp? & $\Cmath{ℝp}$ & \verb?:Rme? & $\Cmath{ℝme}$\\
+\verb?:Rpe? & $\Cmath{ℝpe}$ & \verb?:oij? & $\Cmath{:oij}$ & \verb?:ouv? & $\Cmath{:ouv}$ & \verb?:oijk? & $\Cmath{:oijk}$\\
+\end{tabular}
+\vskip 1em
+
+Les symboles suivants sont des opérateurs binaires, ils doivent être utilisés entre deux arguments.
+
+\begin{tabular}{c c| c c| c c| c c}
+Expression & Affichage & Expression & Affichage & Expression & Affichage & Expression & Affichage\\
+\hline
+\verb?a:enb? & $\Cmath{a≈b}$ & \verb?a:apb? & $\Cmath{a∈b}$ & \verb?a:asb? & $\Cmath{a⟼b}$ & \verb?a->b? & $\Cmath{a⟶b}$ \\
+\verb?a:unb? & $\Cmath{a∪b}$ & \verb?a:itb? & $\Cmath{a∩b}$ & \verb?a:rob? & $\Cmath{a∘b}$ & \verb?a:eqb? & $\Cmath{a:eqb}$\\
+\verb?a:cob? & $\Cmath{a≡b}$ & \verb?a:ppb? & $\Cmath{a∨b}$ & \verb?a:pgb? & $\Cmath{a∧b}$ & \verb?a:veb? & $\Cmath{a∧b}$\\
+\verb?a:peb? & $\Cmath{a⊥b}$ & \verb?a:sdb? & $\Cmath{a⊕b}$ & \verb?a:npb? & $\Cmath{a∉b}$ & \verb?a:imb? & $\Cmath{a⇒b}$\\
+\verb?a:evb? & $\Cmath{a⟺b}$ & \verb?a:rcb? & $\Cmath{a⇐b}$ & \verb?a:icb? & $\Cmath{a⊂b}$ & \verb?a:nib? & $\Cmath{a⊄b}$\\
+\end{tabular}
+
+\vskip 1em
+
+-- \textbf{Les fonctions : syntaxes et exemples}
+
+Les arguments notés entre crochets sont facultatifs.
+
+La colonne de gauche contient ce que l'on tape au clavier. La colonne de droite est le résultat de la compilation avec \LuaLaTeX après avoir composition par \verb?\[\Cmath{}\]?. Avec TeXworks, cette opération est réalisée par l'appui sur Maj+F9.
+
+\vskip 1em
+
+\begin{tabular}{m{0.77\linewidth} S{r}}
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Reconnaissance des fonctions usuelles} \\
+\hline
+\verb?f(x)=x*lnx+1? & $\Cmath{ds(f(x)=x*lnx+1)}$\\
+\end{tabular}
+
+\begin{tabular}{m{0.7\linewidth} S{r}}
+\multicolumn{2}{>{\columncolor{gray!20}}l}{La division : \texttt{n/d}, division en ligne : \texttt{n//d} ou \texttt{n÷d}} \\
+\hline
+\verb?(x+2)/x? & $\Cmath{ds((x+2)/x)}$\\
+\verb?1/(3/4)+1/2=11/2/3? & $\Cmath{ds(1/(3/4)+1/2=11/2/3)}$\\
+\verb?1+1/(1+1/(1+...))? & $\Cmath{ds(1+1/(1+1/(1+...)))}$\\
+\verb?:e^(:i:pi//4)? & $\Cmath{ds(:e^(:i:pi//4))}$\\
+\verb?3÷2? & $\Cmath{ds(3÷2)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{La multiplication implicite, invisible : \texttt{a*b}, visible : \texttt{a×b} ou \texttt{a**b} ou \texttt{a..b}} \\
+\hline
+\verb?1/2x,√3x,2lnx/x? & $\Cmath{ds(1/2x,√3x,2lnx/x)}$\\
+\verb?1/2*x,√3×x,2..lnx/x? & $\Cmath{ds(1/2*x,√3×x,2..lnx/x)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Gestion des parenthèses inutiles} \\
+\hline
+\verb?√(x+1),√(x+1)x,(1+n)/3? & $\Cmath{ds(√(x+1),√(x+1)x,(1+n)/3)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Les racines : \texttt{rac([n,]exp)} ou \texttt{√([n,]exp)}} \\
+\hline
+\verb?√x,√(3,x)? & $\Cmath{ds(√x,√(3,x))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Valeur absolue, module : \texttt{abs(exp)}}\\
+\hline
+\verb?abs(z)? & $\Cmath{abs(z)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Norme : \texttt{nor(exp)}}\\
+\hline
+\verb?nor(vec(AB))? & $\Cmath{nor(vec(AB))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Barre : \texttt{bar(exp)}}\\
+\hline
+\verb?bar(A:unB)=bar(A):itbar(B)? & $\Cmath{bar(A:unB)=bar(A):itbar(B)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Tilde : \texttt{til(exp)}}\\
+\hline
+\verb?til(P:roQ)=til(P):rotil(Q)? & $\Cmath{til(P:roQ)=til(P):rotil(Q)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Angle : \texttt{ang(exp)}}\\
+\hline
+\verb?ang((vec(u),vec(v)))? & $\Cmath{ang((vec(u),vec(v)))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{La puissance : \texttt{a\^{}b}}\\
+\hline
+\verb?:e^(1+1/n),(1/2)^n? & $\Cmath{ds(:e^(1+1/n),(1/2)^n)}$\\
+\verb?10^-5,(10^n)^p=10^(n**p)? & $\Cmath{ds(10^-5,(10^n)^p=10^(n**p))}$\\
+\verb?x^(2^3)? & $\Cmath{ds(x^(2^3))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Les indices : \texttt{a\_b}}\\
+\hline
+\verb?x_1=(1+√5)/2? & $\Cmath{ds(x_1=(1+√5)/2)}$\\
+\verb?a=(y_(M_2)-y_(M_1))/(x_(M_2)-x_(M_1))? & $\Cmath{ds(a=(y_(M_2)-y_(M_1))/(x_(M_2)-x_(M_1)))}$\\
+\verb?P_1*(X)? & $\Cmath{ds(P_1*(X))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Les intervalles} \\
+\hline
+\verb?[0,1/2],]-:in,0]? &  $\Cmath{ds([0,1/2],]-:in,0])}$\\
+\verb?[[1,n]]? &  $\Cmath{ds([[1,n]])}$\\
+\end{tabular}
+
+\begin{tabular}{m{0.63\linewidth} S{r}}
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Forcer le mode textstyle ou displaystyle : \texttt{ts(exp)}, \texttt{ds(exp)}}\\
+\hline
+\verb?ts(x_1=(1+√5)/2)? & $\Cmath{ts(x_1=(1+√5)/2)}$\\
+\verb?ds(x_1=(1+√5)/2)? & $\Cmath{ds(x_1=(1+√5)/2)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Polices caligraphique : \texttt{cal(exp)}, script : \texttt{scr(exp)}, Zapf Chancery : \texttt{pzc(exp)}}\\
+\hline
+\verb?cal(M)_n*(:R),scr(C)_f,pzc(E)? & $\Cmath{cal(M)_n*(:R),scr(C)_f,pzc(E)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Texte : \texttt{"texte"}}\\
+\hline
+\verb?p="nombre de cas favorables"/"nombre de cas possibles"? & $\Cmath{p="nombre de cas favorables"/"nombre de cas possibles"}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Système : \texttt{sys(expr1[,expr2[,expr3[...])}}\\
+\hline
+\verb?sys(u_0=1,u_(n+1)=√(u_n+3))? & $\Cmath{sys(u_0=1,u_(n+1)=√(u_n+3))}$\\
+\verb?f(x)=sys(2x+1*" si "*x>=0,x^2*" si "*x<0)? & $\Cmath{f(x)=sys(2x+1*" si "*x>=0,x^2*" si "*x<0)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Accolade : \texttt{acc(exp)}, inférieure : \texttt{aci(exp)}, supérieure : \texttt{acs(exp)}, droite : \texttt{acd(exp)}}\\
+\hline
+\verb?S=acc(x:ask*x^2,k:ap:R)? & $\Cmath{S=acc(x:ask*x^2,k:ap:R)}$\\
+\verb?1+acs(2×3,6)? & $\Cmath{1+acs(2×3,6)}$\\
+\verb?1+aci(2×3,6)? & $\Cmath{1+aci(2×3,6)}$\\
+\verb?acd(P" est vrai",Q" est vrai"):im(P" et "Q)" est vrai"? & $\Cmath{acd(P" est vrai",Q" est vrai"):im(P" et "Q)" est vrai"}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Vecteur : \texttt{vec(exp)}, vecteur colonne : \texttt{vec(x1,x2[,x3[...])}}\\
+\hline
+\verb?vec(u)*vec(1,2,3)? & $\Cmath{vec(u)*vec(1,2,3)}$\\
+\verb?vec(AB)+vec(BA)=vec(0)? & $\Cmath{vec(AB)+vec(BA)=vec(0)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Intégrale simple : \texttt{int([inf],[sup],fonction[,variable])}}\\
+\hline
+\verb?int(0,1,:e^2x,x)=[1/2*:e^2x]_0^1? & $\Cmath{ds(int(0,1,:e^2x,x)=[1/2*:e^2x]_0^1)}$\\
+\verb?int([:pi,2:pi],,sinx,x)? & $\Cmath{ds(int([:pi,2:pi],,sinx,x))}$\\
+\verb?int(,,lnx)=x*lnx-x+k,k:ap:R? & $\Cmath{ds(int(,,lnx)=x*lnx-x+k,k:ap:R)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Intégrales double : \texttt{iint([inf],[sup],fonction[,variable1,variable2])}}\\
+\hline
+\verb?iint(cal(D),,f(x,y),x,y)? & $\Cmath{ds(iint(cal(D),,f(x,y),x,y))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Intégrales triple : \texttt{iiint([inf],[sup],fonction[,variable1,variable2,variable3])}}\\
+\hline
+\verb?iiint(cal(V),,f(x,y,z),x,y,z)? & $\Cmath{ds(iiint(cal(V),,f(x,y,z),x,y,z))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Écrire autour : \texttt{aut(exp,a,b,c,d)}}\\
+\hline
+\verb?aut(M,1,2,3,4)? & $\Cmath{aut(M,1,2,3,4)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Somme : \texttt{som([inf],[sup],exp)}}\\
+\hline
+\verb?som(i=1,+:in,1/2^n)? & $\Cmath{ds(som(i=1,+:in,1/2^n))}$\\
+
+\end{tabular}
+
+\begin{tabular}{m{0.77\linewidth} S{r}}
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Produit : \texttt{pro([inf],[sup],exp)}}\\
+\hline
+\verb?pro(,,(1+1/i))? & $\Cmath{ds(pro(,,(1+1/i)))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Union : \texttt{uni([inf],[sup],exp)}}\\
+\hline
+\verb?uni(1<=k<=n,,A_k)? & $\Cmath{ds(uni(1<=k<=n,,A_k))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Intersection : \texttt{ite([inf],[sup],exp)}}\\
+\hline
+\verb?ite(i=0,+:in,(]1-a_i,1+b_i[))? & $\Cmath{ds(ite(i=0,+:in,(]1-a_i,1+b_i[)))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Limite : \texttt{lim(exp1[,exp2],fonction)}}\\
+\hline
+\verb?lim(x->2,ln(x-2))=-:in? & $\Cmath{ds(lim(x->2,ln(x-2))=-:in)}$\\
+\verb?lim(x->√2,x<√2,1/(x^2-2))=+:in? & $\Cmath{ds(lim(x->√2,x<√2,1/(x^2-2))=+:in)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Sup : \texttt{sup(exp1,exp2)}, idem pour inf, max, min}\\
+\hline
+\verb?inf(x:ap[a,b],f(x))? & $\Cmath{ds(inf(x:ap[a,b],f(x)))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Souligner : \texttt{sou(exp)}}\\
+\hline
+\verb?sou(AB)? & $\Cmath{sou(AB)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Biffer: \texttt{bif(exp)}}\\
+\hline
+\verb?(bif(2)×3)/(bif(2)×7)? & $\Cmath{ds((bif(2)×3)/(bif(2)×7))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Matrice : \texttt{mat(nombre de colonnes,a,b,c,...)}}\\
+\hline
+\verb?mat(2,1,2,3,4)? & $\Cmath{mat(2,1,2,3,4)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Déterminant : \texttt{det(nombre de colonnes,a,b,c,...)}}\\
+\hline
+\verb?det(2,1,2,3,4)? & $\Cmath{det(2,1,2,3,4)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Crochet : \texttt{cro(nombre de colonnes,a,b,c,...)}}\\
+\hline
+\verb?cro(2,1,2,3,4)? & $\Cmath{cro(2,1,2,3,4)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Équivalent à : \texttt{equ(fonction1,point,fonction2)}}\\
+\hline
+\verb?equ(sinx,0,x)? & $\Cmath{ds(equ(sinx,0,x))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Tendre vers : \texttt{ten(fonction1,point,fonction2)}}\\
+\hline
+\verb?ten(lnx,+:in,+:in)? & $\Cmath{ds(ten(lnx,+:in,+:in))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Dérivée physicienne : \texttt{der(fonction,variable,ordre)}}\\
+\hline
+\verb?der(f,t,3)? & $\Cmath{ds(der(f,t,3))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Dérivée partielle : \texttt{derp(fonction,variables)}}\\
+\hline
+\verb?derp(f,xxyzz)? & $\Cmath{ds(derp(f,xxyzz))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Petit o : \texttt{pto(point,fonction)}, grand o : \texttt{pto(point,fonction)}}\\
+\hline
+\verb?x=pto(+:in,x^2)? & $\Cmath{ds(x=pto(+:in,x^2))}$\\
+\verb?f=gro(0,x)? & $\Cmath{ds(f=gro(0,x))}$\\
+
+\end{tabular}
+
+\begin{tabular}{m{0.84\linewidth} S{r}}
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Restreint à : \texttt{res(fonction,ensemble)}}\\
+\hline
+\verb?res(f,:Rp)? & $\Cmath{res(f,:Rp)}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Suite : \texttt{sui(nom[,indice])}}\\
+\hline
+\verb?sui(u)? & $\Cmath{ds(sui(u))}$\\
+\verb?sui(u,k)? & $\Cmath{ds(sui(u,k))}$\\
+\verb?sui(u,p>=0)? & $\Cmath{ds(sui(u,p>=0))}$\\
+
+\multicolumn{2}{>{\columncolor{gray!20}}l}{Série : \texttt{ser(nom[,indice])}}\\
+\hline
+\verb?ser(u)? & $\Cmath{ds(ser(u))}$\\
+\verb?ser(u,k)? & $\Cmath{ds(ser(u,k))}$\\
+\verb?ser(u,p>=0)? & $\Cmath{ds(ser(u,p>=0))}$\\
+
+\end{tabular}
+
+Pour les symboles \LaTeX qui ne sont pas fournis par Cmath\LuaTeX, il suffit de les ajouter dans une expression Cmath\LuaTeX en doublant le backslash. Par exemple : 
+
+\verb?\[\Cmath{mat(3,a_(1,1),...,a_(1,n),\\vdots,\\ddots,\\vdots,a_(n,1),...,a_(n,n))}\]? donnera :
+
+\[\Cmath{mat(3,a_(1,1),...,a_(1,n),\\vdots,\\ddots,\\vdots,a_(n,1),...,a_(n,n))}\]
+
+\vskip 1em
+
+-- \textbf{Calculs formels}
+
+Pour effectuer des calculs formels dans \LuaLaTeX\ ou construire des tableaux de valeurs ou de variations automatiquement, consulter \url{https://github.com/cdevalland/cmathluatex/wiki/Présentation-de-CmathLuaTeX}.
+
+
+\end{document}
