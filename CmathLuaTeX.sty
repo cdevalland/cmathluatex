@@ -1,1 +1,37 @@
-/home/chris/Documents/math/ATS/Latex/modèles/CmathLuaTeX.sty
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{CmathLuaTeX}[2014/12/30]
+
+%%%%%%%%%%%% Packages nécessaires à CmathLuaTeX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{amsmath,amssymb,mathrsfs,mathtools}
+\RequirePackage[e]{esvect} % pour de jolis vecteurs
+\RequirePackage{stmaryrd} % pour les intervalles d'entiers
+\RequirePackage{cancel} % pour biffer
+\RequirePackage{tikz} % figures géométriques (nécessaire pour les tableaux de variations et de signes)
+\RequirePackage{tkz-tab} % pour les tableaux de variations et de signes
+\RequirePackage{array,cellspace} % pour les tableaux de valeurs
+\newcommand{\bmmax}{2} % Évite de dépasser la limite TeX des 16 polices simultanées. Doit être chargée avant bm.
+\RequirePackage{bm} % pour les formules en gras
+%%%%%%%%%%%% Packages facultatifs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{metalogo} % pour écrire un joli \LuaTeX ou \LuaLaTeX
+\RequirePackage[scr=boondoxo,scrscaled=1.1]{mathalfa} % police mathscr moins penchée. La ligne \newcommand{\bmmax}{2} peut être effacée si ce package n'est pas utilisé.
+%%%%%%%%%%%% Adobe Zapf Chancery font
+\DeclareFontFamily{OT1}{pzc}{}
+\DeclareFontShape{OT1}{pzc}{m}{it}{<-> s * [1.2] pzcmi7t}{}
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it} % pour la police Zapf Chancery
+%%%%%%%%%%%% Opérateurs
+\DeclareMathOperator{\ch}{ch}
+\DeclareMathOperator{\sh}{sh}
+\renewcommand{\th}{\operatorname{th}}
+\DeclareMathOperator{\argch}{argch}
+\DeclareMathOperator{\argsh}{argsh}
+\DeclareMathOperator{\argth}{argth}
+\DeclareMathOperator{\Ima}{Im}
+\DeclareMathOperator{\Ker}{Ker}
+\renewcommand{\Im}{\operatorname{\mathfrak{Im}}}
+\renewcommand{\Re}{\operatorname{\mathfrak{Re}}}
+\DeclareMathOperator{\vect}{Vect}
+\DeclareMathOperator{\pgcd}{pgcd}
+\DeclareMathOperator{\ppcm}{ppcm}
+%%%%%%%%%%%% CmathLuaTeX
+\directlua{require('CmathLuaTeX')}
+\newcommand\Cmath[1]{\directlua{tex.print(Cmath2LaTeX('\detokenize{#1}'))}}
