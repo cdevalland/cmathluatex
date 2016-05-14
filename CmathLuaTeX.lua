@@ -1,5 +1,5 @@
 --[[
-	Cmath pour LuaTeX, version 2016.05.13
+	Cmath pour LuaTeX, version 2016.05.14
     Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
 
     This program is free software: you can redistribute it and/or modify
