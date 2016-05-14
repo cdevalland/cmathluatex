@@ -9,3 +9,5 @@
 * Libre et gratuit, sous licence GNU GPL v3. Le code source est accessible [ici](https://github.com/cdevalland/cmathluatex/blob/master/CmathLuaTeX.lua). L'onglet [Issues](https://github.com/cdevalland/cmathluatex/issues) de cette page permet de remonter des bogues, de proposer des améliorations, etc... 
 
 ## Plus de détails dans le [Wiki](https://github.com/cdevalland/cmathluatex/wiki) ##
+
+
