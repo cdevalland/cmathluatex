@@ -1,48 +1,10 @@
 \documentclass[a4paper,10pt]{article}
 \usepackage{fontspec}
-%\newfontfamily\mono{DejaVu Sans Mono}
-%\makeatletter
-%\def\verbatim@font{\mono\small}
-%\makeatother
-\usepackage[table]{xcolor}
-%%%%%%%%%%%% Packages nécessaires à CmathLuaTeX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{amsmath,amssymb,mathrsfs,mathtools}
-\usepackage[e]{esvect} % pour de jolis vecteurs
-\usepackage{stmaryrd} % pour les intervalles d'entiers
-\usepackage{cancel} % pour biffer
-\usepackage{tikz} % figures géométriques (nécessaire pour les tableaux de variations et de signes)
-\usepackage{tkz-tab} % pour les tableaux de variations et de signes
-\usepackage{array,cellspace} % pour les tableaux de valeurs
-\newcommand{\bmmax}{2} % Évite de dépasser la limite TeX des 16 polices simultanées. Doit être chargée avant bm.
-\usepackage{bm} % pour les formules en gras
-%%%%%%%%%%%% Packages facultatifs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{metalogo} % pour écrire un joli \LuaTeX ou \LuaLaTeX
-\usepackage[scr=boondoxo,scrscaled=1]{mathalfa} % police mathscr moins penchée. \newcommand{\bmmax}{2} peut être effacé si ce package n'est pas utilisé.
-%%%%%%%%%%%% Adobe Zapf Chancery font
-\DeclareFontFamily{OT1}{pzc}{}
-\DeclareFontShape{OT1}{pzc}{m}{it}{<-> s * [1.2] pzcmi7t}{}
-\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it} % pour la police Zapf Chancery
-%%%%%%%%%%%% Opérateurs
-\DeclareMathOperator{\ch}{ch}
-\DeclareMathOperator{\sh}{sh}
-\renewcommand{\th}{\operatorname{th}}
-\DeclareMathOperator{\argch}{argch}
-\DeclareMathOperator{\argsh}{argsh}
-\DeclareMathOperator{\argth}{argth}
-\DeclareMathOperator{\Ima}{Im}
-\DeclareMathOperator{\Ker}{Ker}
-\renewcommand{\Im}{\operatorname{\mathfrak{Im}}}
-\renewcommand{\Re}{\operatorname{\mathfrak{Re}}}
-\DeclareMathOperator{\vect}{Vect}
-\DeclareMathOperator{\pgcd}{pgcd}
-\DeclareMathOperator{\ppcm}{ppcm}
-%%%%%%%%%%%% CmathLuaTeX
-\directlua{dofile('CmathLuaTeX.lua')}
-\newcommand\Cmath[1]{\directlua{tex.print(Cmath2LaTeX('\detokenize{#1}'))}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[margin=3cm]{geometry}
-\usepackage{hyperref}
+\usepackage{CmathLuaTeX}
+%\usepackage[table]{xcolor}
 \usepackage{multirow}
+\usepackage{hyperref}
+\usepackage[margin=2.5cm]{geometry}
 
 \setlength{\parindent}{0cm}
 \setlength{\cellspacetoplimit}{4pt}
@@ -61,7 +23,7 @@
 
 \href{mailto:christophe.devalland@ac-rouen.fr}{christophe.devalland@ac-rouen.fr}
 
-29 décembre 2014}
+2014-2016}
 \end{center}
 
 -- \textbf{Raccourcis TeXworks}
@@ -84,10 +46,12 @@ Touches 	& Action \\
 \verb?Ctrl+R? 	&Affiche le symbole √\\
 \end{tabular}
 
-Pour configurer TeXworks, voir là : \url{https://code.google.com/p/cmathluatex/}.
+Pour configurer TeXworks, voir là : \url{https://github.com/cdevalland/cmathluatex/wiki/Configuration-TeXworks}.
 \vskip 1em
 
 -- \textbf{Les symboles}
+
+
 
 Les symboles suivants sont obtenus en tapant \verb?:? suivi du raccourci correspondant. Je n'indique pas les lettres grecques dans ce tableau ; elles sont toutes disponibles. Par exemple \verb?:de? donne $\Cmath{δ}$. On obtient la version majuscule en tapant le raccourci en majuscule. $\Cmath{Δ}$ est obtenu avec \verb?:DE?.
 
