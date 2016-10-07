@@ -1,0 +1,1604 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{fontspec}
+%\usepackage{Cmath}
+\usepackage{CmathLuaTeX}
+\usepackage{multirow}
+\usetikzlibrary{calc}
+\usepackage{graphicx}
+\usepackage{fancyvrb}
+\usepackage{enumitem}
+\usepackage[colorlinks=true,linktoc=page]{hyperref}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[frenchb]{babel}
+\usepackage[tikz]{bclogo}
+
+
+% Changement de la police teletype pour afficher correctement les lettres grecques 
+% dans les lignes de code. Il est possible de remplacer le nom de la police voire de commenter le ligne \setmonofont pour compiler le document.
+\setmonofont{DejaVu Sans Mono}[Scale=MatchLowercase]
+%\setmonofont{Ubuntu Mono}
+%\setmonofont{Droid Sans Mono}
+%\setmonofont{FreeMono}
+
+
+\setlength{\parindent}{0cm}
+\setlength{\cellspacetoplimit}{4pt}
+\setlength{\cellspacebottomlimit}{4pt}
+
+\newenvironment{code}
+{\SaveVerbatim{VerbEnv}}
+{\endSaveVerbatim\parindent0pt
+\begin{tikzpicture}
+	\node [fill=gray!20,rectangle,inner xsep=5pt,inner ysep=5pt] (box)
+	{\begin{minipage}{\linewidth-1.1em}
+		\UseVerbatim{VerbEnv}
+	\end{minipage}
+    };
+\end{tikzpicture}
+}
+
+\newenvironment{afficher}
+{\begin{bclogo}[logo=\bccrayon,noborder=true,marge=0,barre=snake]{Affichage :}}
+{\end{bclogo}}
+
+\renewcommand\bcStyleTitre[1]{\textbf{#1}}
+
+\begin{document}
+
+\begin{center}
+{\Large Cmath\LuaTeX}
+
+{\large
+\url{https://github.com/cdevalland/cmathluatex}
+
+\href{mailto:christophe.devalland@ac-rouen.fr}{christophe.devalland@ac-rouen.fr}
+
+2014-2016}
+\end{center}
+
+\tableofcontents
+
+
+\section{Présentation}
+
+L'objectif de Cmath (qui existe déjà sous Word et OpenOffice/LibreOffice) est de taper ses formules aussi simplement que sur une calculatrice. La version pour \LuaLaTeX\ est dans le même esprit. Ainsi, en tapant :
+
+\begin{code}
+$\Cmath{x_1=(1-√5)/2}$
+\end{code}
+
+on obtiendra après compilation :
+
+\[\Cmath{x_1=(1-√5)/2}\]
+
+Avantage si on utilise \TeX works : le code source sera rendu très lisible en exploitant les caractères disponibles grâce à l'encodage UTF-8. En tapant :
+
+\begin{code}
+int(1,+:in,1/t^:al,t)=1/(:al-1)
+\end{code}
+
+puis en appuyant sur la touche F9, \TeX works affiche :
+
+\begin{code}
+$\Cmath{∫(1,+∞,1/t^α,t)=1/(α-1)}$
+\end{code}
+
+et après compilation :
+
+\[\Cmath{∫(1,+∞,1/t^α,t)=1/(α-1)}\]
+
+En tapant 
+
+\begin{code}
+n:ap:N
+\end{code}
+
+suivi de \texttt{F9}, on obtient
+
+\begin{code}
+$\Cmath{n∈ℕ}$
+\end{code}
+
+ce qui est plus agréable à lire que 
+
+\begin{code}
+$n\in\mathbb{N}$
+\end{code}
+
+Avec un autre éditeur, il sera pratique de se créer un raccourci clavier qui entourera ses formules de \verb?$\Cmath{}$?. On ne bénéficiera pas de l'affichage amélioré comme dans \TeX works mais la compilation donnera le même résultat.
+
+\section{Écrire des mathématiques}
+
+\subsection{Les symboles}
+
+Les symboles suivants sont obtenus en tapant \verb?:? suivi du raccourci correspondant. Je n'indique pas les lettres grecques dans ce tableau ; elles sont toutes disponibles. Par exemple \verb?:de? donne $\Cmath{δ}$. On obtient la version majuscule en tapant le raccourci en majuscule. $\Cmath{Δ}$ est obtenu avec \verb?:DE?.
+
+\begin{tabular}{c c| c c| c c| c c}
+Raccourci & Symbole & Raccourci & Symbole & Raccourci & Symbole & Raccourci & Symbole\\
+\hline
+\verb?:in? & $\Cmath{∞}$ & \verb?:ll? & $\Cmath{ℓ}$ & \verb?:pm? & $\Cmath{±}$ & \verb?:dr? & $\Cmath{∂}$\\
+\verb?:vi? & $\Cmath{∅}$ & \verb?:ex? & $\Cmath{∃}$ & \verb?:qs? & $\Cmath{∀}$ & \verb?:e? & $\Cmath{е}$\\
+\verb?:i? & $\Cmath{і}$ & \verb?:d? & $\Cmath{:d}$ & \verb?:K? & $\Cmath{𝕂}$ & \verb?:N? & $\Cmath{ℕ}$\\
+\verb?:Z? & $\Cmath{ℤ}$ & \verb?:Q? & $\Cmath{ℚ}$ & \verb?:R? & $\Cmath{ℝ}$ & \verb?:C? & $\Cmath{ℂ}$\\
+\verb?:Ne? & $\Cmath{ℕe}$ & \verb?:Z? & $\Cmath{ℤe}$ & \verb?:Qe? & $\Cmath{ℚe}$ & \verb?:Re? & $\Cmath{ℝe}$\\
+\verb?:Ce? & $\Cmath{ℂe}$ & \verb?:Rm? & $\Cmath{ℝm}$ & \verb?:Rp? & $\Cmath{ℝp}$ & \verb?:Rme? & $\Cmath{ℝme}$\\
+\verb?:Rpe? & $\Cmath{ℝpe}$ & \verb?:oij? & $\Cmath{:oij}$ & \verb?:ouv? & $\Cmath{:ouv}$ & \verb?:oijk? & $\Cmath{:oijk}$\\
+\end{tabular}
+\vskip 1em
+
+Les symboles suivants sont des opérateurs binaires, ils doivent être utilisés entre deux arguments.
+
+\begin{tabular}{c c| c c| c c| c c}
+Expression & Affichage & Expression & Affichage & Expression & Affichage & Expression & Affichage\\
+\hline
+\verb?a:enb? & $\Cmath{a≈b}$ & \verb?a:apb? & $\Cmath{a∈b}$ & \verb?a:asb? & $\Cmath{a⟼b}$ & \verb?a->b? & $\Cmath{a⟶b}$ \\
+\verb?a:unb? & $\Cmath{a∪b}$ & \verb?a:itb? & $\Cmath{a∩b}$ & \verb?a:rob? & $\Cmath{a∘b}$ & \verb?a:eqb? & $\Cmath{a:eqb}$\\
+\verb?a:cob? & $\Cmath{a≡b}$ & \verb?a:ppb? & $\Cmath{a∨b}$ & \verb?a:pgb? & $\Cmath{a∧b}$ & \verb?a:veb? & $\Cmath{a∧b}$\\
+\verb?a:peb? & $\Cmath{a⊥b}$ & \verb?a:sdb? & $\Cmath{a⊕b}$ & \verb?a:npb? & $\Cmath{a∉b}$ & \verb?a:imb? & $\Cmath{a⇒b}$\\
+\verb?a:evb? & $\Cmath{a⟺b}$ & \verb?a:rcb? & $\Cmath{a⇐b}$ & \verb?a:icb? & $\Cmath{a⊂b}$ & \verb?a:nib? & $\Cmath{a⊄b}$\\
+\end{tabular}
+
+\subsection{Les fonctions : syntaxes et exemples}
+
+Les arguments notés entre crochets sont facultatifs. Les formules sont compilées avec \LuaLaTeX\ après les avoir composées entourées de \verb?\[\Cmath{}\]?. Avec \TeX works, cette opération est réalisée par l'appui sur Maj+F9.
+
+\begin{itemize}[leftmargin=*,align=left]
+\item Reconnaissance des fonctions usuelles\\
+\begin{code}
+f(x)=x*lnx+1
+\end{code}
+\[\Cmath{f(x)=x*lnx+1}\]
+
+\item La division : \texttt{n/d}, division en ligne : \texttt{n//d} ou \texttt{n÷d}\\
+\begin{code}
+(x+2)/x
+\end{code}
+\[\Cmath{(x+2)/x}\]
+\begin{code}
+1/(3/4)+1/2=11/2/3
+\end{code}
+\[\Cmath{1/(3/4)+1/2=11/2/3}\]
+\begin{code}
+1+1/(1+1/(1+...))
+\end{code}
+\[\Cmath{1+1/(1+1/(1+...))}\]
+\begin{code}
+:e^(:i:pi//4)
+\end{code}
+\[\Cmath{:e^(:i:pi//4)}\]
+\begin{code}
+3÷2
+\end{code}
+\[\Cmath{3÷2}\]
+
+\item La multiplication implicite, invisible : \texttt{a*b}, visible : \texttt{a×b} ou \texttt{a**b} ou \texttt{a..b}\\
+\begin{code}
+1/2x,√3x,2lnx/x
+\end{code}
+\[\Cmath{1/2x,√3x,2lnx/x}\]
+
+\begin{code}
+1/2*x,√3×x,2..lnx/x
+\end{code}
+\[\Cmath{1/2*x,√3×x,2..lnx/x}\]
+
+\item Gestion des parenthèses inutiles\\
+\begin{code}
+√(x+1),√(x+1)x,(1+n)/3
+\end{code}
+\[\Cmath{√(x+1),√(x+1)x,(1+n)/3}\]
+
+\item Les racines : \texttt{rac([n,]exp)} ou \texttt{√([n,]exp)}\\
+\begin{code}
+√x,√(3,x)
+\end{code}
+\[\Cmath{√x,√(3,x)}\]
+
+\item Valeur absolue, module : \texttt{abs(exp)}\\
+\begin{code}
+abs(z)
+\end{code}
+\[\Cmath{abs(z)}\]
+
+\item Norme : \texttt{nor(exp)}\\
+\begin{code}
+nor(vec(AB))
+\end{code}
+\[\Cmath{nor(vec(AB))}\]
+
+\item Barre : \texttt{bar(exp)}\\
+\begin{code}
+bar(A:unB)=bar(A):itbar(B)
+\end{code}
+\[\Cmath{bar(A∪B)=bar(A)∩bar(B)}\]
+
+\item Tilde : \texttt{til(exp)}\\
+\begin{code}
+til(P:roQ)=til(P):rotil(Q)
+\end{code}
+\[\Cmath{til(P∘Q)=til(P)∘til(Q)}\]
+
+\item Angle : \texttt{ang(exp)}\\
+\begin{code}
+ang((vec(u),vec(v)))
+\end{code}
+\[\Cmath{ang((vec(u),vec(v)))}\]
+
+\item La puissance : \texttt{a\^{}b}\\
+\begin{code}
+:e^(1+1/n),(1/2)^n
+\end{code}
+\[\Cmath{е^(1+1/n),(1/2)^n}\]
+\begin{code}
+10^-5,(10^n)^p=10^(n**p)
+\end{code}
+\[\Cmath{10^-5,(10^n)^p=10^(n×p)}\]
+\begin{code}
+x^(2^3)
+\end{code}
+\[\Cmath{x^(2^3)}\]
+
+\item Les indices : \texttt{a\_b}\\
+\begin{code}
+x_1=(1+√5)/2
+\end{code}
+\[\Cmath{x_1=(1+√5)/2}\]
+\begin{code}
+a=(y_(M_2)-y_(M_1))/(x_(M_2)-x_(M_1))
+\end{code}
+\[\Cmath{a=(y_(M_2)-y_(M_1))/(x_(M_2)-x_(M_1))}\]
+\begin{code}
+P_1*(X)
+\end{code}
+\[\Cmath{P_1*(X)}\]
+
+\item Les intervalles\\
+\begin{code}
+[0,1/2],]-:in,0]
+\end{code}
+\[\Cmath{[0,1/2],]-∞,0]}\]
+\begin{code}
+[[1,n]]
+\end{code}
+\[\Cmath{⟦1,n⟧}\]
+
+\item Forcer le mode textstyle ou displaystyle : \texttt{ts(exp)}, \texttt{ds(exp)}\\
+\begin{code}
+ts(x_1=(1+√5)/2)
+\end{code}
+\[\Cmath{ts(x_1=(1+√5)/2)}\]
+\begin{code}
+ds(x_1=(1+√5)/2)
+\end{code}
+\[\Cmath{ds(x_1=(1+√5)/2)}\]
+
+\item Polices caligraphique : \texttt{cal(exp)}, script : \texttt{scr(exp)}, Zapf Chancery : \texttt{pzc(exp)}\\
+\begin{code}
+cal(M)_n*(:R),scr(C)_f,pzc(E)
+\end{code}
+\[\Cmath{cal(M)_n*(ℝ),scr(C)_f,pzc(E)}\]
+
+\item Texte : \texttt{"texte"}\\
+\begin{code}
+p="nombre de cas favorables"/"nombre de cas possibles"
+\end{code}
+\[\Cmath{p="nombre de cas favorables"/"nombre de cas possibles"}\]
+
+\item Système : \texttt{sys(expr1[,expr2[,expr3[...])}\\
+\begin{code}
+sys(u_0=1,u_(n+1)=√(u_n+3))
+\end{code}
+\[\Cmath{sys(u_0=1,u_(n+1)=√(u_n+3))}\]
+\begin{code}
+f(x)=sys(2x+1*" si "*x>=0,x^2*" si "*x<0)
+\end{code}
+\[\Cmath{f(x)=sys(2x+1*" si "*x⩾0,x^2*" si "*x<0)}\]
+
+\item Accolade : \texttt{acc(exp)}, inférieure : \texttt{aci(exp)}, supérieure : \texttt{acs(exp)}, droite : \texttt{acd(exp)}\\
+\begin{code}
+S=acc(x:ask*x^2,k:ap:R)
+\end{code}
+\[\Cmath{S=acc(x⟼k*x^2,k∈ℝ)}\]
+\begin{code}
+1+acs(2×3,6)
+\end{code}
+\[\Cmath{1+acs(2×3,6)}\]
+\begin{code}
+1+aci(2×3,6)
+\end{code}
+\[\Cmath{1+aci(2×3,6)}\]
+\begin{code}
+acd(P" est vrai",Q" est vrai"):im(P" et "Q)" est vrai"
+\end{code}
+\[\Cmath{acd(P" est vrai",Q" est vrai")⇒(P" et "Q)" est vrai"}\]
+
+\item Vecteur : \texttt{vec(exp)}, vecteur colonne : \texttt{vec(x1,x2[,x3[...])}\\
+\begin{code}
+vec(u)*vec(1,2,3)
+\end{code}
+\[\Cmath{vec(u)*vec(1,2,3)}\]
+\begin{code}
+vec(AB)+vec(BA)=vec(0)
+\end{code}
+\[\Cmath{vec(AB)+vec(BA)=vec(0)}\]
+
+\item Intégrale simple : \texttt{int([inf],[sup],fonction[,variable])}\\
+\begin{code}
+int(0,1,:e^2x,x)=[1/2*:e^2x]_0^1
+\end{code}
+\[\Cmath{∫(0,1,е^2x,x)=[1/2*е^2x]_0^1}\]
+\begin{code}
+int([:pi,2:pi],,sinx,x)
+\end{code}
+\[\Cmath{∫([π,2π],,sinx,x)}\]
+\begin{code}
+int(,,lnx)=x*lnx-x+k,k:ap:R
+\end{code}
+\[\Cmath{∫(,,lnx)=x*lnx-x+k,k∈ℝ}\]
+
+\item Intégrales double : \texttt{iint([inf],[sup],fonction[,variable1,variable2])}\\
+\begin{code}
+iint(cal(D),,f(x,y),x,y)
+\end{code}
+\[\Cmath{∬(cal(D),,f(x,y),x,y)}\]
+
+\item Intégrales triple : \texttt{iiint([inf],[sup],fonction[,variable1,variable2,variable3])}\\
+\begin{code}
+iiint(cal(V),,f(x,y,z),x,y,z)
+\end{code}
+\[\Cmath{∭(cal(V),,f(x,y,z),x,y,z)}\]
+
+\item Écrire autour : \texttt{aut(exp,a,b,c,d)}\\
+\begin{code}
+aut(M,1,2,3,4)
+\end{code}
+\[\Cmath{aut(M,1,2,3,4)}\]
+
+\item Somme : \texttt{som([inf],[sup],exp)}\\
+\begin{code}
+som(i=1,+:in,1/2^n)
+\end{code}
+\[\Cmath{som(i=1,+∞,1/2^n)}\]
+
+\item Produit : \texttt{pro([inf],[sup],exp)}\\
+\begin{code}
+pro(,,(1+1/i))
+\end{code}
+\[\Cmath{pro(,,(1+1/i))}\]
+
+\item Union : \texttt{uni([inf],[sup],exp)}\\
+\begin{code}
+uni(1<=k<=n,,A_k)
+\end{code}
+\[\Cmath{uni(1⩽k⩽n,,A_k)}\]
+
+\item Intersection : \texttt{ite([inf],[sup],exp)}\\
+\begin{code}
+ite(i=0,+:in,(]1-a_i,1+b_i[))
+\end{code}
+\[\Cmath{ite(i=0,+∞,(]1-a_i,1+b_i[))}\]
+
+\item Limite : \texttt{lim(exp1[,exp2],fonction)}\\
+\begin{code}
+lim(x->2,ln(x-2))=-:in
+\end{code}
+\[\Cmath{lim(x⟶2,ln(x-2))=-∞}\]
+\begin{code}
+lim(x->√2,x<√2,1/(x^2-2))=+:in
+\end{code}
+\[\Cmath{lim(x⟶√2,x<√2,1/(x^2-2))=+∞}\]
+
+\item Sup : \texttt{sup(exp1,exp2)}, idem pour inf, max, min\\
+\begin{code}
+inf(x:ap[a,b],f(x))
+\end{code}
+\[\Cmath{inf(x∈[a,b],f(x))}\]
+
+\item Souligner : \texttt{sou(exp)}\\
+\begin{code}
+sou(AB)
+\end{code}
+\[\Cmath{sou(AB)}\]
+
+\item Biffer: \texttt{bif(exp)}\\
+\begin{code}
+(bif(2)×3)/(bif(2)×7)
+\end{code}
+\[\Cmath{(bif(2)×3)/(bif(2)×7)}\]
+
+\item Matrice : \texttt{mat(nombre de colonnes,a,b,c,...)}\\
+\begin{code}
+mat(2,1,2,3,4)
+\end{code}
+\[\Cmath{mat(2,1,2,3,4)}\]
+
+\item Déterminant : \texttt{det(nombre de colonnes,a,b,c,...)}\\
+\begin{code}
+det(2,1,2,3,4)
+\end{code}
+\[\Cmath{det(2,1,2,3,4)}\]
+
+\item Crochet : \texttt{cro(nombre de colonnes,a,b,c,...)}\\
+\begin{code}
+cro(2,1,2,3,4)
+\end{code}
+\[\Cmath{cro(2,1,2,3,4)}\]
+
+\item Équivalent à : \texttt{equ(fonction1,point,fonction2)}\\
+\begin{code}
+equ(sinx,0,x)
+\end{code}
+\[\Cmath{equ(sinx,0,x)}\]
+
+\item Tendre vers : \texttt{ten(fonction1,point,fonction2)}\\
+\begin{code}
+ten(lnx,+:in,+:in)
+\end{code}
+\[\Cmath{ten(lnx,+∞,+∞)}\]
+
+\item Dérivée physicienne : \texttt{der(fonction,variable,ordre)}\\
+\begin{code}
+der(f,t,3)
+\end{code}
+\[\Cmath{der(f,t,3)}\]
+
+\item Dérivée partielle : \texttt{derp(fonction,variables)}\\
+\begin{code}
+derp(f,xxyzz)
+\end{code}
+\[\Cmath{derp(f,xxyzz)}\]
+
+\item Petit o : \texttt{pto(point,fonction)}, grand o : \texttt{pto(point,fonction)}\\
+\begin{code}
+x=pto(+:in,x^2)
+\end{code}
+\[\Cmath{x=pto(+∞,x^2)}\]
+\begin{code}
+f=gro(0,x)
+\end{code}
+\[\Cmath{f=gro(0,x)}\]
+
+\item Restreint à : \texttt{res(fonction,ensemble)}\\
+\begin{code}
+res(f,:Rp)
+\end{code}
+\[\Cmath{res(f,ℝp)}\]
+
+\item Suite : \texttt{sui(nom[,indice])}\\
+\begin{code}
+sui(u)
+\end{code}
+\[\Cmath{sui(u)}\]
+\begin{code}
+sui(u,k)
+\end{code}
+\[\Cmath{sui(u,k)}\]
+\begin{code}
+sui(u,p>=0)
+\end{code}
+\[\Cmath{sui(u,p⩾0)}\]
+
+\item Série : \texttt{ser(nom[,indice])}\\
+\begin{code}
+ser(u)
+\end{code}
+\[\Cmath{ser(u)}\]
+\begin{code}
+ser(u,k)
+\end{code}
+\[\Cmath{ser(u,k)}\]
+\begin{code}
+ser(u,p>=0)
+\end{code}
+\[\Cmath{ser(u,p⩾0)}\]
+
+\end{itemize}
+
+Pour les symboles \LaTeX\ qui ne sont pas fournis par Cmath\LuaTeX, il suffit de les ajouter dans une expression Cmath\LuaTeX\ en doublant le backslash. Par exemple : 
+
+\begin{code}
+\[\Cmath{mat(3,a_(1,1),...,a_(1,n),\\vdots,\\ddots,\\vdots,a_(n,1),...,a_(n,n))}\]
+\end{code}
+
+ donnera :
+
+\[\Cmath{mat(3,a_(1,1),...,a_(1,n),\\vdots,\\ddots,\\vdots,a_(n,1),...,a_(n,n))}\]
+
+
+\section{Calculs formels via la librairie Giac de XCAS}
+
+Cmath\LuaTeX\ fournit une fonction \texttt{xcas(expression)} qui renvoie le résultat au format \LaTeX\ de l'expression passée en paramètre après traitement par Xcas. Plus précisément, Cmath\LuaTeX\ n'utilise que le moteur de calcul Giac de Xcas en appelant le programme \texttt{icas}. Mais comme tout le monde connaît Xcas, j'ai choisi ce nom pour la fonction intégrée à Cmath\LuaTeX.
+
+Exemples :
+
+\begin{code}
+sin(π/4)=xcas(sin(pi/4))
+\end{code}
+
+\[\sin  \left( \frac{\pi }{4}\right)  = \frac{\sqrt{2}}{2}\] % Traduction CmathLuaTeX de : sin(π/4)=xcas(sin(pi/4))
+
+\begin{code}
+f(x)=(3x-2)/(2x+1)(x-3)=xcas(partfrac((3x-2)/(2x+1)(x-3)))
+\end{code}
+
+\[f \left( x\right)  = \frac{3 x-2}{\left( 2 x+1\right)  \left( x-3\right) } = \frac{1}{x-3}+\frac{1}{2 x+1}\] % Traduction CmathLuaTeX de : f(x)=(3x-2)/(2x+1)(x-3)=xcas(partfrac((3x-2)/(2x+1)(x-3)))
+
+Dans le cas ou l'expression à évaluer par Xcas est une affectation ou un "assume", rien n'est renvoyé vers Lua\LaTeX\ mais l'instruction est exécutée et la variable est disponible pour les instructions futures, comme dans une session Xcas :
+
+\begin{code}
+$\Cmath{xcas(restart)}$% efface les variables
+Soit le réel $\Cmath{x=π/4}$. $\Cmath{xcas(x:=pi/4)}$
+Une valeur approchée de $\Cmath{x}$ est $\Cmath{xcas(evalf(x,20))}$
+Une primitive de $\Cmath{t⟼1/t}$ est $\Cmath{t⟼xcas(int(1/t,t))}$. 
+$\Cmath{xcas(assume(t>0))}$
+Sur $\Cmath{]0,+∞[}$, cette primitive devient $\Cmath{t⟼xcas(int(1/t,t))}$.
+$\Cmath{xcas(A:=[[cos(theta),-sin(theta),0],[sin(theta),cos(theta),0],[0,0,1]])}$
+Soit la matrice \[\Cmath{A=xcas(A)}\]
+La matrice $\Cmath{A^3=xcas(A)^3}$ vaut $\Cmath{xcas(tlin(A^3))}$.
+\end{code}
+
+\begin{afficher}
+$\Cmath{xcas(restart)}$% efface les variables
+Soit le réel $\Cmath{x=π/4}$. $\Cmath{xcas(x:=pi/4)}$
+
+Une valeur approchée de $\Cmath{x}$ est $\Cmath{xcas(evalf(x,20))}$
+
+Une primitive de $\Cmath{t⟼1/t}$ est $\Cmath{t⟼xcas(int(1/t,t))}$. $\Cmath{xcas(assume(t>0))}$
+
+Sur $\Cmath{]0,+∞[}$, cette primitive devient $\Cmath{t⟼xcas(int(1/t,t))}$.
+
+$\Cmath{xcas(A:=[[cos(theta),-sin(theta),0],[sin(theta),cos(theta),0],[0,0,1]])}$
+
+Soit la matrice \[\Cmath{A=xcas(A)}\]
+
+La matrice $\Cmath{A^3=xcas(A)^3}$ vaut $\Cmath{xcas(tlin(A^3))}$.
+\end{afficher}
+
+Il est possible de définir des programmes Xcas au sein du code source et de les utiliser ensuite :
+
+\begin{code}
+$\Cmath{xcas(
+tabVal(f,xmin,xmax,xpas,nb_decimales):={
+  local tab;
+  if(nb_decimales==0){
+    tab:=seq([simplifier(x),f(x)],x,xmin,xmax,xpas);
+  } else {
+    tab:=seq([simplifier(x),format(f(x),"f"+string(nb_decimales))],x,xmin,xmax,xpas);
+  }
+  tab:=prepend(tab,[x,f(x)]);
+  return(tran(tab));
+}
+)}$\\
+-- Tableau de valeurs arrondies à 2 décimales de $\Cmath{x⟼x/(2x-3)}$ sur 
+$\Cmath{[0,5]}$ avec un pas de $\Cmath{1}$ :\\
+$\Cmath{xcas(tabVal(x->x/(2x-3),0,5,1,2))}$\\
+-- Tableau de valeurs exactes de $\Cmath{x⟼cos(x)}$ sur $\Cmath{[0,π]}$ avec un pas de
+$\Cmath{π/6}$ : \\
+$\Cmath{xcas(tabVal(x->cos(x),0,pi,pi/6,0))}$
+\end{code}
+
+\begin{afficher}
+$\Cmath{xcas(restart)}$
+$\Cmath{xcas(
+tabVal(f,xmin,xmax,xpas,nb_decimales):={
+  local tab;
+  if(nb_decimales==0){
+    tab:=seq([simplifier(x),f(x)],x,xmin,xmax,xpas);
+  } else {
+    tab:=seq([simplifier(x),format(f(x),"f"+string(nb_decimales))],x,xmin,xmax,xpas);
+  }
+  tab:=prepend(tab,[x,f(x)]);
+  return(tran(tab));
+}
+)}$\\
+-- Tableau de valeurs arrondies à 2 décimales de $\Cmath{x⟼x/(2x-3)}$ sur $\Cmath{[0,5]}$
+ avec un pas de $\Cmath{1}$ :\\
+$\Cmath{xcas(tabVal(x->x/(2x-3),0,5,1,2))}$\\
+-- Tableau de valeurs exactes de $\Cmath{x⟼cos(x)}$ sur $\Cmath{[0,π]}$ avec un pas de
+$\Cmath{π/6}$ : \\
+$\Cmath{xcas(tabVal(x->cos(x),0,pi,pi/6,0))}$
+\end{afficher}
+
+\section{Tableaux automatisés}
+
+\subsection{Tableaux de valeurs}
+
+La fonction \texttt{TVal(liste\_x,fonction[,nombre\_decimales])} construit un tableau de valeurs. Lorsque le nombre de décimales est omis, les images sont calculées en valeurs exactes : 
+
+\begin{code}
+TVal([-2,-1,0,1,2],x^2)
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TVal([-2,-1,0,1,2],x^2)}\]
+\end{afficher}
+
+Toute expression comprise par Xcas peut définir la \texttt{liste\_x}. En particulier, lorsque le pas est constant, l'instruction \texttt{seq()} peut être utile.
+
+\begin{code}
+TVal([seq(-pi+k*pi/3,k=0..6)],sin(x))
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TVal([seq(-pi+k*pi/3,k=0..6)],sin(x))}\]
+\end{afficher}
+
+Il est possible de désigner la fonction sous la forme \texttt{f(x)=...}. Dans ce cas, c'est le nom de la fonction qui apparaît dans le tableau et le nom de la variable est détecté automatiquement.
+
+\begin{code}
+TVal([seq(t,t=-3..3)],g(t)=t/e^t,2)
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TVal([seq(t,t=-3..3)],g(t)=t/e^t,2)}\]
+\end{afficher}
+
+Pour afficher un tableau sans images
+
+\begin{code}
+TVal([-3,-1,3/2,7/3],f(x)="")
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TVal([-3,-1,3/2,7/3],f(x)="")}\]
+\end{afficher}
+
+Si le tableau ne convient pas tout à fait, il est possible, avec \TeX works, d'afficher le code qui est transmis à Lua\LaTeX. Pour cela, taper : \texttt{TVal([-3,-1,3/2,7/3],phi(t)=(t+4)/t)} puis, au lieu d'appuyer sur \texttt{F9} (pour encadrer la formule de \verb?$\Cmath{}$?), appuyer sur \texttt{Ctrl+F9}. \TeX works affiche alors :
+
+\begin{code}
+${\renewcommand{\arraystretch}{1.5}
+\newcolumntype{C}[1]{S{>{\centering \arraybackslash}m{#1}}}
+\setlength{\cellspacetoplimit}{4pt}
+\setlength{\cellspacebottomlimit}{4pt}
+\begin{tabular}{|C{1.5cm}|*{4}{C{1cm}|}}
+\hline $t$ & $\displaystyle -3$ &$\displaystyle -1$ &$\displaystyle \frac{3}{2}$ &
+$\displaystyle \frac{7}{3}$ \\
+\hline $\phi(t)$ & $\displaystyle \frac{-1}{3}$ &$\displaystyle -3$ &$\displaystyle 
+\frac{11}{3}$ &$\displaystyle \frac{19}{7}$ \\
+\hline
+\end{tabular}}$ % Traduction CmathLuaTeX de : TVal([-3,-1,3/2,7/3],phi(t)=(t+4)/t)
+\end{code}
+
+qui donnera bien sûr après compilation :
+
+\begin{afficher}
+\[\Cmath{TVal([-3,-1,3/2,7/3],phi(t)=(t+4)/t)}\]
+\end{afficher}
+
+L'appel à la fonction \texttt{Ctrl+F9} n'est pas limité aux tableaux de valeurs. Elle fonctionne pour toute expression Cmath\LuaTeX\ et peut servir à rendre le code source portable, à modifier finement les expressions obtenues, etc... tout en gardant dans le commentaire de la dernière ligne l'origine de la commande Cmath\LuaTeX\ l'ayant engendrée.
+
+\subsection{Tableaux de signes}
+
+La fonction \texttt{TSig(liste\_x,fonction)} construit le tableau de signes de la fonction en s'appuyant sur l'excellent package \texttt{tkz-tab}. Tout est automatisé :
+\begin{itemize}
+\item la reconnaissance de la variable utilisée.
+\item la définition de l'intervalle d'étude \texttt{[x\_min,x\_max]} en fonction de la \texttt{liste\_x} fournie.
+\item la détection des facteurs contenus dans la fonction à étudier (pour les produits et quotients).
+\item la recherche des valeurs interdites.
+\item et la détermination du signe bien sûr !
+
+\end{itemize}
+
+\begin{code}
+TSig([-infinity,+infinity],P(t)=(t-3)(t+2))
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TSig([-infinity,+infinity],P(t)=(t-3)(t+2))}\]
+\end{afficher}
+
+Avec un quotient :
+
+\begin{code}
+TSig([-5,5],(x-3)/(x^2-2))
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TSig([-5,5],(x-3)/(x^2-2))}\]
+\end{afficher}
+
+Avec des fonctions trigonométriques : 
+
+\begin{code}
+TSig([0,pi],sin(2x)/cos(3x))
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TSig([0,pi],sin(2x)/cos(3x))}\]
+\end{afficher}
+
+Il faudra parfois indiquer explicitement certaines valeurs interdites qui ne seraient pas détectées autrement :
+
+\begin{code}
+TSig([0,pi/2,3*pi/2,2*pi],tan(x))
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TSig([0,pi/2,3*pi/2,2*pi],tan(x))}\]
+\end{afficher}
+
+\subsection{Tableaux de variations}
+
+La fonction \texttt{TVar(liste\_x,fonction[,nb\_decimales])} construit le tableau de variations d'une fonction en s'appuyant sur tkz-tab. Si \texttt{nb\_decimales} est précisé, les images sont calculées en valeurs approchées avec \texttt{nb\_decimales} décimales. La fonction \texttt{TVar} :
+\begin{itemize}
+\item Reconnaît la variable utilisée,
+\item Définit l'intervalle d'étude \texttt{[x\_min,x\_max]} en fonction de la \texttt{liste\_x} fournie,
+\item Calcule la dérivée de la fonction et calcule son signe,
+\item Trouve les valeurs interdites,
+\item Trouve les zones interdites,
+\item Calcule les extrema,
+\item Calcule les limites si besoin,
+\item Reconnaît les prolongements par continuité,
+\item et détermine les variations de la fonction bien sûr !
+\end{itemize}
+
+\begin{code}
+TVar([-infinity,+infinity],f(t)=t^2/(t^2-1))
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TVar([-infinity,+infinity],f(t)=t^2/(t^2-1))}\]
+\end{afficher}
+
+Pour calculer des images supplémentaires, il suffit d'ajouter les valeurs souhaitées dans la \texttt{liste\_x} :
+
+\begin{code}
+TVar([0,1,e,+infinity],f(x)=ln(x))
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TVar([0,1,e,+infinity],f(x)=ln(x))}\]
+\end{afficher}
+
+Avec une zone interdite :
+
+\begin{code}
+TVar([-infinity,+infinity],f(x)=sqrt(x^2-1))
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TVar([-infinity,+infinity],f(x)=sqrt(x^2-1))}\]
+\end{afficher}
+
+Une fonction trigonométrique :
+
+\begin{code}
+TVar([0,pi],x(alpha)=1-sin(2*alpha))
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TVar([0,pi],x(alpha)=1-sin(2*alpha))}\]
+\end{afficher}
+
+
+\subsection{Les courbes paramétrées}
+
+La fonction \texttt{TVarP(liste\_x,fonction\_x, fonction\_y,nb\_decimales)} construit le tableau de variations conjoint des deux fonctions. Si \texttt{nb\_decimales} est précisé, les images sont calculées en valeurs approchées avec \texttt{nb\_decimales} décimales. Contrairement aux tableaux de variations d'une fonction, les valeurs des fonctions dérivées aux points remarquables sont calculés.
+
+\begin{code}
+TVarP([-infinity,+infinity],x(t)=t^2/(t+1)(t-2),y(t)=t^2*(t+2)/(t+1))
+\end{code}
+
+\begin{afficher}
+\[\Cmath{TVarP([-infinity,+infinity],x(t)=t^2/(t+1)(t-2),y(t)=t^2*(t+2)/(t+1))}\]
+\end{afficher}
+
+et comme pour toutes les instructions Cmath\LuaTeX, si l'éditeur utilisé est \TeX works et que l'on veut avoir accès au code généré (pour le modifier ou autre), il suffit après avoir tapé 
+
+\begin{code}
+TVarP([-infinity,+infinity],x(t)=t^2/(t+1)(t-2),y(t)=t^2*(t+2)/(t+1))
+\end{code}
+
+d'appuyer sur \texttt{Ctrl+F9} pour que \TeX works affiche le code source du tableau :
+
+\begin{code}
+$\begin{tikzpicture}
+\tkzTabInit[lgt=2,espcl=2,deltacl=0.5]
+{$t$ / 1,$x'(t)$ / 1,$x$ / 2,$y$ / 2,$y'(t)$ / 1}
+{$-\infty $,$-4$,$-1$,$0$,$2$,$+\infty $}
+\tkzTabLine { ,-,z,+,d,+,z,-,d,-, }
+\tkzTabVar {+ / $1$,- / $\frac{8}{9}$,+D- / $+\infty $ / $-\infty $,+ / $0$,-D+
+/ $-\infty $ / $+\infty $,- / $1$}
+\tkzTabVar {+ / $+\infty $,R,-D+ / $-\infty $ / $+\infty $,- / $0$,R,+ / $+\infty $}
+\tkzTabIma{1}{3}{2}{$\frac{32}{3}$}
+\tkzTabIma{4}{6}{5}{$\frac{16}{3}$}
+\tkzTabLine { ,-,\frac{-64}{9},-,d,-,z,+,\frac{44}{9},+, }
+\end{tikzpicture}
+$ % Traduction CmathLuaTeX de : TVarP([-infinity,+infinity],x(t)=t^2/(t+1)(t-2),
+y(t)=t^2*(t+2)/(t+1))
+\end{code}
+
+\section{Systèmes linéaires}
+
+
+\subsection{Affichage d'un système linéaire}
+
+La fonction \texttt{sysl(systeme,variables)} aligne les variables dans l'ordre indiqué par l'argument \texttt{variables}.
+
+\begin{code}
+sysl([2x+y+3z=1,x-z=0,z+3y=2],[x,y,z])
+\end{code}
+
+\begin{afficher}
+\[\Cmath{sysl([2x+y+3z=1,x-z=0,z+3y=2],[x,y,z])}\]
+\end{afficher}
+
+\subsection{Résolution d'un système linéaire par la méthode du pivot de Gauss, éventuellement avec paramètre(s)}
+
+La fonction \texttt{GaussSysl(système,variables[,mode\_fraction])} résout un système linéaire par la méthode du pivot de Gauss en détaillant les étapes et les opérations effectuées. Le \texttt{mode\_fraction} vaut \texttt{false} par défaut. C'est la méthode du pivot Gauss en évitant l'apparition de fractions.
+
+\begin{code}
+GaussSysl([2x+2y+z=1,-x+y+z=2,3x-y+z=0],[x,y,z])
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussSysl([2x+2y+z=1,-x+y+z=2,3x-y+z=0],[x,y,z])}
+\end{afficher}
+
+\begin{code}
+GaussSysl([2x+2y+z=1,-x+y+z=2,3x-y+z=0],[x,y,z],true)
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussSysl([2x+2y+z=1,-x+y+z=2,3x-y+z=0],[x,y,z],true)}
+\end{afficher}
+
+\begin{code}
+GaussSysl([2y+z+t=0,x-y+2z-2t=0],[x,y,z,t])
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussSysl([2y+z+t=0,x-y+2z-2t=0],[x,y,z,t])}
+\end{afficher}
+
+
+\begin{code}
+GaussSysl([sqrt(3)*beta+sqrt(2)*alpha=1,sqrt(3)*alpha-sqrt(2)*beta=0],[alpha,beta])
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussSysl([sqrt(3)*beta+sqrt(2)*alpha=1,sqrt(3)*alpha-sqrt(2)*beta=0],[alpha,beta])}
+\end{afficher}
+
+\begin{code}
+GaussSysl([a*x+y=0,x-y=0],[x,y])
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussSysl([a*x+y=0,x-y=0],[x,y])}
+\end{afficher}
+
+\begin{code}
+GaussSysl([x_1+x_2=1,alpha*x_1-x_2=2],[x_1,x_2])
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussSysl([x_1+x_2=1,alpha*x_1-x_2=2],[x_1,x_2])}
+\end{afficher}
+
+\begin{code}
+GaussSysl([m*(m+1)*x+y=0,m*x+y=0],[x,y])
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussSysl([m*(m+1)*x+y=0,m*x+y=0],[x,y])}
+\end{afficher}
+
+\begin{code}
+GaussSysl([x+y=a,3x-5y=b],[x,y])
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussSysl([x+y=a,3x-5y=b],[x,y])}
+\end{afficher}
+
+\section{Calcul matriciel}
+
+\subsection{Rang d'une matrice}
+
+\begin{code}
+GaussRang([[1,0,2],[2,0,4],[0,2,2]])
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussRang([[1,0,2],[2,0,4],[0,2,2]])}
+\end{afficher}
+
+\begin{code}
+GaussRang([[a,-1,0,-1],[0,a,-1,-1],[-1,-1,a,0],[-1,0,-1,a]])
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussRang([[a,-1,0,-1],[0,a,-1,-1],[-1,-1,a,0],[-1,0,-1,a]])}
+\end{afficher}
+
+\subsection{Inverse d'une matrice}
+
+\begin{code}
+GaussInv([[2,-1,0],[-1,2,-1],[0,-1,2]])
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussInv([[2,-1,0],[-1,2,-1],[0,-1,2]])}
+\end{afficher}
+
+\begin{code}
+GaussInv([[1,1,0],[1,2,-1],[0,a,1]])
+\end{code}
+
+\begin{afficher}
+\Cmath{GaussInv([[1,1,0],[1,2,-1],[0,a,1]])}
+\end{afficher}
+
+\section{Graphiques avec Ti{\color{orange}\textit{k}}Z}
+
+Ti{\color{orange}\textit{k}}Z est un outil de dessin formidable qui souffre néanmoins des faibles capacités de calculs de \TeX. Ainsi, pour tracer des fonctions mathématiques, les problèmes peuvent surgir et il faut souvent passer par le programme externe \texttt{gnuplot} pour les calculs. Grâce à \LuaTeX, ces problèmes disparaissent et il n'y a plus besoin de passer par un programme externe pour tracer des courbes. Je fournis quelques fonctions qui facilitent les tracés de courbes, à la manière du package tkz-fct dont j'ai repris les idées. Comme un dessin vaut mieux qu'un long discours, voici un exemple qui montre l'intérêt de ces fonctions et de l'usage de Lua dans du code \LaTeX :
+
+\begin{code}
+% Tracé de sommes partielles d'une série de Fourier
+\begin{tikzpicture}
+\Cmath{tikzWindow(x1cm=2,y1cm=1,xmin=0,xmax=10*pi,ymin=-2,ymax=2)}
+\Cmath{tikzGrid([color=gray!50,dashed],xstep=pi,ystep=0.5)}
+\Cmath{codeLua(
+f=function(n,x)
+	s=0
+	for k=1,n do
+		s=s+math.sin(k*x)/k
+	end
+	return s
+end
+)}
+\Cmath{tikzAxeX([line width=0.6,-{Stealth[round]}],step=pi,trig=true,label=x)}
+\Cmath{tikzAxeY([line width=0.6,-{Stealth[round]}],step=0.5,label=y,zero=false)}
+\Cmath{tikzPlot([color=red,smooth,line width=1],variable=x,function=f(5,x),samples=200)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(20,x),samples=400)}
+\Cmath{tikzPoint(labelColor=red,x=9.5,y=1.2,label=som(k=1,5,sin(k*x)/k),size=0)}
+\Cmath{tikzPoint(labelColor=blue,x=16,y=1.2,label=som(k=1,20,sin(k*x)/k),size=0)}
+\end{tikzpicture}
+\end{code}
+
+et la courbe produite :
+
+% Tracé de sommes partielles d'une série de Fourier
+\begin{tikzpicture}
+\Cmath{tikzWindow(x1cm=2,y1cm=1,xmin=0,xmax=10*pi,ymin=-2,ymax=2)}
+\Cmath{tikzGrid([color=gray!50,dashed],xstep=pi,ystep=0.5)}
+\Cmath{codeLua(
+f=function(n,x)
+	s=0
+	for k=1,n do
+		s=s+math.sin(k*x)/k
+	end
+	return s
+end
+)}
+\Cmath{tikzAxeX([line width=0.6,-{Stealth[round]}],step=pi,trig=true,label=x)}
+\Cmath{tikzAxeY([line width=0.6,-{Stealth[round]}],step=0.5,label=y,zero=false)}
+\Cmath{tikzPlot([color=red,smooth,line width=1],variable=x,function=f(5,x),samples=200)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(20,x),samples=400)}
+\Cmath{tikzPoint(labelColor=red,x=9.5,y=1.2,label=som(k=1,5,sin(k*x)/k),size=0)}
+\Cmath{tikzPoint(labelColor=blue,x=16,y=1.2,label=som(k=1,20,sin(k*x)/k),size=0)}
+\end{tikzpicture}
+
+On y gagne aussi sur le temps de calcul : sur cet exemple, le tracé de ces deux courbes nécessitent 9000 itérations de la boucle \texttt{for}. Pourtant, son influence sur la compilation de mon document reste imperceptible.
+
+\subsection{Réglage de la fenêtre d'affichage}
+
+\begin{code}
+tikzWindow(<paramètres>)
+\end{code}
+
+\begin{tabular}{lcl}
+\hline
+\textbf{Paramètre} & \textbf{Valeur par défaut} & \textbf{Description}\\
+\hline
+\texttt{xmin} & $-5$ & valeur minimale des abscisses en unités\\
+\texttt{xmax} & $5$ & valeur maximale des abscisses en unités\\
+\texttt{ymin} & $-5$ & valeur minimale des ordonnées en unités\\
+\texttt{ymax} & $5$ & valeur maximale des ordonnées en unités\\
+\texttt{x1cm} & $1$ & nombre d'unités représenté par 1 cm sur l'axe des abscisses\\
+\texttt{y1cm} & $1$ & nombre d'unités représenté par 1 cm sur l'axe des ordonnées
+\end{tabular}
+
+\subsection{Affichage des axes}
+
+\begin{code}
+tikzAxeX([<options tikz>],<paramètres>)
+\end{code}
+
+\begin{tabular}{lcl}
+\hline
+\textbf{Paramètre} & \textbf{Valeur par défaut} & \textbf{Description}\\
+\hline
+\texttt{xmin} & xmin défini par \texttt{tikzWindow} & valeur minimale des abscisses en unités\\
+\texttt{xmax} & xmax défini par \texttt{tikzWindow} & valeur maximale des abscisses en unités\\
+\texttt{step} & $1$ & espacement entre deux graduations\\
+\texttt{trig} & \texttt{false} & graduations en fractions de $\pi$\\
+\texttt{zero} & \texttt{true} & affichage du zéro\\
+\texttt{tick} & \texttt{true} & affichage des tirets\\
+\texttt{digits} & $3$ & nombre de décimales\\
+\texttt{position} & \texttt{below} & position des valeurs de $x$ par rapport à l'axe\\
+\texttt{rightspace} & $0.5$ & prolongement de l'axe des abscisses\\
+\texttt{label} & \texttt{x} & label de l'axe des abscisses
+\end{tabular}
+
+\begin{code}
+tikzAxeY([<options tikz>],<paramètres>)
+\end{code}
+
+\begin{tabular}{lcl}
+\hline
+\textbf{Paramètre} & \textbf{Valeur par défaut} & \textbf{Description}\\
+\hline
+\texttt{ymin} & ymin défini par \texttt{tikzWindow} & valeur minimale des ordonnées en unités\\
+\texttt{ymax} & ymax défini par \texttt{tikzWindow} & valeur maximale des ordonnées en unités\\
+\texttt{step} & $1$ & espacement entre deux graduations\\
+\texttt{trig} & \texttt{false} & graduations en fractions de $\pi$\\
+\texttt{zero} & \texttt{true} & affichage du zéro\\
+\texttt{tick} & \texttt{true} & affichage des tirets\\
+\texttt{digits} & $3$ & nombre de décimales\\
+\texttt{position} & \texttt{right=3pt} & position des valeurs de $x$ par rapport à l'axe\\
+\texttt{upspace} & $0.5$ & prolongement de l'axe des ordonnées\\
+\texttt{label} & \texttt{y} & label de l'axe des ordonnées
+\end{tabular}
+
+\subsection{Affichage d'une grille}
+
+\begin{code}
+tikzGrid([<options tikz>],<paramètres>)
+\end{code}
+
+\begin{tabular}{lcl}
+\hline
+\textbf{Paramètre} & \textbf{Valeur par défaut} & \textbf{Description}\\
+\hline
+\texttt{xmin} & xmin défini par \texttt{tikzWindow} & valeur minimale des abscisses en unités\\
+\texttt{xmax} & xmax défini par \texttt{tikzWindow} & valeur maximale des abscisses en unités\\
+\texttt{ymin} & ymin défini par \texttt{tikzWindow} & valeur minimale des ordonnées en unités\\
+\texttt{ymax} & ymax défini par \texttt{tikzWindow} & valeur maximale des ordonnées en unités\\
+\texttt{xstep} & $1$ & pas des graduations sur l'axe des abscisses\\
+\texttt{ystep} & $1$ & pas des graduations sur l'axe des ordonnées
+\end{tabular}
+
+\subsection{Affichage d'une courbe}
+
+\begin{code}
+tikzPlot([<options tikz>],<paramètres>)
+\end{code}
+
+\begin{tabular}{lcl}
+\hline
+\textbf{Paramètre} & \textbf{Valeur par défaut} & \textbf{Description}\\
+\hline
+\texttt{variable} & \texttt{x} & variable de la fonction\\
+\texttt{type} & \texttt{cartesian} & \texttt{cartesian} ou \texttt{parametric} ou \texttt{polar}\\
+\texttt{function} &  & expression de la fonction\\
+\texttt{domain} & \texttt{xmin:xmax} & intervalle du tracé\\
+\texttt{samples} & $100$ & nombre de points calculés pour le tracé\\
+\end{tabular}
+
+\subsection{Affichage d'un point ou d'un texte}
+
+\begin{code}
+tikzPoint(<paramètres>)
+\end{code}
+
+Le point est affiché, soit à partir de ses coordonnées, soit à partir d'une fonction en un point.
+Si la taille du point vaut 0, seul le label sera affiché. Cela permet de placer du texte sur le graphique.
+
+
+\begin{tabular}{lcl}
+\hline
+\textbf{Paramètre} & \textbf{Valeur par défaut} & \textbf{Description}\\
+\hline
+\texttt{x} &  & abscisse du point\\
+\texttt{y} &  & ordonnée du point\\
+\texttt{variable} &  & valeur de la variable de la fonction\\
+\texttt{function} &  & fonction\\
+\texttt{type} & \texttt{cartesian} & type de fonction\\
+\texttt{pointColor} & \texttt{black} & couleur du point\\
+\texttt{size} & $1.5$ & taille du point\\
+\texttt{label} &  & nom du point à afficher\\
+\texttt{labelColor} & \texttt{black} & couleur du label\\
+\texttt{position} & \texttt{above} & position du label par rapport au point\\
+\texttt{name} &  & nom du point pour y faire référence ultérieurement
+\end{tabular}
+
+\subsection{Affichage d'une tangente}
+
+Le vecteur tangent ou la tangente peut se tracer de deux manières : soit en donnant la fonction, le point et éventuellement un coefficient, soit l'intervalle sur lequel tracer la tangente \texttt{(xmin,xmax)}.
+
+\begin{code}
+tikzTangent([<options tikz>],<paramètres>)
+\end{code}
+
+\begin{tabular}{lcl}
+\hline
+\textbf{Paramètre} & \textbf{Valeur par défaut} & \textbf{Description}\\
+\hline
+\texttt{variable} &  & valeur de la variable\\
+\texttt{function} &  & fonction dont on trace la tangente\\
+\texttt{type} & \texttt{cartesian} & type de fonction\\
+\texttt{k} & $1$ & coefficient de réduction du vecteur\\
+\texttt{direction} & $1$ & 1 : tangente à droite, -1 : tangente à gauche\\
+\texttt{xmin} &  & valeur minimale de l'intervalle d'affichage de la tangente\\
+\texttt{xmax} &  & valeur maximale de l'intervalle d'affichage de la tangente\\
+\texttt{position} & \texttt{above} & position du label\\
+\texttt{label} & & nom du vecteur tangent ou de la tangente
+\end{tabular}
+
+\subsection{Exemples}
+
+\begin{code}
+% Tracé du type y=f(x)
+\begin{tikzpicture}
+\Cmath{tikzWindow(xmin=-5,xmax=5,ymin=-5,ymax=5,x1cm=1.5,y1cm=1.5)}
+\Cmath{tikzGrid([line width=0.4pt,color=gray!50,dashed])}
+\Cmath{tikzAxeX([line width=0.6pt,-{Stealth[round]}],step=1)}
+\Cmath{tikzAxeY([line width=0.6pt,-{Stealth[round]}],step=1,zero=false)}
+\Cmath{codeLua(f=function(x) return 1/x end)}
+\Cmath{tikzPlot([color=blue,smooth,line width=0.7],variable=x,function=f(x),samples=100,
+domain=-5:5)}
+\Cmath{tikzPoint(pointColor=blue,variable=-1,function=f,label=A,position=below left)}
+\Cmath{tikzPoint(pointColor=blue,variable=1,function=f,label=B,position=above right)}
+\Cmath{tikzPoint(x=1,y=4,label=scr(H),size=0)}
+\end{tikzpicture}
+\end{code}
+
+\begin{center}
+% Tracé du type y=f(x)
+\begin{tikzpicture}
+\Cmath{tikzWindow(xmin=-5,xmax=5,ymin=-5,ymax=5,x1cm=1.5,y1cm=1.5)}
+\Cmath{tikzGrid([line width=0.4pt,color=gray!50,dashed])}
+\Cmath{tikzAxeX([line width=0.6pt,-{Stealth[round]}],step=1)}
+\Cmath{tikzAxeY([line width=0.6pt,-{Stealth[round]}],step=1,zero=false)}
+\Cmath{codeLua(f=function(x) return 1/x end)}
+\Cmath{tikzPlot([color=blue,smooth,line width=0.7],variable=x,function=f(x),samples=100,domain=-5:5)}
+\Cmath{tikzPoint(pointColor=blue,variable=-1,function=f,label=A,position=below left)}
+\Cmath{tikzPoint(pointColor=blue,variable=1,function=f,label=B,position=above right)}
+\Cmath{tikzPoint(x=1,y=4,label=scr(H),size=0)}
+\end{tikzpicture}
+\end{center}
+
+\begin{code}
+% fonction trigonométrique définie par morceaux
+\begin{tikzpicture}
+\Cmath{tikzWindow(x1cm=1.5,y1cm=0.3,xmin=-3*pi,xmax=3*pi,ymin=-0.2,ymax=1)}
+\Cmath{tikzGrid([color=gray!50,dashed],xstep=pi/2,ystep=0.2)}
+\Cmath{tikzAxeX([line width=0.6,-{Stealth[round]}],step=pi/2,label=x,trig=true)}
+\Cmath{tikzAxeY([line width=0.6,-{Stealth[round]}],ymin=0,label=y,zero=false)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),samples=50,
+domain=-pi/2:pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),samples=50,
+domain=-5*pi/2:-3*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),samples=50,
+domain=3*pi/2:5*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,
+domain=-3*pi/2:-pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,
+domain=pi/2:3*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,
+domain=-3*pi:-5*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,
+domain=5*pi/2:3*pi)}
+\end{tikzpicture}
+\end{code}
+
+\begin{center}
+% fonction trigonométrique définie par morceaux
+\begin{tikzpicture}
+\Cmath{tikzWindow(x1cm=1.5,y1cm=0.3,xmin=-3*pi,xmax=3*pi,ymin=-0.2,ymax=1)}
+\Cmath{tikzGrid([color=gray!50,dashed],xstep=pi/2,ystep=0.2)}
+\Cmath{tikzAxeX([line width=0.6,-{Stealth[round]}],step=pi/2,label=x,trig=true)}
+\Cmath{tikzAxeY([line width=0.6,-{Stealth[round]}],ymin=0,label=y,zero=false)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),samples=50,domain=-pi/2:pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),samples=50,domain=-5*pi/2:-3*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),samples=50,domain=3*pi/2:5*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,domain=-3*pi/2:-pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,domain=pi/2:3*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,domain=-3*pi:-5*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,domain=5*pi/2:3*pi)}
+\end{tikzpicture}
+\end{center}
+
+\begin{code}
+% Courbe paramétrique et papier milimétré
+\begin{tikzpicture}
+\Cmath{tikzWindow(xmin=-1,xmax=1,ymin=-1,ymax=1,x1cm=0.2,y1cm=0.2)}
+\Cmath{tikzGrid([line width=0.4pt,color=gray!20],xstep=0.02,ystep=0.02)}
+\Cmath{tikzGrid([line width=0.5pt,color=gray!40],xstep=0.1,ystep=0.1)}
+\Cmath{tikzGrid([line width=0.6pt,color=gray!70],xstep=0.2,ystep=0.2)}
+\Cmath{tikzAxeX([line width=0.8pt,-{Stealth[round]}],step=0.5,zero=false)}
+\Cmath{tikzAxeY([line width=0.8pt,-{Stealth[round]}],step=0.5,zero=false)}
+\Cmath{codeLua(f=function(t) return cos(t)^3,sin(t)^3 end)}
+\Cmath{codeLua(g=function(t) return cos(t)*sin(t)^2,sin(t)*cos(t)^2 end)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],type=parametric,variable=t,function=f(t),
+samples=400,domain=-pi:pi)}
+\Cmath{tikzPlot([color=red,smooth,line width=1],type=parametric,variable=t,function=g(t),
+samples=400,domain=-pi:pi)}
+\Cmath{tikzPoint(labelColor=blue,variable=pi/6,function=f,label=scr(C)_f,position=above,
+size=0)}
+\Cmath{tikzPoint(labelColor=red,variable=pi/8,function=g,label=scr(C)_g,position=above left,
+size=0)}
+\end{tikzpicture}
+\end{code}
+
+\begin{center}
+% Courbe paramétrique et papier milimétré
+\begin{tikzpicture}
+\Cmath{tikzWindow(xmin=-1,xmax=1,ymin=-1,ymax=1,x1cm=0.2,y1cm=0.2)}
+\Cmath{tikzGrid([line width=0.4pt,color=gray!20],xstep=0.02,ystep=0.02)}
+\Cmath{tikzGrid([line width=0.5pt,color=gray!40],xstep=0.1,ystep=0.1)}
+\Cmath{tikzGrid([line width=0.6pt,color=gray!70],xstep=0.2,ystep=0.2)}
+\Cmath{tikzAxeX([line width=0.8pt,-{Stealth[round]}],step=0.5,zero=false)}
+\Cmath{tikzAxeY([line width=0.8pt,-{Stealth[round]}],step=0.5,zero=false)}
+\Cmath{codeLua(f=function(t)	return cos(t)^3,sin(t)^3 end)}
+\Cmath{codeLua(g=function(t)	return cos(t)*sin(t)^2,sin(t)*cos(t)^2 end)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],type=parametric,variable=t,function=f(t),samples=400,domain=-pi:pi)}
+\Cmath{tikzPlot([color=red,smooth,line width=1],type=parametric,variable=t,function=g(t),samples=400,domain=-pi:pi)}
+\Cmath{tikzPoint(labelColor=blue,variable=pi/6,function=f,label=scr(C)_f,position=above,size=0)}
+\Cmath{tikzPoint(labelColor=red,variable=pi/8,function=g,label=scr(C)_g,position=above left,size=0)}
+\end{tikzpicture}
+\end{center}
+
+
+\begin{code}
+% tangentes
+\begin{tikzpicture}
+\Cmath{tikzWindow(xmin=-4,xmax=2,ymin=-1,ymax=3,x1cm=0.5,y1cm=0.5)}
+\Cmath{tikzGrid([line width=0.4pt,color=gray!50,dashed])}
+\Cmath{tikzAxeX([line width=0.6pt,-{Stealth[round]}],step=1)}
+\Cmath{tikzAxeY([line width=0.6pt,-{Stealth[round]}],step=1,zero=false)}
+\Cmath{codeLua(f=function(x)	return x*exp(x) end)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(x),samples=400)}
+\Cmath{tikzPoint(x=1,y=2.5,label={f(x)=x*:e^x},labelColor=blue,position=right,size=0)}
+\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=-2,function=f)}
+\Cmath{tikzPoint(variable=-2,function=f,label=A,pointColor=blue,labelColor=blue,
+position=below)}
+\Cmath{tikzTangent([color=brown,line width=1pt,{Stealth[round]}-{Stealth[round]}],
+variable=0.5,function=f,xmin=0,xmax=1)}
+\Cmath{tikzPoint(variable=0.5,function=f,label=B,pointColor=blue,labelColor=blue,
+position=right)}
+\end{tikzpicture}
+\end{code}
+
+\begin{center}
+% tangentes
+\begin{tikzpicture}
+\Cmath{tikzWindow(xmin=-4,xmax=2,ymin=-1,ymax=3,x1cm=0.5,y1cm=0.5)}
+\Cmath{tikzGrid([line width=0.4pt,color=gray!50,dashed])}
+\Cmath{tikzAxeX([line width=0.6pt,-{Stealth[round]}],step=1)}
+\Cmath{tikzAxeY([line width=0.6pt,-{Stealth[round]}],step=1,zero=false)}
+\Cmath{codeLua(f=function(x)	return x*exp(x) end)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(x),samples=400)}
+\Cmath{tikzPoint(x=1,y=2.5,label={f(x)=x*:e^x},labelColor=blue,position=right,size=0)}
+\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=-2,function=f)}
+\Cmath{tikzPoint(variable=-2,function=f,label=A,pointColor=blue,labelColor=blue,position=below)}
+\Cmath{tikzTangent([color=brown,line width=1pt,{Stealth[round]}-{Stealth[round]}],variable=0.5,function=f,xmin=0,xmax=1)}
+\Cmath{tikzPoint(variable=0.5,function=f,label=B,pointColor=blue,labelColor=blue,position=right)}
+\end{tikzpicture}
+\end{center}
+
+\begin{code}
+%demie-tangentes
+\begin{tikzpicture}
+\Cmath{tikzWindow(xmin=-2,xmax=3,ymin=0,ymax=3,x1cm=0.5,y1cm=0.5)}
+\Cmath{tikzGrid([line width=0.4pt,color=gray!50,dashed])}
+\Cmath{tikzAxeX([line width=0.6pt,-{Stealth[round]}],step=1)}
+\Cmath{tikzAxeY([line width=0.6pt,-{Stealth[round]}],step=1)}
+\Cmath{codeLua(f=function(x)	return sqrt(x^3+x^2) end)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(x),samples=400)}
+\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=0,function=f,
+direction=-1,label=vec(T_g))}
+\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=0,function=f,
+direction=1,label=vec(T_d),position=below right)}
+\Cmath{tikzPoint(x=1.5,y=2.2,label={f(x)=√(x^3+x^2)},labelColor=blue,position=right,size=0)}
+\end{tikzpicture}
+\end{code}
+
+\begin{center}
+%demie-tangentes
+\begin{tikzpicture}
+\Cmath{tikzWindow(xmin=-2,xmax=3,ymin=0,ymax=3,x1cm=0.5,y1cm=0.5)}
+\Cmath{tikzGrid([line width=0.4pt,color=gray!50,dashed])}
+\Cmath{tikzAxeX([line width=0.6pt,-{Stealth[round]}],step=1)}
+\Cmath{tikzAxeY([line width=0.6pt,-{Stealth[round]}],step=1)}
+\Cmath{codeLua(f=function(x)	return sqrt(x^3+x^2) end)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(x),samples=400)}
+\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=0,function=f,direction=-1,label=vec(T_g))}
+\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=0,function=f,direction=1,label=vec(T_d),position=below right)}
+\Cmath{tikzPoint(x=1.5,y=2.2,label={f(x)=√(x^3+x^2)},labelColor=blue,position=right,size=0)}
+\end{tikzpicture}
+\end{center}
+
+\begin{code}
+% courbe en polaire
+\begin{tikzpicture}
+\Cmath{tikzWindow(x1cm=0.1,y1cm=0.1,xmin=-0.5,xmax=0.5,ymin=-0.5,ymax=0.5)}
+\Cmath{tikzGrid([color=gray!50,dashed],xstep=0.1,ystep=0.1)}
+\Cmath{codeLua(f=function(theta) return cos(theta)*sin(theta) end)}
+\Cmath{tikzAxeX([line width=0.6,-{Stealth[round]}],step=0.1,label=x)}
+\Cmath{tikzAxeY([line width=0.6,-{Stealth[round]}],step=0.2,label=y)}
+\Cmath{tikzPlot([color=NavyBlue,smooth,line width=0.7],type=polar,variable=t,function=f(t),
+samples=100,domain=-2*pi:2*pi)}
+\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],variable=pi/6,
+function=f,type=polar,k=0.5,label=vec(u(:pi/6)),position=right)}
+\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/6,function=f,label=A,position=right,
+type=polar)}
+\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],variable=pi/4,
+function=f,type=polar,k=0.5,label=vec(u(:pi/4)),position=right)}
+\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/4,function=f,label=B,type=polar)}
+\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],variable=pi/3,
+function=f,type=polar,k=0.5,label=vec(u(:pi/3)))}
+\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/3,function=f,label=C,type=polar)}
+\Cmath{tikzPoint(x=-0.3,y=0.4,label={ρ=cosθ*sinθ},size=0)}
+\end{tikzpicture}
+\end{code}
+
+\begin{center}
+% courbe en polaire
+\begin{tikzpicture}
+\Cmath{tikzWindow(x1cm=0.1,y1cm=0.1,xmin=-0.5,xmax=0.5,ymin=-0.5,ymax=0.5)}
+\Cmath{tikzGrid([color=gray!50,dashed],xstep=0.1,ystep=0.1)}
+\Cmath{codeLua(f=function(theta) return cos(theta)*sin(theta) end)}
+\Cmath{tikzAxeX([line width=0.6,-{Stealth[round]}],step=0.1,label=x)}
+\Cmath{tikzAxeY([line width=0.6,-{Stealth[round]}],step=0.2,label=y)}
+\Cmath{tikzPlot([color=NavyBlue,smooth,line width=0.7],type=polar,variable=t,function=f(t),samples=100,domain=-2*pi:2*pi)}
+\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],variable=pi/6,function=f,type=polar,k=0.5,label=vec(u(:pi/6)),position=right)}
+\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/6,function=f,label=A,position=right,type=polar)}
+\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],variable=pi/4,function=f,type=polar,k=0.5,label=vec(u(:pi/4)),position=right)}
+\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/4,function=f,label=B,type=polar)}
+\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],variable=pi/3,function=f,type=polar,k=0.5,label=vec(u(:pi/3)))}
+\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/3,function=f,label=C,type=polar)}
+\Cmath{tikzPoint(x=-0.3,y=0.4,label={ρ=cosθ*sinθ},size=0)}
+\end{tikzpicture}
+\end{center}
+
+\section{Installation}
+
+Téléchargez et décompressez le fichier zip qui contient l'intégralité des fichiers nécessaires au fonctionnement de Cmath\LuaTeX\ : \url{https://github.com/cdevalland/cmathluatex/archive/master.zip}.
+
+
+\subsection{Installation sans package}
+
+Pour utliser Cmath\LuaTeX\, ajoutez ces deux lignes dans le préambule de votre fichier tex :
+
+\begin{code}
+\directlua{dofile('CmathLuaTeX.lua')}
+\newcommand\Cmath[1]{\directlua{tex.print(Cmath2LaTeX('\detokenize{#1}'))}}
+\end{code}
+
+et c'est tout... ou presque.
+
+Plus précisément :
+
+\begin{enumerate}
+\item
+Il faut que le fichier \texttt{CmathLuaTeX.lua} soit accessible à \LuaTeX\ lors de la compilation. Si vous ne changez rien à la commande
+
+\begin{code}
+\directlua{dofile('CmathLuaTeX.lua')}
+\end{code}
+
+cela suppose que \texttt{CmathLuaTeX.lua} est dans le même répertoire que votre fichier tex. Mais il est probable que vous vouliez placer \texttt{CmathLuaTeX.lua} dans un répertoire qui sera accessible à tous vos fichiers tex où qu'ils soient sur le disque. Il faudra dans ce cas donner le chemin d'accès complet à CmathLuaTeX.lua. Par exemple sous Linux :
+
+\begin{code}
+\directlua{dofile('/home/mon_repertoire/CmathLuaTeX.lua')}
+\end{code}
+
+ou sous Window\$ :
+
+\begin{code}
+\directlua{dofile('C:/mon_repertoire/CmathLuaTeX.lua')}
+\end{code}
+
+\item Il est nécessaire de compiler ses documents avec Lua\LaTeX. Si vous utilisiez \texttt{pdflatex} auparavant, il suffira de remplacer la commande \texttt{pdflatex} par \texttt{lualatex} et tout fonctionnera sans problème la plupart du temps. Comme les distributions modernes de \LaTeX\ incluent toutes Lua\LaTeX\ (MikTeX, TexLive...), la plupart des éditeurs LaTeX sont configurables pour compiler via Lua\LaTeX. Cherchez dans les options.
+
+\item Certains packages et définitions sont requis par CmathLuaTeX. Utilisez le \texttt{Document test pour CmathLuaTeX.tex}, prêt à compiler, qui contient le préambule nécessaire.
+	
+\end{enumerate}
+\subsection{Installation sous forme d'un package}
+
+C'est la méthode la plus confortable puisqu'il n'y a pas besoin d'indiquer dans le code source le chemin du fichier \texttt{CmathLuaTeX.lua} ni d'inclure le préambule nécessaire à Cmath\LuaTeX. Le document précédent devient :
+
+\begin{code}
+\documentclass[a4paper,10pt]{article}
+\usepackage{fontspec}
+\usepackage{CmathLuaTeX}
+\begin{document}
+$\Cmath{sin{π/2}=1}$
+\end{document}
+\end{code}
+
+Il suffit pour cela de mettre dans un répertoire visible par la distribution LaTeX les deux fichiers \texttt{CmathLuaTeX.lua} et \texttt{CmathLuaTeX.sty}. Un endroit facilement accessible est le répertoire désigné par la variable \texttt{TEXMFHOME}. Sous Linux, il s'agit probablement de \texttt{/home/votre\_login/texmf} (à créer si besoin). On peut connaître le contenu de cette variable grâce à l'instruction \texttt{kpsewhich -var-value=TEXMFHOME}. Sous windows, il s'agira probablement d'un répertoire du genre \texttt{c:\setminus users\setminus votre\_login\setminus texmf}. Sur une clé USB avec texlive pour windows, il s'agit de \texttt{texlive/texmf-local}. Créer dans ce répertoire l'arborescence \texttt{tex/latex/CmathLuaTeX}. Sur ma machine, j'ai donc placé ces deux fichiers dans le répertoire \texttt{~/texmf/tex/latex/CmathLuaTeX}.
+
+Ceci fait, essayez de compiler le petit document ci-dessus.
+
+\section{Pour utiliser Xcas}
+
+Xcas doit être installé sur votre ordinateur et il faut configurer votre éditeur pour compiler en Lua\LaTeX\ avec l'option \texttt{-shell-escape} pour les appels à Xcas. De plus, l'auteur Bernard Parisse, suite à nos échanges, a fait quelques corrections nécessaires au fonctionnement de CmathLuaTeX. Il faut donc impérativement télécharger Xcas en version supérieure ou égale à 1.1.1 (datée de juin 2014) : \url{http://www-fourier.ujf-grenoble.fr/~parisse/install_fr}. J'en profite pour remercier ici Bernard pour sa grande disponibilité et sa rapidité à résoudre les problèmes.
+
+Les utilisateurs de windows qui n'auraient pas choisi d'installer Xcas dans le répertoire par défaut devront modifier cette ligne du fichier \texttt{CmathLuaTeX.lua} pour prendre en compte votre répertoire d'installation (faites une recherche sur l'instruction ``bash") :
+
+\begin{code}
+os.execute('\\xcas\\bash.exe -c "export LANG=fr_FR.UTF-8 ; /xcas/icas.exe giac.in"')
+\end{code}
+
+Pour cela, il convient d'être prudent. Ce fichier est codé en UTF-8 et le modifier avec un éditeur bas de gamme (notepad par exemple) le rendrait inutilisable.
+
+\begin{itemize}
+\item
+Installez un éditeur de texte digne de ce nom tel que Notepad++ ou Geany (c'est celui que j'utilise),
+\item Modifiez cette ligne en changeant le chemin d'accès \texttt{c:\setminus xcas\setminus} par le vôtre en respectant la même syntaxe,
+\item Sauvegardez le fichier en vérifiant que vous êtes bien en encodage de caractères UTF-8.
+\end{itemize}
+
+Cela devrait fonctionner.
+
+Pour tester Xcas, compilez ce code :
+
+\begin{code}
+\documentclass[a4paper,10pt]{article}
+\usepackage{fontspec}
+\usepackage{CmathLuaTeX}
+\begin{document}
+$\Cmath{sin{π/2}=xcas(sin(pi/2))}$
+\end{document}
+\end{code}
+
+\section{Quid de la portabilité ?}
+
+Comme je l'ai expliqué, il est nécessaire de compiler le code source avec Lua\LaTeX. Pourtant, il est possible de convertir toutes les commandes \texttt{\setminus Cmath} d'un document en code \LaTeX\ pour obtenir un code source standard et portable. Cela permet, par exemple, de le compiler avec \texttt{pdfLaTeX}, de le publier dans un wiki, un forum, etc...
+
+Je fournis pour cela un script pour \TeX works accessible via le menu \texttt{Scripts,Cmath,Document Cmath -> document LaTeX}.
+
+Ce script parcourt le document courant, traduit toutes les commandes \texttt{\setminus Cmath} en \LaTeX, y compris les commandes XCAS, les tableaux de variations, les graphiques, etc... Le nouveau code est inséré dans un nouveau document. Ce code est totalement indépendant de Cmath\LuaTeX\ et peut être compilé avec \texttt{pdfLaTeX}.
+
+Exemple : ce script exécuté pour le code ci-dessous tapé avec Cmath\LuaTeX
+
+\begin{code}
+\begin{document}
+Pour $\Cmath{x∈ℝ}$, on définit la fonction $\Cmath{f}$ par $\Cmath{f(x)=sinx}$.
+On a : \[\Cmath{f(π/3)=xcas(sin(pi/3))}\]
+\end{document}
+\end{code}
+
+fera apparaître un nouveau document contenant :
+
+\begin{code}
+\begin{document}
+Pour $x\in \mathbb{R} $, on définit la fonction $f$ par $f \left( x\right)  = \sin x$.
+On a : \[f \left( \frac{\pi }{3}\right)  = \frac{\sqrt{3}}{2}\]
+\end{document}
+\end{code}
+
+\section{Utilisation avec \TeX works}
+
+Le confort d'utilisation de Cmath\LuaTeX\ sera optimale avec l'excellent éditeur \TeX works. Son apparence est rudimentaire mais il est d'une efficacité redoutable une fois qu'on a pris le temps de le personnaliser. Le gros avantage de l'utiliser avec Cmath\LuaTeX\ est qu'il permet d'exécuter des scripts écrits en Lua et par conséquent ceux de Cmath\LuaTeX. L'autre grande force de \TeX works est la possibilité de complètement créer ses propres raccourcis claviers pour y mettre le texte que l'on veut (voir \url{https://github.com/TeXworks/texworks/wiki/CodeCompletion}). Un raccourci suivi de la touche TAB permet alors de faire défiler les possibilités que l'on aura programmées. Exemple : dans mon fichier de ``completion", j'ai inscrit, entre autre :
+
+\begin{code}
+...
+tvar:=TVar([#INS#,•],f(x)=•)
+mq:=Montrer que #INS#
+mq:=montrer que #INS#
+...
+\end{code}
+
+Ainsi, \texttt{mq} suivi de la touche \texttt{TAB} (éventuellement plusieurs fois), fait défiler les enregistrements. C'est au final bien plus rapide que d'aller chercher des icônes à la souris. \TeX works fournit déjà beaucoup de raccourcis prédéfinis dans les fichiers \texttt{tw-latex.txt} et \texttt{tw-basic.txt}. Par exemple en tapant 
+
+\begin{code}
+\beg TAB en TAB
+\end{code}
+
+On obtient :
+
+\begin{code}
+\begin{enumerate}
+\item
+
+\end{enumerate}•
+\end{code}
+
+Dans la suite, je suppose que \TeX works est installé sur votre ordinateur.
+
+
+\subsection{Sous Window\$}
+
+Pour les utilisateurs de windows, je conseille d'utiliser une version au moins égale à la 1391, à télécharger dans la rubrique ``Latest" sur le site \TeX works (\url{https://github.com/TeXworks/texworks/releases/latest}). Les développeurs ont accepté de compiler \TeX works avec une option qui permet à \TeX works d'appeler des librairies externes. Cela permet d'utiliser la librairie \texttt{lpeg.dll} avec l'interpréteur Lua fourni avec \TeX works. Ce fichier est nécessaire à l'exécution des fonctions Lua de Cmath\LuaTeX\ (il s'agit de la librairie d'analyse grammaticale d'expressions et elle n'est pas incluse dans \TeX works). Vous trouverez sur le site évoqué plus haut un répertoire nommé \texttt{Lua 5.2 Modules}. Enregistrez le fichier \texttt{lpeg.dll} contenu dans ce répertoire à côté du fichier \texttt{texworks.exe} sur votre disque dur. Les scripts Cmath devraient maintenant fonctionner.
+
+Les utilisateurs de TeX Live peuvent utiliser le \TeX works fourni avec cette distribution LaTeX en y ajoutant ce même fichier \texttt{lpeg.dll}. MikTeX contient aussi une version de \TeX works mais je ne sais pas si elle accepte ce fichier \texttt{lpeg.dll}.
+
+\subsection{Sous Linux}
+
+C'est plus simple. \TeX works s'appuie sur toute distribution Lua installée sur l'ordinateur. Il faut donc installer une distribution Lua (version >= 5.1) ainsi que la librairie lpeg à partir de votre installateur de paquets préféré.
+
+\subsection{Ajout des scripts}
+
+Maintenant, il faut configurer \TeX works pour les raccourcis clavier. Dans l'archive \texttt{master.zip}, je fournis un répertoire \texttt{TeXworks}. Il contient :
+
+\begin{itemize}
+\item la librairie lpeg.dll pour windows uniquement que j'ai compilée avec Mingw et lua 5.2. Elle fait double-emploi avec celle fournie par \TeX works.
+\item un répertoire scripts qui contient un répertoire Cmath à copier dans le répertoire scripts de \TeX works. Pourcela, ouvrez le répertoire appelé Ressources de \TeX works : on le trouve facilement grâce au menu Aide, Paramètres et Ressources de \TeX works. Une fenêtre s'ouvre ; cliquez sur le lien Ressources. Le contenu du répertoire s'ouvre. Un répertoire scripts s'y trouve déjà. Copier le répertoire \texttt{scripts/Cmath} que je fournis dans le répertoire \texttt{scripts} de \TeX works.
+\item	un répertoire configuration. Il contient un fichier shortcuts.ini qui désactive deux raccourcis intégrés à \TeX works : Ctrl+R pour rechercher/remplacer et Ctrl+= pour montrer la sélection. Ces deux fonctions resteront toutefois accessibles par le menu Recherche de \TeX works. Le but étant de rediriger ces deux raccourcis pour les symboles ``racine carrée" et ``environ". Si vous avez déjà un fichier \texttt{shortcuts.ini}, y ajouter les deux lignes du fichier que je fournis, sinon, le copier tel quel dans le répertoire configuration.
+\end{itemize}
+
+Une fois installé, il est nécessaire d'autoriser l'exécution des scripts puisque les raccourcis claviers de Cmath\LuaTeX\ sont des programmes écrits en Lua qui sont lancés par \TeX works. L'option se trouve dans le menu \texttt{Editions, Préférences} (voir figure \ref{scripts}). Ce sont les mêmes fonctions qui sont appelées par Lua\LaTeX\ que celles appelées par \TeX works. Ainsi, il n'y a aucune différence entre le code renvoyé par Ctrl+F9 dans \TeX works et celui qui sera compilé par Lua\LaTeX\ pour une formule entourée par \texttt{\setminus Cmath{}}.
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{PréférencesTeXworks016.png}
+\end{center}
+\caption{Activation des scripts dans \TeX works}
+\label{scripts}
+\end{figure}
+
+\subsection{Configurer la compilation}
+
+Il faut configurer \TeX works pour compiler en Lua\LaTeX\ avec l'option \texttt{-shell-escape} pour les appels à Xcas. Ajouter cet argument à l'outil de traitement Lua\LaTeX\ comme indiqué sur la figure \ref{compil} (il doit être en première position). Validez puis configurez Lua\LaTeX\ comme outil de traitement par défaut (raccourcis Ctrl+T dans l'éditeur).
+Redémarrez \TeX works pour que les changements prennent effet.
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{PréférencesTeXworks018.png}
+\end{center}
+\caption{Configurer la compilation dans \TeX works}
+\label{compil}
+\end{figure}
+
+\subsection{Raccourcis clavier}
+
+Les combinaisons de touches disponibles dans \TeX works sont :
+
+\begin{tabular}{c p{12cm}}
+Touches 	& Action \\
+\hline
+\verb?F9? 	&Compose la formule tapée juste avant le curseur avec la fonction \verb?$\Cmath{}$?. Action réversible en retapant F9.\\
+\verb?Maj+F9? 	&Compose la formule tapée juste avant le curseur avec la fonction \verb?\[\Cmath{}\]?. Action réversible.\\
+\verb?Alt+F9? 	&Compose la formule tapée juste avant le curseur avec la fonction \verb?\Cmath{}?. Action réversible.\\
+\verb?Ctrl+F9? &	Traduit en LaTeX la formule tapée juste avant le curseur, en mode texte.\\
+\verb?Ctrl+Maj+F9? &	Traduit en LaTeX la formule tapée juste avant le curseur, en mode hors-texte.\\
+\verb?Ctrl+*? 	&Affiche le symbole ×\\
+\verb?Ctrl+/? 	&Affiche le symbole ÷\\
+\verb?Ctrl+=? 	&Affiche le symbole environ égal\\
+\verb?Ctrl+R? 	&Affiche le symbole √\\
+\end{tabular}
+
+\subsection{Test de la configuration}
+
+Dans un document vierge, taper \texttt{1/2} suivi de \texttt{F9}. Vous devez voir :
+
+\begin{code}
+$\Cmath{1/2}$
+\end{code}
+
+Tapez : \texttt{1/2} suivi de \texttt{Ctrl+F9} :
+
+\begin{code}
+$\frac{1}{2}$ % Traduction CmathLuaTeX de : 1/2
+\end{code}
+
+Tapez \texttt{xcas(1+2)} suivi de \texttt{Ctrl+F9} :
+
+\begin{code}
+$3$ % Traduction CmathLuaTeX de : xcas(1+2)
+\end{code}
+
+Si certains raccourcis ne fonctionnent pas, il se peut que leur séquence de touche soient interceptée par le système d'exploitation. Le cas s'est présenté sur un Linux Mint. Dans ce cas, désactivez le raccourci concerné dans dans le système.
+
+
+
+
+\section{CmathLua\TeX\ portable pour windows}
+
+Dans nos collèges et lycées, les ordinateurs sont pour une majorité sous windows. Voici une méthode qui permet de créer une clé USB prête à l'emploi pour compiler ses textes avec CmathLuaTeX. Aucun droit d'administration ne sont nécessaires. Il suffit d'insérer la clé pour pouvoir commencer à rédiger. Suivez ce lien pour créer sa clé USB : \url{https://github.com/cdevalland/cmathluatex/wiki/Cmathluatex-Portable}.
+
+
+\section{Liste de diffusion, forum}
+
+Pour rester informé des nouveautés et des mises à jour, inscrivez-vous à cette liste :
+
+L'URL pour s'inscrire est : \url{mailto:cmathluatex-request@ml.free.fr?subject=subscribe}
+
+L'URL pour se désinscrire est : \url{mailto:cmathluatex-request@ml.free.fr?subject=unsubscribe}
+
+\end{document}
