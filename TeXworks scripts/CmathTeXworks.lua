@@ -7,7 +7,7 @@ function estFormule(txt)
 	local f=true
 	local i,fonction
 	for i,fonction in pairs({"GaussSysl","GaussRang","GaussInv","tikzPlot","tikzWindow","tikzGrid",
-		"tikzAxeX","tikzAxeY","tikzAxeX","tikzAxeY","tikzPoint","codeLua"}) do
+		"tikzAxeX","tikzAxeY","tikzAxeX","tikzAxeY","tikzPoint","tikzTangent","codeLua"}) do
 		if string.find(txt,fonction)==1 then
 			f=false
 		end

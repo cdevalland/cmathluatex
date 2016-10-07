@@ -1,5 +1,5 @@
 --[[
-	Cmath pour LuaTeX, version 2016.05.14
+	Cmath pour LuaTeX, version 2016.10.06
     Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
 
     This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,9 @@
 --]]
 
 os.setlocale("en_US.UTF-8", "numeric") -- le séparateur décimal doit être le point
-pi=math.pi
+sin,cos,tan,asin,acos,atan=math.sin,math.cos,math.tan,math.asin,math.acos,math.atan
+abs,sqrt,exp,log,ln=math.abs,math.sqrt,math.exp,math.log,math.log
+pi,huge=math.pi,math.huge
 local lpeg = require "lpeg"
 local write = io.write
 local match = lpeg.match
@@ -288,7 +290,7 @@ local Intervalle_Entier_Ouvert = P("[[")+P("⟦")
 local Intervalle_Entier_Ferme = P("]]")+P("⟧")
 local Fonction_sans_eval = P("xcas")+P("TVarP")+P("TVar")+P("TSig")+P("TVal")+P("sysl")+P("GaussSysl")+P("GaussRang")+P("GaussInv")
 							+P("tikzPlot")+P("tikzWindow")+P("tikzGrid")+P("tikzAxeX")+P("tikzAxeY")+P("tikzPoint")
-							+P("codeLua")
+							+P("codeLua")+P("tikzTangent")
 local CaractereSansParentheses=(1-S"()")
 local Egal = S('=')* Espace
 local CaractereSansParenthesesSep=(1-S"(),;")
@@ -1115,7 +1117,7 @@ elseif (op=='no_eval') then
 		if Arbre[3]=='restart' then
 			return Giac("restart;",'""',"false")
 		else
-			return Giac("",Arbre[3],"true")
+			return Giac(XCAS_var2latex,Arbre[3],"true")
 		end
 	elseif Arbre[2]=='TVar' then
 		return Giac(XCAS_Tableaux,'TVar('..Arbre[3]..')',"false")
@@ -1147,6 +1149,8 @@ elseif (op=='no_eval') then
 		return tikzPoint(Arbre[3])
 	elseif Arbre[2]=='codeLua' then
 		return codeLua(Arbre[3])
+	elseif Arbre[2]=='tikzTangent' then
+		return tikzTangent(Arbre[3])		
 	else	
 		return Arbre[2]..'("'..Arbre[3]..'")'
 	end
@@ -1254,7 +1258,7 @@ if(Resultat=='Resultat'){
   Resultat:="Erreur Xcas"};
 Sortie:=fopen("]]..giacOut..[[");
 if(]]..latex..[[){
-  fprint(Sortie,Unquoted,latex(Resultat));
+  fprint(Sortie,Unquoted,var2latex(Resultat));
 } else {
   fprint(Sortie,Unquoted,Resultat);
 };
@@ -1379,7 +1383,25 @@ function Cmath2LaTeXinTW(formule)
 	end
 end
 
-XCAS_Systemes=[[
+XCAS_var2latex=[[
+var2latex(variable):={
+// supprime les mathrm, les cdot et évite la perte des indices
+local s:=latex(variable);
+local j;
+for(j:=inString(s,"\\_");j<>-1;j:=inString(s,"\\_")){
+  s:=left(s,j)+"_"+mid(s,j+2);
+}
+for(j:=inString(s,"\\mathrm");j<>-1;j:=inString(s,"\\mathrm")){
+  s:=left(s,j)+mid(s,j+7);
+}
+for(j:=inString(s,"\\cdot");j<>-1;j:=inString(s,"\\cdot")){
+  s:=left(s,j)+mid(s,j+5);
+}
+return(s);
+}:;
+]]
+
+XCAS_Systemes=XCAS_var2latex..[[
 sysl(arguments):={
 // systeme : vecteur ou matrice du système.
 // Exemple : [x+y=0,y+z=0,x+z=0] ou [ [1,1,0,0],[0,1,1,0],[1,0,1,0] ]
@@ -1387,7 +1409,7 @@ sysl(arguments):={
 // operations (facultatif) : matrice des opérations élémentaires à afficher.
 local systeme; // vecteur contenant les lignes du système
 local variables; // vecteur contenant les variables
-local s:="\\[\\left\\{\n\\begin{alignedat}{";
+local s:="\\left\\{\n\\begin{alignedat}{";
 local nb_var;
 local nb_lig;
 local n,p;
@@ -1488,7 +1510,7 @@ for(n:=0;n<nb_lig;n++){
   } 
   s:=s+" \\\\\n"; 
 }
-s:=s+"\\end{alignedat}\n\\right.\\]\n";
+s:=s+"\\end{alignedat}\n\\right.\n";
 return(s);
 }:;
 
@@ -1517,33 +1539,16 @@ if(estNombre(coef)){
     } else {
       if(sommet(coef)=='+' or sommet(coef)=='-'){// mettre des parenthèses
         v[0]:="+";
-        v[1]:="\\left("+latex(coef)+"\\right)";
+        v[1]:="\\left("+var2latex(coef)+"\\right)";
       } else {
         v[0]:="+";
-        v[1]:=latex(coef);
+        v[1]:=var2latex(coef);
       }
     }
   }
 }
 return(v);
 }:;
-
-var2latex(variable):={
-// supprime les mathrm, les cdot et évite la perte des indices
-local s:=latex(variable);
-local j;
-for(j:=inString(s,"\\_");j<>-1;j:=inString(s,"\\_")){
-  s:=left(s,j)+"_"+mid(s,j+2);
-}
-for(j:=inString(s,"\\mathrm");j<>-1;j:=inString(s,"\\mathrm")){
-  s:=left(s,j)+mid(s,j+7);
-}
-for(j:=inString(s,"\\cdot");j<>-1;j:=inString(s,"\\cdot")){
-  s:=left(s,j)+mid(s,j+5);
-}
-return(s);
-}:;
-
 
 liste_param(solutions,variables):={
 local l:=size(variables);
@@ -1588,8 +1593,6 @@ if((j==nb_lig-1 and direction==1) or (j==0 and direction==-1) and systeme[j][p]=
 }
 }:;
 
-
-
 estNombre(x):={
 //local num:=evalf(x);
 local t:=type(evalf(x));
@@ -1630,6 +1633,11 @@ if (size(liste)>0){
 }
 }:;
 
+sysld(arguments):={
+// renvoie sysl en mode display
+	return "\\["+sysl(arguments)+"\\]\n";
+}:;
+
 GaussPivotSysl(systeme,msysteme,variables,fraction,n,p,pivot_nul):={
 // systeme : système linéaire au format vecteur
 // msysteme : système linéaire au format matrice
@@ -1653,7 +1661,7 @@ if(p>=nb_var or n>=nb_lig){ // pivotage terminé, afficher les solutions
   k:=cherchePivot(msysteme,n,p,nb_lig,1);
   if(k==-1){// la colonne ne contient pas la variable
     if(n<nb_lig-1){
-      s:=s+"La variable $"+var2latex(variables[p])+"$ est absente à partir de la ligne "+string(n+2)+". Il n'y a donc rien à faire pour l'éliminer.\\\\\n";
+      s:=s+"La variable $"+var2latex(variables[p])+"$ est absente à partir de la ligne "+string(n+2)+". Il n'y a donc rien à faire pour l'éliminer.\n\n";
     }
     afficher("Rien à faire pour la colonne "+string(p));
     p++;
@@ -1666,7 +1674,7 @@ if(p>=nb_var or n>=nb_lig){ // pivotage terminé, afficher les solutions
         s:=s+"On échange la ligne "+string(n+1)+" avec la ligne "+string(k+1)+" pour obtenir un pivot non nul :\n";
       }
       msysteme:=rowSwap(msysteme,n,k);
-      s:=s+sysl(msysteme,variables);
+      s:=s+sysld(msysteme,variables);
       afficher ("Echange lignes "+string(n)+" et "+string(k));
       afficher(msysteme);
     }
@@ -1677,7 +1685,7 @@ if(p>=nb_var or n>=nb_lig){ // pivotage terminé, afficher les solutions
       lz:=solve(coef1=0,lv[0]); // zéros du coef pour la première variable
       nb_sol:=size(lz);
       if(nb_sol>0 and coefVautZero(pivot_nul,lv[0],lz,nb_sol)==vrai){// disjonction des cas si au moins une valeur qui annule le pivot
-        s:=s+"Le pivot $"+latex(coef1)+"$ peut s'annuler. On raisonne donc par disjonction des cas.\n\\begin{itemize}";
+        s:=s+"Le pivot $"+var2latex(coef1)+"$ peut s'annuler. On raisonne donc par disjonction des cas.\n\\begin{itemize}";
         for(j:=0;j<nb_sol;j++){
           if(not(contains(pivot_nul,[lv[0],lz[j] ]))){//cette racine n'a pas été étudiée avant, le pivot peut s'annuler
             // substituer et résoudre ce cas 
@@ -1685,7 +1693,7 @@ if(p>=nb_var or n>=nb_lig){ // pivotage terminé, afficher les solutions
             msys_subst:=simplifier(subst(msysteme,lv[0]=lz[j]));
             sys_subst:=simplifier(subst(systeme,lv[0]=lz[j]));
             s:=s+"Si $"+var2latex(lv[0])+"="+var2latex(lz[j])+"$, alors on est amené à résoudre le système :\n";
-            s:=s+sysl(msys_subst,variables,[]);
+            s:=s+sysld(msys_subst,variables,[]);
             //s:=s+"On élimine la variable $"+var2latex(variables[p])+"$ à partir de la ligne "+string(n+2)+" :\\\\\n";
             if(pivot_nul==[]){
               pivot_nul:=[ [lv[0],lz[j] ] ]
@@ -1706,7 +1714,7 @@ if(p>=nb_var or n>=nb_lig){ // pivotage terminé, afficher les solutions
           }
           s:=s+var2latex(lz[nb_sol-1])+"\\right\\}$";
         }        
-        s:=s+", alors le pivot est non nul et on continue la résolution.\\\\\n";       
+        s:=s+", alors le pivot est non nul et on continue la résolution.\n\n";       
         s:=s+GaussPivotSysl(systeme,msysteme,variables,fraction,n,p,pivot_nul);
         s:=s+"\n\\end{itemize}\n";
         return(s);
@@ -1731,11 +1739,11 @@ if(p>=nb_var or n>=nb_lig){ // pivotage terminé, afficher les solutions
       }
     }
     if(operations<>[]){
-      s:=s+"On élimine la variable $"+var2latex(variables[p])+"$ à partir de la ligne "+string(n+2)+" :\\\\\n";
-      s:=s+sysl(msysteme,variables,operations);
+      s:=s+"On élimine la variable $"+var2latex(variables[p])+"$ à partir de la ligne "+string(n+2)+" :\n\n";
+      s:=s+sysld(msysteme,variables,operations);
     } else {
       if(n<nb_lig-1){
-        s:=s+"La variable $"+var2latex(variables[p])+"$ est déjà éliminée à partir de la ligne "+string(n+2)+".\\\\\n";
+        s:=s+"La variable $"+var2latex(variables[p])+"$ est déjà éliminée à partir de la ligne "+string(n+2)+".\n";
       }
     }
     n++;p++;
@@ -1743,7 +1751,6 @@ if(p>=nb_var or n>=nb_lig){ // pivotage terminé, afficher les solutions
   }
 }
 }:;
-
 
 
 coefVautZero(pivot_nul,variable,liste_zeros,nb_sol):={
@@ -1773,7 +1780,7 @@ if (size(arguments)==3){
 } else {
   fraction:=faux;
 }
-s:="Par la méthode du pivot de Gauss, on résout le système :\n"+sysl(systeme,variables);
+s:="Par la méthode du pivot de Gauss, on résout le système :\n"+sysld(systeme,variables);
 // pivoter à partir de (0,0)
 s:=s+GaussPivotSysl(systeme,msysteme,variables,fraction,0,0,[]);
 // affichage des solutions
@@ -1916,9 +1923,6 @@ if(j==-1){ //chercher un pivot numerique dans la ligne n
 }
 }:;
 
-
-
-
 GaussPivotRang(matrice,n,p,pivot_nul,rang):={
 local nb_col,nb_lig;
 local s:="";
@@ -1969,7 +1973,7 @@ if((p>=nb_col) or (n>=nb_lig)){
       nb_sol:=size(lz);
       if(nb_sol>0 and coefVautZero(pivot_nul,lv[0],lz,nb_sol)==vrai){// disjonction des cas si au moins une valeur qui annule le pivot
         s:=s+ifte((n<nb_lig-1)and(p<nb_col-1),"Le pivot ","Le coefficient ");
-        s:=s+"$"+latex(coef1)+"$ peut s'annuler. On raisonne donc par disjonction des cas.\n\\begin{itemize}";
+        s:=s+"$"+var2latex(coef1)+"$ peut s'annuler. On raisonne donc par disjonction des cas.\n\\begin{itemize}";
         for(j:=0;j<nb_sol;j++){
           if(not(contains(pivot_nul,[lv[0],lz[j] ]))){//cette racine n'a pas été étudiée avant, le pivot peut s'annuler
             // substituer et résoudre ce cas 
@@ -1998,7 +2002,7 @@ if((p>=nb_col) or (n>=nb_lig)){
             s:=s+var2latex(lz[nb_sol-1])+"\\right\\}$";
         }        
         s:=s+ifte((n<nb_lig-1)and(p<nb_col-1),", alors le pivot ",", alors le coefficient ");
-        s:=s+"$"+var2latex(coef1)+"$ est non nul.\\\\\n";
+        s:=s+"$"+var2latex(coef1)+"$ est non nul.\n\n";
         s:=s+GaussPivotRang(matrice,n,p,pivot_nul,rang);
         s:=s+"\n\\end{itemize}\n";
         return(s);
@@ -2031,6 +2035,7 @@ if((p>=nb_col) or (n>=nb_lig)){
 return(s);
 }:;
 
+
 GaussRang(matrice):={
 local s;
 s:="Par la méthode du pivot de Gauss, on calcule le rang de la matrice :\n"+affMatrice(matrice,[]);
@@ -2061,7 +2066,7 @@ nb_lig:=nrows(matrice);
 if(n==nb_lig){ // repartir en remontant
   // On sait maintenant si la matrice est inversible
   if(det(matrice)==0){
-    s:=s+"La matrice n'est donc pas inversible.\n"; 
+    s:=s+"Cette matrice n'est pas inversible.\n"; 
   } else {
     return(GaussPivotInv(matrice,n-1,p-1,pivot_nul,-1))
   }  
@@ -2083,7 +2088,7 @@ if(n==nb_lig){ // repartir en remontant
     afficher("Rien à faire pour la colonne "+string(p));
     s:=s+GaussPivotInv(matrice,n+direction,p+direction,pivot_nul,direction);
   } else {
-    if(k<>n){// il faut permuter
+    if(k<>n and direction==1){// il faut permuter
       if(estNombre(matrice[n][p])==faux){
         s:=s+"On échange la ligne "+string(n+1)+" avec la ligne "+string(k+1)+" pour obtenir un pivot toujours non nul :\n";
       } else {
@@ -2101,14 +2106,15 @@ if(n==nb_lig){ // repartir en remontant
       lz:=solve(coef1=0,lv[0]); // zéros du coef pour la première variable
       nb_sol:=size(lz);
       if(nb_sol>0 and coefVautZero(pivot_nul,lv[0],lz,nb_sol)==vrai){// disjonction des cas si au moins une valeur qui annule le pivot
-        s:=s+"Le pivot $"+latex(coef1)+"$ peut s'annuler. On raisonne donc par disjonction des cas.\n\\begin{itemize}";
+        s:=s+"Le pivot $"+var2latex(coef1)+"$ peut s'annuler. On raisonne donc par disjonction des cas.\n\\begin{itemize}";
         for(j:=0;j<nb_sol;j++){
           if(not(contains(pivot_nul,[lv[0],lz[j] ]))){//cette racine n'a pas été étudiée avant, le pivot peut s'annuler
             // substituer et résoudre ce cas 
             s:=s+"\n\\item\n"; 
             matrice_subst:=simplifier(subst(matrice,lv[0]=lz[j]));
-            s:=s+"Si $"+var2latex(lv[0])+"="+var2latex(lz[j])+"$, alors on est amené à inverser la matrice :\n";
-            s:=s+affMatriceInv(matrice_subst,[]);
+            s:=s+"Si $"+var2latex(lv[0])+"="+var2latex(lz[j])+"$, alors la matrice à inverser devient :\n";
+            s:=s+affMatrice(makemat((j,k)->matrice_subst[j][k],n+1,n+1),[]);
+            //s:=s+affMatriceInv(matrice_subst,[]);
             //s:=s+"On élimine la variable $"+var2latex(variables[p])+"$ à partir de la ligne "+string(n+2)+" :\\\\\n";
             if(pivot_nul==[]){
               pivot_nul:=[ [lv[0],lz[j] ] ]
@@ -2129,7 +2135,7 @@ if(n==nb_lig){ // repartir en remontant
           }
           s:=s+var2latex(lz[nb_sol-1])+"\\right\\}$";
         }        
-        s:=s+", alors le pivot est non nul et on continue la résolution.\\\\\n";       
+        s:=s+", alors le pivot est non nul et on continue la résolution.\n\n";       
         s:=s+GaussPivotInv(matrice,n,p,pivot_nul,direction);
         s:=s+"\n\\end{itemize}\n";
         return(s);
@@ -2155,7 +2161,7 @@ if(n==nb_lig){ // repartir en remontant
       s:=s+affMatriceInv(matrice,operations);
     } else {
       if(n<nb_lig-1){
-        s:=s+"Rien à faire ligne "+string(n+2)+".\\\\\n";
+        s:=s+"Rien à faire ligne "+string(n+2)+".\n\n";
       }
     }
     s:=s+GaussPivotInv(matrice,n+direction,p+direction,pivot_nul,direction);
@@ -2164,6 +2170,7 @@ if(n==nb_lig){ // repartir en remontant
 }
 return(s);
 }:;
+
 
 affMatriceInv(matrice,operations):={
 // matrice de taille nx2n, avec un trait vertical au milieu
@@ -2224,8 +2231,7 @@ return(s);
 
 ]]
 
-
-XCAS_Tableaux=[[
+XCAS_Tableaux=XCAS_var2latex..[[
 initCas():={
   complex_mode:=0;
   complex_variables:=0;
@@ -2260,9 +2266,9 @@ debutTableau(colonne,hauteurLigne,valX,nb_decimales):={
   for(k:=0;k<size(valX);k++){
     if (k>0){s:=s+","};
       if(type(nb_decimales)==DOM_INT and type(valX[k])==DOM_FLOAT){
-        s:=s+"$"+latex(evalf(valX[k],nb_decimales))+"$";
+        s:=s+"$"+var2latex(evalf(valX[k],nb_decimales))+"$";
       } else {
-        s:=s+"$"+latex(valX[k])+"$";
+        s:=s+"$"+var2latex(valX[k])+"$";
       }
   }
   s:=s+"}\n";
@@ -2585,23 +2591,23 @@ for(k:=0;k<n;k++){
   if (pos!="R"){
     if(pos=="+" or pos=="-"){
       if(k==0){
-        sTkzTabVar:=sTkzTabVar+" / $"+latex(images[0][1])+"$";        
+        sTkzTabVar:=sTkzTabVar+" / $"+var2latex(images[0][1])+"$";        
       } else {
-        sTkzTabVar:=sTkzTabVar+" / $"+latex(images[k][0])+"$";      
+        sTkzTabVar:=sTkzTabVar+" / $"+var2latex(images[k][0])+"$";      
       }
     } else {
     if(left(pos,1)=="-" or left(pos,1)=="+"){
       if(k==0){
         sTkzTabVar:=sTkzTabVar+"/ ";        
       } else {
-       sTkzTabVar:=sTkzTabVar+" / $"+latex(images[k][0])+"$";      
+       sTkzTabVar:=sTkzTabVar+" / $"+var2latex(images[k][0])+"$";      
       }
     };
     if(right(pos,1)=="-" or right(pos,1)=="+"){
       if(k==n-1){
         sTkzTabVar:=sTkzTabVar+"/ ";        
       } else {
-        sTkzTabVar:=sTkzTabVar+" / $"+latex(images[k][1])+"$";      
+        sTkzTabVar:=sTkzTabVar+" / $"+var2latex(images[k][1])+"$";      
       }
     }
   }   
@@ -2624,7 +2630,7 @@ lignesImages(noeuds,images):={
       sTkzTabIma:=sTkzTabIma+"\\tkzTabIma{"+noeuds[k][0]+"}";
       sTkzTabIma:=sTkzTabIma+"{"+noeuds[k][1]+"}";
       sTkzTabIma:=sTkzTabIma+"{"+noeuds[k][2]+"}";
-      sTkzTabIma:=sTkzTabIma+"{$"+latex(images[k][0])+"$}\n";
+      sTkzTabIma:=sTkzTabIma+"{$"+var2latex(images[k][0])+"$}\n";
     }
   }
   return(sTkzTabIma);
@@ -2659,9 +2665,9 @@ identifier(expression):={
     fonc:=op(g)[0];
     variable:=op(g)[1];
     commande:="unapply(d,"+variable+")";
-    return([execute(commande),[variable,latex(variable)],[fonc,latex(fonc)],[fonc+"'",latex(fonc)+"'"] ]);
+    return([execute(commande),[variable,var2latex(variable)],[fonc,var2latex(fonc)],[fonc+"'",var2latex(fonc)+"'"] ]);
   } else {
-  return([unapply(expression,x),["x","x"],["x->"+expression,"x\\mapsto "+latex(expression)],["(x->"+expression+")'","\\left( x\\mapsto "+latex(expression)+"\\right) '"] ])
+  return([unapply(expression,x),["x","x"],["x->"+expression,"x\\mapsto "+var2latex(expression)],["(x->"+expression+")'","\\left( x\\mapsto "+var2latex(expression)+"\\right) '"] ])
   }
 }:;
 
@@ -2725,9 +2731,9 @@ for(k:=0;k<n;k++){
       sTkzTabLine+="z";
       } else {
         if(type(nb_decimales)==DOM_STRING) {
-          sTkzTabLine:=sTkzTabLine+latex(signes[k]);
+          sTkzTabLine:=sTkzTabLine+var2latex(signes[k]);
         } else {
-          sTkzTabLine:=sTkzTabLine+latex(evalf(signes[k],nb_decimales));
+          sTkzTabLine:=sTkzTabLine+var2latex(evalf(signes[k],nb_decimales));
         }
       }
     }
@@ -2839,12 +2845,12 @@ if (size(facteurs)==1){ facteurs:=NULL };
 // construction de la structure du tableau
 colonne:=append([nom_variable],facteurs);
 if(type(nom_fonction)==DOM_STRING){
-  colonne:=append(colonne,"$\\displaystyle "+latex(f(x))+"$");
+  colonne:=append(colonne,"$\\displaystyle "+var2latex(f(x))+"$");
 } else {
   colonne:=append(colonne,"$"+id_fonction[2][1]+"("+id_fonction[1][1]+")$");
 }
 for(k:=0;k<size(colonne)-1;k++)
-  colonne[k]:="$"+latex(colonne[k])+"$";
+  colonne[k]:="$"+var2latex(colonne[k])+"$";
 hauteurs_lignes:=makelist(1,1,size(colonne)-1);
 if (denominateur){
   hauteurs_lignes:=append(hauteurs_lignes,2);
@@ -2986,9 +2992,9 @@ nom_fonction_f:=id_fonction_f[2][0];
 n:=size(IE);
 s:=s+string(n)+"}{C{1cm}|}}\n\\hline $"+nom_variable_f+"$ & ";
 for(k:=0;k<n-1;k++){
-  s:=s+"$\\displaystyle "+latex(simplifier(IE[k]))+"$ &";
+  s:=s+"$\\displaystyle "+var2latex(simplifier(IE[k]))+"$ &";
 }
-s:=s+"$\\displaystyle "+latex(simplifier(IE[k]))+"$ \\\\\n\\hline $"
+s:=s+"$\\displaystyle "+var2latex(simplifier(IE[k]))+"$ \\\\\n\\hline $"
 if(type(nom_fonction_f)==DOM_STRING){
   s:=s+"\\displaystyle "+latex(f(x))+"$ & ";
 } else {
@@ -2996,15 +3002,15 @@ if(type(nom_fonction_f)==DOM_STRING){
 }
 for(k:=0;k<n-1;k++){
   if(type(nb_decimales)!=DOM_INT){
-    s:=s+"$\\displaystyle "+latex(simplifier(f(IE[k])))+"$ &";
+    s:=s+"$\\displaystyle "+var2latex(simplifier(f(IE[k])))+"$ &";
   } else {
-    s:=s+"$\\displaystyle "+latex(format(f(IE[k]),"f"+string(nb_decimales)))+"$ &";
+    s:=s+"$\\displaystyle "+var2latex(format(f(IE[k]),"f"+string(nb_decimales)))+"$ &";
   }
 }
 if(type(nb_decimales)!=DOM_INT){
-  s:=s+"$\\displaystyle "+latex(simplifier(f(IE[k])))+"$ \\\\\n\\hline\n\\end{tabular}}";
+  s:=s+"$\\displaystyle "+var2latex(simplifier(f(IE[k])))+"$ \\\\\n\\hline\n\\end{tabular}}";
 } else {
-  s:=s+"$\\displaystyle "+latex(format(f(IE[k]),"f"+string(nb_decimales)))+"$ \\\\\n\\hline\n\\end{tabular}}";
+  s:=s+"$\\displaystyle "+var2latex(format(f(IE[k]),"f"+string(nb_decimales)))+"$ \\\\\n\\hline\n\\end{tabular}}";
 }
 return(s);
 }:;
@@ -3015,13 +3021,13 @@ purge(x);
 -- fonction qui exécute du code Lua et renvoie la chaine vide
 -- peut permettre de définir des fonctions
 function codeLua(arg)
-	assert(loadstring(arg))()
+	assert(load(arg))()
 	return ""
 end
 
 function eval(arg)
 	if(type(arg)=='string') then
-		return assert(loadstring('return '..arg))()
+		return assert(load('return '..arg))()
 	else
 		return arg
 	end
@@ -3054,7 +3060,7 @@ function tikzWindow(arg)
 				+  P'x1cm'*Egal*C(argument)/function(...) x1cm=eval(...) end
 				+  P'y1cm'*Egal*C(argument)/function(...) y1cm=eval(...) end
 				+  C(ExpressionEntreCrochets)/function(...) optionsTikz=... end,
-		argument=(CaractereSansParenthesesSep^1*ExpressionEntreParentheses^0)*Espace,
+		argument=(CaractereSansParenthesesSep^1*(ExpressionEntreParentheses*argument^0)^0)*Espace,
 		ExpressionEntreParentheses=P{'('*(CaractereSansParentheses+V(1))^0*')'},
 		ExpressionEntreCrochets=P{'['*(CaractereSansCrochets+V(1))^0*']'}
 	}
@@ -3066,11 +3072,12 @@ local ExpressionEntreCrochets=P{'('*(CaractereSansCrochets+V(1))^0*')'}
 
 -- crée une liste de coordonnées utilisable avec PGFplots
 function tikzPlot(arg)
-	local pVariable,pFunction,pType,pDomaine,pSamples
+	local pVariable="x"
+	local pSamples=100
+	local pFunction,pType,pDomaine
 	local a=xmin
 	local b=xmax	
 	local optionsTikz=""
-	sin,cos,abs=math.sin,math.cos,math.abs
 	-- grammaire des arguments
 	local Options, Option, argument = V'Options', V'Option', V'argument'
 	local ExpressionEntreParentheses=V'ExpressionEntreParentheses'
@@ -3083,7 +3090,7 @@ function tikzPlot(arg)
 				+  P'domain'*Egal*C(argument)/function(...) pDomaine=... end
 				+  P'samples'*Egal*C(argument)/function(...) pSamples=... end
 				+  C(ExpressionEntreCrochets)/function(...) optionsTikz=... end,
-		argument=(CaractereSansParenthesesSep^1*ExpressionEntreParentheses^0)*Espace,
+		argument=(CaractereSansParenthesesSep^1*(ExpressionEntreParentheses*argument^0)^0)*Espace,
 		ExpressionEntreParentheses=P{'('*(CaractereSansParentheses+V(1))^0*')'},
 		ExpressionEntreCrochets=P{'['*(CaractereSansCrochets+V(1))^0*']'}
 	}
@@ -3097,10 +3104,12 @@ function tikzPlot(arg)
 	if pFunction==nil then pFunction=0 end
 	if pSamples==nil then pSamples=50 end
 	local code_fonction = "f_draw_tikz = function("..pVariable..") return "..pFunction.." end"
-	local draw="\\draw "..optionsTikz.." plot coordinates{"
-	assert(loadstring(code_fonction))()
+	local draw=''
+	assert(load(code_fonction))()
 	local x,x_f,y_f,x_f_before,y_f_before
-	local join=true -- tant qu'on ne détecte pas de discontinuité
+	local join=false -- tant qu'on ne détecte pas de discontinuité
+	local clip=false -- pas besoin de limiter l'affichage
+	local coordinates=""
 	for x=a,b,(b-a)/(pSamples-1) do
 		if pType=='polar' then
 			x_f=f_draw_tikz(x)*cos(x)
@@ -3111,13 +3120,15 @@ function tikzPlot(arg)
 			x_f=x
 			y_f=f_draw_tikz(x)
 		end
-		if y_f>ymax or y_f<ymin or x_f>xmax or x_f<xmin then --ne pas tracer
+		-- y_f~=y_f seule façon de tester nan (=not a number, valeur interdite pour une racine par exemple)
+		if y_f>ymax or y_f<ymin or y_f~=y_f or x_f>xmax or x_f<xmin or x_f~=x_f then
+		-- on sort de la fenêtre ou non défini
 			if join==true then
-				if math.abs(y_f)~=math.huge and math.abs(x_f)~=math.huge then
+				if abs(y_f)~=huge and abs(x_f)~=huge and y_f==y_f and x_f==x_f then
 					-- ce n'est pas une valeur interdite
 					-- prendre en compte ce point mais limiter la fenêtre d'affichage
-					draw="\\clip ("..xmin/x1cm..","..ymin/y1cm..") rectangle ("..xmax/x1cm..","..ymax/y1cm..");\n"..draw
-					draw = draw .."("..x_f/x1cm..","..y_f/y1cm..")"
+					clip=true
+					coordinates = coordinates .."("..x_f/x1cm..","..y_f/y1cm..")"
 				end
 				-- stopper la courbe
 				join=false
@@ -3126,28 +3137,35 @@ function tikzPlot(arg)
 				-- ne pas tenir compte de ce point		
 			end
 		else
+		-- le point est dans la fenêtre
 			if join==false then
 				-- on reprend le tracé
+				join=true
 				-- voir si le point juste avant était une discontinuité
-				if math.abs(y_f_before)~=math.huge and math.abs(x_f)~=math.huge then
+				if y_f_before~=nil and x_f_before~=nil and math.abs(y_f_before)~=math.huge and math.abs(x_f_before)~=math.huge and y_f_before==y_f_before and x_f_before==x_f_before then
 					-- ce n'est pas une valeur interdite
 					-- prendre en compte ce point mais limiter la fenêtre d'affichage (déjà fait avant)
-					draw = draw .. "};\n"
-					draw=draw.."\\draw "..optionsTikz.." plot coordinates{"
-					draw = draw .."("..x_f_before/x1cm..","..y_f_before/y1cm..")"
-					draw = draw .."("..x_f/x1cm..","..y_f/y1cm..")"
-					join=true
-				else
-					-- ne pas tenir compte de ce point
+					if coordinates~='' then
+						draw = draw .. "\\draw "..optionsTikz.." plot coordinates{"..coordinates.."};\n"
+						coordinates=''
+					end
+					coordinates = coordinates .."("..x_f_before/x1cm..","..y_f_before/y1cm..")"
+--					coordinates = coordinates .."("..x_f/x1cm..","..y_f/y1cm..")"
+				--else
+					-- ne pas tenir compte du point précédent
+					--coordinates = coordinates .."("..x_f/x1cm..","..y_f/y1cm..")"
 				end
-			else
-				draw = draw .."("..x_f/x1cm..","..y_f/y1cm..")"
 			end
+			coordinates = coordinates .."("..x_f/x1cm..","..y_f/y1cm..")"
+			--end
 		end
 		x_f_before=x_f
 		y_f_before=y_f
 	end
-	draw = draw .. "};"
+	draw = draw .. "\\draw "..optionsTikz.." plot coordinates{"..coordinates.."};"
+	if clip==true then 
+		draw="\\clip ("..xmin/x1cm..","..ymin/y1cm..") rectangle ("..xmax/x1cm..","..ymax/y1cm..");\n"..draw
+	end
 	return draw
 end
 
@@ -3172,14 +3190,14 @@ function tikzGrid(arg)
 				+ P'ymin'*Egal*C(argument)/function(...) gYmin=eval(...) end
 				+ P'ymax'*Egal*C(argument)/function(...) gYmax=eval(...) end
 				+ C(ExpressionEntreCrochets)/function(...) optionsTikz=... end,
-		argument=(CaractereSansParenthesesSep^1*ExpressionEntreParentheses^0)*Espace,
+		argument=(CaractereSansParenthesesSep^1*(ExpressionEntreParentheses*argument^0)^0)*Espace,
 		ExpressionEntreParentheses=P{'('*(CaractereSansParentheses+V(1))^0*')'},
 		ExpressionEntreCrochets=P{'['*(CaractereSansCrochets+V(1))^0*']'}
 	}
 	match(OptionsGrid,arg)
 	local grid="\\draw "..optionsTikz.." ("..gXmin/x1cm..","..gYmin/y1cm..") grid [xstep="..gXstep/x1cm..",ystep="..
 				gYstep/y1cm.."] ("..gXmax/x1cm..","..gYmax/y1cm..");"
-	--print(grid)
+	
 	return grid
 end
 
@@ -3187,8 +3205,6 @@ function tikzAxeX(arg)
 	local step=1
 	local aXmin=xmin
 	local aXmax=xmax
-	local aYmin=ymin
-	local aYmax=ymax
 	local tick=true
 	local size=""
 	local position="below"
@@ -3207,8 +3223,6 @@ function tikzAxeX(arg)
 		Option = P'step'*Egal*C(argument)/function(...) step=eval(...) end 
 				+ P'xmin'*Egal*C(argument)/function(...) aXmin=eval(...) end
 				+ P'xmax'*Egal*C(argument)/function(...) aXmax=eval(...) end
-				+ P'ymin'*Egal*C(argument)/function(...) aYmin=eval(...) end
-				+ P'ymax'*Egal*C(argument)/function(...) aYmax=eval(...) end
 				+ P'trig'*Egal*C(argument)/function(...) trig=eval(...) end
 				+ P'digits'*Egal*C(argument)/function(...) digits=eval(...) end
 				+ P'zero'*Egal*C(argument)/function(...) zero=eval(...) end
@@ -3217,7 +3231,7 @@ function tikzAxeX(arg)
 				+ P'position'*Egal*C(argument)/function(...) position=... end
 				+ P'rightspace'*Egal*C(argument)/function(...) rightspace=... end
 				+ P'label'*Egal*C(argument)/function(...) label=... end,
-		argument=(CaractereSansParenthesesSep^1*ExpressionEntreParentheses^0)*Espace,
+		argument=(CaractereSansParenthesesSep^1*(ExpressionEntreParentheses*argument^0)^0)*Espace,
 		ExpressionEntreParentheses=P{'('*(CaractereSansParentheses+V(1))^0*')'},
 		ExpressionEntreCrochets=P{'['*(CaractereSansCrochets+V(1))^0*']'}
 	}
@@ -3243,7 +3257,6 @@ function tikzAxeX(arg)
 			end
 		end		
 	end
-	--print(axe)
 	return axe
 end
 
@@ -3269,8 +3282,6 @@ function tikzAxeY(arg)
 	local OptionsAxe = P { Options,
 		Options = C(Option * Cg(P(SepListe) * Option)^0),
 		Option = P'step'*Egal*C(argument)/function(...) step=eval(...) end 
-				+ P'xmin'*Egal*C(argument)/function(...) aXmin=eval(...) end
-				+ P'xmax'*Egal*C(argument)/function(...) aXmax=eval(...) end
 				+ P'ymin'*Egal*C(argument)/function(...) aYmin=eval(...) end
 				+ P'ymax'*Egal*C(argument)/function(...) aYmax=eval(...) end
 				+ P'trig'*Egal*C(argument)/function(...) trig=eval(...) end
@@ -3279,9 +3290,9 @@ function tikzAxeY(arg)
 				+ C(ExpressionEntreCrochets)/function(...) optionsTikz=... end
 				+ P'tick'*Egal*C(argument)/function(...) tick=... end
 				+ P'position'*Egal*C(argument)/function(...) position=... end
-				+ P'rightspace'*Egal*C(argument)/function(...) upspace=... end
+				+ P'upspace'*Egal*C(argument)/function(...) upspace=... end
 				+ P'label'*Egal*C(argument)/function(...) label=... end,
-		argument=(CaractereSansParenthesesSep^1*ExpressionEntreParentheses^0)*Espace,
+		argument=(CaractereSansParenthesesSep^1*(ExpressionEntreParentheses*argument^0)^0)*Espace,
 		ExpressionEntreParentheses=P{'('*(CaractereSansParentheses+V(1))^0*')'},
 		ExpressionEntreCrochets=P{'['*(CaractereSansCrochets+V(1))^0*']'}
 	}
@@ -3312,37 +3323,125 @@ end
 
 function tikzPoint(arg)
 	local position="above"
-	local x,y
-	local size=7
+	local x,y,z,a,tFunction
+	local size=1.5
 	local name=""
-	local color='black'
+	local tType=""
+	local pointColor='black'
+	local labelColor='black'
 	-- grammaire des arguments
 	local Options, Option, argument = V'Options', V'Option', V'argument'
 	local ExpressionEntreParentheses=V'ExpressionEntreParentheses'
 	local ExpressionEntreCrochets=V'ExpressionEntreCrochets'
 	local OptionsPoint = P { Options,
 		Options = C(Option * Cg(P(SepListe) * Option)^0),
-		Option = P'x'*Egal*C(argument)/function(...) x=eval(...) end 
-				+ P'y'*Egal*C(argument)/function(...) y=eval(...) end
+		Option = P'variable'*Egal*C(argument)/function(...) a=eval(...) end 
+				+ P'function'*Egal*C(argument)/function(...) tFunction=... end
+				+ P'x'*Egal*C(argument)/function(...) x=eval(...) end 
+				+ P'y'*Egal*C(argument)/function(...) y,z=eval(...) end
 				--+ C(ExpressionEntreCrochets)/function(...) optionsTikz=... end
 				+ P'size'*Egal*C(argument)/function(...) size=eval(...) end
-				+ P'color'*Egal*C(argument)/function(...) color=... end
+				+ P'pointColor'*Egal*C(argument)/function(...) pointColor=... end
+				+ P'labelColor'*Egal*C(argument)/function(...) labelColor=... end
 				+ P'position'*Egal*C(argument)/function(...) position=... end
-				+ P'label'*Egal*C(argument)/function(...) label=... end
+				+ P'label'*Egal*C(argument^1)/function(...) label=... end
+				+ P'type'*Egal*C(argument)/function(...) tType=... end
 				+ P'name'*Egal*C(argument)/function(...) name=... end,
-		argument=(CaractereSansParenthesesSep^1*ExpressionEntreParentheses^0)*Espace,
+		argument=(CaractereSansParenthesesSep^1*(ExpressionEntreParentheses*argument^0)^0)*Espace,
 		ExpressionEntreParentheses=P{'('*(CaractereSansParentheses+V(1))^0*')'},
-		ExpressionEntreCrochets=P{'['*(CaractereSansCrochets+V(1))^0*']'}
+		ExpressionEntreCrochets=P{'['*(CaractereSansCrochets+V(1))^0*']'},
 	}
 	match(OptionsPoint,arg)
+	if a~=nil then
+		-- point sur courbe
+		x,y=_G[tFunction](a)
+		if y==nil then
+			if tType=="polar" then
+				y=x*sin(a)
+				x=x*cos(a)
+			else
+				y=x
+				x=a
+			end
+		end
+	end	
+	--print(x,y)
+	if z~=nil then -- courbe paramétrée
+		y=z
+	end
 	local point=""
 	if name~="" then
 		point="\\coordinate ("..name..") at ("..x/x1cm..","..y/y1cm..");\n"
 	end
-	point=point.."\\fill ["..color..",even odd rule] ("..x/x1cm..","..y/y1cm..") circle (1.8pt) circle (1pt);\n"
-	point=point.."\\fill["..color.."!50] ".." ("..x/x1cm..","..y/y1cm..") circle (1pt);\n"
-	point=point.."\\draw ("..x/x1cm..","..y/y1cm..") node ["..position.."] {$"..Cmath2LaTeX(label).."$};\n"
+	if size~=0 then
+		point=point.."\\fill ["..pointColor..",even odd rule] ("..x/x1cm..","..y/y1cm..") circle ("..
+		size.."pt) circle ("..size/2 .."pt);\n"
+		point=point.."\\fill["..pointColor.."!50] ".." ("..x/x1cm..","..y/y1cm..") circle ("..size/2 .."pt);\n"
+	end
+	point=point.."\\draw ["..labelColor.."] ("..x/x1cm..","..y/y1cm..") node ["..position.."] {$"..Cmath2LaTeX(label).."$};\n"
 	return point
+end
+
+function tikzTangent(arg)
+	local a, tFunction
+	local k=1
+	local direction=1
+	local tXmin, tXmax=nil, nil
+	local tType=""
+	local optionsTikz=""
+	local label=""
+	local position="above"
+	-- grammaire des arguments
+	local Options, Option, argument = V'Options', V'Option', V'argument'
+	local ExpressionEntreParentheses=V'ExpressionEntreParentheses'
+	local ExpressionEntreCrochets=V'ExpressionEntreCrochets'
+	local OptionsAxe = P { Options,
+		Options = C(Option * Cg(P(SepListe) * Option)^0),
+		Option = P'variable'*Egal*C(argument)/function(...) a=eval(...) end 
+				+ P'function'*Egal*C(argument)/function(...) tFunction=... end
+				+ P'k'*Egal*C(argument)/function(...) k=eval(...) end
+				+ P'direction'*Egal*C(argument)/function(...) direction=eval(...) end
+				+ P'xmin'*Egal*C(argument)/function(...) tXmin=eval(...) end
+				+ P'xmax'*Egal*C(argument)/function(...) tXmax=eval(...) end
+				+ P'position'*Egal*C(argument)/function(...) position=... end
+				+ P'type'*Egal*C(argument)/function(...) tType=... end
+				+ P'label'*Egal*C(argument^1)/function(...) label=... end				
+				+ C(ExpressionEntreCrochets)/function(...) optionsTikz=... end,
+		argument=(CaractereSansParenthesesSep^1*(ExpressionEntreParentheses*argument^0)^0)*Espace,
+		ExpressionEntreParentheses=P{'('*(CaractereSansParentheses+V(1))^0*')'},
+		ExpressionEntreCrochets=P{'['*(CaractereSansCrochets+V(1))^0*']'}
+	}
+	match(OptionsAxe,arg)
+	if direction<0 then 
+		direction=-1
+	else
+		direction=1
+	end
+	local x,y=_G[tFunction](a)
+	local dxp,dyp=derivee(a,_G[tFunction],direction)
+	local dxm,dym=0,0
+	if y==nil then
+		if tType=="polar" then
+			y=x*sin(a)
+			x=x*cos(a)
+			dxp=dyp*cos(a)-direction*y
+			dyp=dyp*sin(a)+direction*x
+		else
+			y=x
+			x=a
+		end
+	end
+	if tXmin~=nil then
+		dxm=x-tXmin
+		dym=dyp*dxm/dxp
+	end
+	if tXmax~=nil then
+		dyp=dyp*(tXmax-x)/dxp
+		dxp=(tXmax-x)
+	end
+	if label~='' then label=Cmath2LaTeX(label) end
+	local tangent="\\draw "..optionsTikz.." ("..(x-dxm*k)/x1cm..","..(y-dym*k)/y1cm..") -- ("..(x+dxp*k)/x1cm..","..(y+dyp*k)/y1cm..") node [midway,"..position.."] {$"..label.."$};\n"
+	return tangent
 end
 
 function round(num, idp)
@@ -3360,10 +3459,19 @@ function rational(x,eps)
   return round(q*x),q
 end
 
---tikzWindow('xmin=-10,xmax=5,ymin=-2,ymax=5,x1cm=1,y1cm=1')
---print(tikzPoint('color=blue,x=2,y=1/2,label=B,size=7,name=B'))
---print(tikzPlot('[color=blue,smooth,line width=1],type=parametric,variable=t,function=f(t),samples=10,domain=0.01:10'))
-
+function derivee(t,f,direction)
+-- renvoie les coordonnées du vecteur dérivée de f en t
+	local x,y,x2,y2
+	local eps=10^-10
+	x,y=f(t)
+	x2,y2=f(t+direction*eps)
+	if y~=nil then
+		-- paramétrique
+		return (x2-x)/eps,(y2-y)/eps
+	else
+		return direction,(x2-x)/eps
+	end
+end
 
 
 --[[
