@@ -1,4 +1,4 @@
-## Cmath pour LuaLaTeX c'est :
+## Cmath pour LuaLaTeX c'est :##
 * La syntaxe [Cmath](http://cdeval.free.fr/spip.php?article83) pour LaTeX,
 * Un code source très lisible,
 * Du calcul formel grâce aux appels faciles à [Giac](http://www-fourier.ujf-grenoble.fr/~parisse/giac_fr.html), le moteur de calcul formel de Xcas,
@@ -11,4 +11,39 @@
 * Fonctionne sous Linux, Window$ et probablement MacO$ (si quelqu'un veut faire le test !),
 * Libre et gratuit, sous licence GNU GPL v3. Le code source est accessible [ici](https://github.com/cdevalland/cmathluatex/blob/master/CmathLuaTeX.lua). L'onglet [Issues](https://github.com/cdevalland/cmathluatex/issues) de cette page permet de remonter des bogues, de proposer des améliorations, etc... 
 
-## Voir la [documentation](https://github.com/cdevalland/cmathluatex/blob/master/Documentation/Documentation%20CmathLuaTeX.pdf) pour les fonctionnalités détaillées
+### Voir la [documentation](https://github.com/cdevalland/cmathluatex/blob/master/Documentation/Documentation%20CmathLuaTeX.pdf) pour les fonctionnalités détaillées###
+
+### Liste de diffusion###
+
+Pour rester informé des nouveautés et des mises à jour, inscrivez-vous à la liste cmathluatex :
+
+L'URL pour s'inscrire est : mailto:cmathluatex-request@ml.free.fr?subject=subscribe
+
+L'URL pour se désinscrire est : mailto:cmathluatex-request@ml.free.fr?subject=unsubscribe
+
+### Historique des versions###
+
+6 octobre 2016 :
+	Ajout de résolution de systèmes linéaires, de calculs de rang et d'inverse de matrices, de tracé de courbes.
+
+3 janvier 2015 :
+
+    Résolution d'un bug sur les tableaux de variations (fichier à mettre à jour : CmathLuaTeX.lua).
+    Création d'un package CmathLuaTeX.sty pour une installation encore plus simple.
+
+20 Août 2014 :
+
+    Amélioration des tableaux de variations (fichier à mettre à jour : CmathLuaTeX.lua).
+
+17 Août 2014 :
+
+    Ajout du script TeXworks Cmath2Latex (fichiers à mettre à jour : tous les fichiers du répertoire TeXworks/scripts/Cmath/)
+    Meilleure gestion du symbole de la dérivation (fichier à mettre à jour : CmathLuaTeX.lua).
+
+Juin 2014 :
+
+    Première version.
+
+###Qui suis-je ?###
+
+Christophe Devalland, Professeur de mathématiques en [CPGE ATS au lycée Blaise Pascal de Rouen](http://pascal-lyc.spip.ac-rouen.fr/spip.php?rubrique15).
