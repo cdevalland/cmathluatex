@@ -11,7 +11,7 @@
 * Fonctionne sous Linux, Window$ et probablement MacO$ (si quelqu'un veut faire le test !),
 * Libre et gratuit, sous licence GNU GPL v3. Le code source est accessible [ici](https://github.com/cdevalland/cmathluatex/blob/master/CmathLuaTeX.lua). L'onglet [Issues](https://github.com/cdevalland/cmathluatex/issues) de cette page permet de remonter des bogues, de proposer des améliorations, etc... 
 
-### Pour utiliser CmathLuaTeX :
+### Pour utiliser CmathLuaTeX###
 
 * Télécharger l'archive contenant les fichiers grâce au bouton "Clone or Download"
 * Décompresser l'archive
