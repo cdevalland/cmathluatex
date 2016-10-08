@@ -1504,9 +1504,9 @@ Dans la suite, je suppose que \TeX works est installé sur votre ordinateur.
 
 \subsection{Sous Window\$}
 
-Pour les utilisateurs de windows, je conseille d'utiliser une version au moins égale à la 1391, à télécharger dans la rubrique ``Latest" sur le site \TeX works (\url{https://github.com/TeXworks/texworks/releases/latest}). Les développeurs ont accepté de compiler \TeX works avec une option qui permet à \TeX works d'appeler des librairies externes. Cela permet d'utiliser la librairie \texttt{lpeg.dll} avec l'interpréteur Lua fourni avec \TeX works. Ce fichier est nécessaire à l'exécution des fonctions Lua de Cmath\LuaTeX\ (il s'agit de la librairie d'analyse grammaticale d'expressions et elle n'est pas incluse dans \TeX works). Vous trouverez sur le site évoqué plus haut un répertoire nommé \texttt{Lua 5.2 Modules}. Enregistrez le fichier \texttt{lpeg.dll} contenu dans ce répertoire à côté du fichier \texttt{texworks.exe} sur votre disque dur. Les scripts Cmath devraient maintenant fonctionner.
+Cmath\LuaTeX\ utilise librairie d'analyse grammaticale d'expressions \texttt{lpeg} de lua. Ce fichier est nécessaire à l'exécution des fonctions Lua de Cmath\LuaTeX\ et elle n'est pas incluse dans \TeX works. À ma demande, les développeurs ont accepté de compiler \TeX works avec une option qui permet au programme d'appeler des librairies externes. Cela permet d'utiliser la librairie \texttt{lpeg.dll} avec l'interpréteur Lua fourni avec \TeX works. Vous trouverez dans mon dépôt le répertoire \texttt{TeXworks 0.5-20160206 Windows} contenant une version de \TeX works portable fonctionnant avec la librairie \texttt{lpeg}.
 
-Les utilisateurs de TeX Live peuvent utiliser le \TeX works fourni avec cette distribution LaTeX en y ajoutant ce même fichier \texttt{lpeg.dll}. MikTeX contient aussi une version de \TeX works mais je ne sais pas si elle accepte ce fichier \texttt{lpeg.dll}.
+Les versions plus récentes de \TeX works ne permettent plus de fonctionner avec \texttt{lpeg}. J'ai relancé les développeurs pour intégrer cette librairie à leur programme...
 
 \subsection{Sous Linux}
 
