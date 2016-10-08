@@ -11,4 +11,4 @@
 * Fonctionne sous Linux, Window$ et probablement MacO$ (si quelqu'un veut faire le test !),
 * Libre et gratuit, sous licence GNU GPL v3. Le code source est accessible [ici](https://github.com/cdevalland/cmathluatex/blob/master/CmathLuaTeX.lua). L'onglet [Issues](https://github.com/cdevalland/cmathluatex/issues) de cette page permet de remonter des bogues, de proposer des améliorations, etc... 
 
-## Plus de détails dans le [Wiki](https://github.com/cdevalland/cmathluatex/wiki)
+## Voir la [documentation](https://github.com/cdevalland/cmathluatex/blob/master/Documentation/Documentation%20CmathLuaTeX.pdf) pour les fonctionnalités détaillées
