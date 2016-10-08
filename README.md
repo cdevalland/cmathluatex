@@ -17,13 +17,14 @@
 
 Pour rester informé des nouveautés et des mises à jour, inscrivez-vous à la liste cmathluatex :
 
-L'URL pour s'inscrire est : mailto:cmathluatex-request@ml.free.fr?subject=subscribe
+L'URL pour s'inscrire est : cmathluatex-request@ml.free.fr?subject=subscribe
 
-L'URL pour se désinscrire est : mailto:cmathluatex-request@ml.free.fr?subject=unsubscribe
+L'URL pour se désinscrire est : cmathluatex-request@ml.free.fr?subject=unsubscribe
 
 ### Historique des versions###
 
 6 octobre 2016 :
+
 	Ajout de résolution de systèmes linéaires, de calculs de rang et d'inverse de matrices, de tracé de courbes.
 
 3 janvier 2015 :
@@ -37,7 +38,7 @@ L'URL pour se désinscrire est : mailto:cmathluatex-request@ml.free.fr?subject=u
 
 17 Août 2014 :
 
-    Ajout du script TeXworks Cmath2Latex (fichiers à mettre à jour : tous les fichiers du répertoire TeXworks/scripts/Cmath/)
+    Ajout du script TeXworks Cmath2Latex.
     Meilleure gestion du symbole de la dérivation (fichier à mettre à jour : CmathLuaTeX.lua).
 
 Juin 2014 :
