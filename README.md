@@ -1,4 +1,4 @@
-### Cmath pour LuaLaTeX c'est :###
+## Cmath pour LuaLaTeX c'est :##
 * La syntaxe [Cmath](http://cdeval.free.fr/spip.php?article83) pour LaTeX,
 * Un code source très lisible,
 * Du calcul formel grâce aux appels faciles à [Giac](http://www-fourier.ujf-grenoble.fr/~parisse/giac_fr.html), le moteur de calcul formel de Xcas,
