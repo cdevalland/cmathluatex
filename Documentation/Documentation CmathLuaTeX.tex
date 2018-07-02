@@ -12,14 +12,9 @@
 \usepackage[frenchb]{babel}
 \usepackage[tikz]{bclogo}
 
-
-% Changement de la police teletype pour afficher correctement les lettres grecques 
-% dans les lignes de code. Il est possible de remplacer le nom de la police voire de commenter le ligne \setmonofont pour compiler le document.
-\setmonofont{DejaVu Sans Mono}[Scale=MatchLowercase]
-%\setmonofont{Ubuntu Mono}
-%\setmonofont{Droid Sans Mono}
-%\setmonofont{FreeMono}
-
+% Changement de la police teletype pour afficher correctement les lettres grecques et les symboles spéciaux dans les lignes de code.
+\setmonofont{FreeMono}[Scale=0.92]
+%\setmonofont{DejaVu Sans Mono}[Scale=MatchLowercase]
 
 \setlength{\parindent}{0cm}
 \setlength{\cellspacetoplimit}{4pt}
@@ -563,7 +558,8 @@ tabVal(f,xmin,xmax,xpas,nb_decimales):={
   if(nb_decimales==0){
     tab:=seq([simplifier(x),f(x)],x,xmin,xmax,xpas);
   } else {
-    tab:=seq([simplifier(x),format(f(x),"f"+string(nb_decimales))],x,xmin,xmax,xpas);
+    tab:=seq([simplifier(x),format(f(x),"f"+string(nb_decimales))],x,xmin,xmax,
+xpas);
   }
   tab:=prepend(tab,[x,f(x)]);
   return(tran(tab));
@@ -572,8 +568,8 @@ tabVal(f,xmin,xmax,xpas,nb_decimales):={
 -- Tableau de valeurs arrondies à 2 décimales de $\Cmath{x⟼x/(2x-3)}$ sur 
 $\Cmath{[0,5]}$ avec un pas de $\Cmath{1}$ :\\
 $\Cmath{xcas(tabVal(x->x/(2x-3),0,5,1,2))}$\\
--- Tableau de valeurs exactes de $\Cmath{x⟼cos(x)}$ sur $\Cmath{[0,π]}$ avec un pas de
-$\Cmath{π/6}$ : \\
+-- Tableau de valeurs exactes de $\Cmath{x⟼cos(x)}$ sur $\Cmath{[0,π]}$ avec un 
+pas de $\Cmath{π/6}$ : \\
 $\Cmath{xcas(tabVal(x->cos(x),0,pi,pi/6,0))}$
 \end{code}
 
@@ -585,7 +581,8 @@ tabVal(f,xmin,xmax,xpas,nb_decimales):={
   if(nb_decimales==0){
     tab:=seq([simplifier(x),f(x)],x,xmin,xmax,xpas);
   } else {
-    tab:=seq([simplifier(x),format(f(x),"f"+string(nb_decimales))],x,xmin,xmax,xpas);
+    tab:=seq([simplifier(x),format(f(x),"f"+string(nb_decimales))],x,xmin,xmax,
+xpas);
   }
   tab:=prepend(tab,[x,f(x)]);
   return(tran(tab));
@@ -594,7 +591,8 @@ tabVal(f,xmin,xmax,xpas,nb_decimales):={
 -- Tableau de valeurs arrondies à 2 décimales de $\Cmath{x⟼x/(2x-3)}$ sur $\Cmath{[0,5]}$
  avec un pas de $\Cmath{1}$ :\\
 $\Cmath{xcas(tabVal(x->x/(2x-3),0,5,1,2))}$\\
--- Tableau de valeurs exactes de $\Cmath{x⟼cos(x)}$ sur $\Cmath{[0,π]}$ avec un pas de
+-- Tableau de valeurs exactes de $\Cmath{x⟼cos(x)}$ sur $\Cmath{[0,π]}$ avec un
+ pas de
 $\Cmath{π/6}$ : \\
 $\Cmath{xcas(tabVal(x->cos(x),0,pi,pi/6,0))}$
 \end{afficher}
@@ -651,9 +649,11 @@ ${\renewcommand{\arraystretch}{1.5}
 \setlength{\cellspacetoplimit}{4pt}
 \setlength{\cellspacebottomlimit}{4pt}
 \begin{tabular}{|C{1.5cm}|*{4}{C{1cm}|}}
-\hline $t$ & $\displaystyle -3$ &$\displaystyle -1$ &$\displaystyle \frac{3}{2}$ &
+\hline $t$ & $\displaystyle -3$ &$\displaystyle -1$ &$\displaystyle \frac{3}
+{2}$ &
 $\displaystyle \frac{7}{3}$ \\
-\hline $\phi(t)$ & $\displaystyle \frac{-1}{3}$ &$\displaystyle -3$ &$\displaystyle 
+\hline $\phi(t)$ & $\displaystyle \frac{-1}{3}$ &$\displaystyle -3$
+ &$\displaystyle 
 \frac{11}{3}$ &$\displaystyle \frac{19}{7}$ \\
 \hline
 \end{tabular}}$ % Traduction CmathLuaTeX de : TVal([-3,-1,3/2,7/3],phi(t)=(t+4)/t)
@@ -799,13 +799,14 @@ $\begin{tikzpicture}
 \tkzTabLine { ,-,z,+,d,+,z,-,d,-, }
 \tkzTabVar {+ / $1$,- / $\frac{8}{9}$,+D- / $+\infty $ / $-\infty $,+ / $0$,-D+
 / $-\infty $ / $+\infty $,- / $1$}
-\tkzTabVar {+ / $+\infty $,R,-D+ / $-\infty $ / $+\infty $,- / $0$,R,+ / $+\infty $}
+\tkzTabVar {+ / $+\infty $,R,-D+ / $-\infty $ / $+\infty $,- / $0$,R,+ / 
+$+\infty $}
 \tkzTabIma{1}{3}{2}{$\frac{32}{3}$}
 \tkzTabIma{4}{6}{5}{$\frac{16}{3}$}
 \tkzTabLine { ,-,\frac{-64}{9},-,d,-,z,+,\frac{44}{9},+, }
 \end{tikzpicture}
-$ % Traduction CmathLuaTeX de : TVarP([-infinity,+infinity],x(t)=t^2/(t+1)(t-2),
-y(t)=t^2*(t+2)/(t+1))
+$ % Traduction CmathLuaTeX de : TVarP([-infinity,+infinity],x(t)=t^2/(t+1)(t-2)
+,y(t)=t^2*(t+2)/(t+1))
 \end{code}
 
 \section{Systèmes linéaires}
@@ -950,10 +951,14 @@ end
 )}
 \Cmath{tikzAxeX([line width=0.6,-{Stealth[round]}],step=pi,trig=true,label=x)}
 \Cmath{tikzAxeY([line width=0.6,-{Stealth[round]}],step=0.5,label=y,zero=false)}
-\Cmath{tikzPlot([color=red,smooth,line width=1],variable=x,function=f(5,x),samples=200)}
-\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(20,x),samples=400)}
-\Cmath{tikzPoint(labelColor=red,x=9.5,y=1.2,label=som(k=1,5,sin(k*x)/k),size=0)}
-\Cmath{tikzPoint(labelColor=blue,x=16,y=1.2,label=som(k=1,20,sin(k*x)/k),size=0)}
+\Cmath{tikzPlot([color=red,smooth,line width=1],variable=x,function=f(5,x),
+samples=200)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(20,x),
+samples=400)}
+\Cmath{tikzPoint(labelColor=red,x=9.5,y=1.2,label=som(k=1,5,sin(k*x)/k),
+size=0)}
+\Cmath{tikzPoint(labelColor=blue,x=16,y=1.2,label=som(k=1,20,sin(k*x)/k),
+size=0)}
 \end{tikzpicture}
 \end{code}
 
@@ -1012,14 +1017,16 @@ tikzAxeX([<options tikz>],<paramètres>)
 \hline
 \texttt{xmin} & xmin défini par \texttt{tikzWindow} & valeur minimale des abscisses en unités\\
 \texttt{xmax} & xmax défini par \texttt{tikzWindow} & valeur maximale des abscisses en unités\\
-\texttt{step} & $1$ & espacement entre deux graduations\\
+\texttt{label} & \texttt{"x"} & label de l'axe des abscisses\\
+\texttt{tick} & \texttt{true} & affichage des tirets\\
+\texttt{step} & $1$ & espacement entre deux graduations (0 pour aucune graduation)\\
+\texttt{tickxmin} & \texttt{xmin} & premier tiret à afficher\\
+\texttt{tickxmax} & \texttt{xmin} & dernier tiret à afficher\\
 \texttt{trig} & \texttt{false} & graduations en fractions de $\pi$\\
 \texttt{zero} & \texttt{true} & affichage du zéro\\
-\texttt{tick} & \texttt{true} & affichage des tirets\\
 \texttt{digits} & $3$ & nombre de décimales\\
 \texttt{position} & \texttt{below} & position des valeurs de $x$ par rapport à l'axe\\
-\texttt{rightspace} & $0.5$ & prolongement de l'axe des abscisses\\
-\texttt{label} & \texttt{x} & label de l'axe des abscisses
+\texttt{rightspace} & $0.5cm$ & prolongement de l'axe des abscisses
 \end{tabular}
 
 \begin{code}
@@ -1032,14 +1039,17 @@ tikzAxeY([<options tikz>],<paramètres>)
 \hline
 \texttt{ymin} & ymin défini par \texttt{tikzWindow} & valeur minimale des ordonnées en unités\\
 \texttt{ymax} & ymax défini par \texttt{tikzWindow} & valeur maximale des ordonnées en unités\\
-\texttt{step} & $1$ & espacement entre deux graduations\\
+\texttt{label} & \texttt{"y"} & label de l'axe des ordonnées\\
+\texttt{tick} & \texttt{true} & affichage des tirets\\
+\texttt{step} & $1$ & espacement entre deux graduations (0 pour aucune graduation)\\
+\texttt{tickymin} & \texttt{ymin} & premier tiret à afficher\\
+\texttt{tickymax} & \texttt{ymax} & dernier tiret à afficher\\
 \texttt{trig} & \texttt{false} & graduations en fractions de $\pi$\\
 \texttt{zero} & \texttt{true} & affichage du zéro\\
-\texttt{tick} & \texttt{true} & affichage des tirets\\
 \texttt{digits} & $3$ & nombre de décimales\\
 \texttt{position} & \texttt{right=3pt} & position des valeurs de $x$ par rapport à l'axe\\
-\texttt{upspace} & $0.5$ & prolongement de l'axe des ordonnées\\
-\texttt{label} & \texttt{y} & label de l'axe des ordonnées
+\texttt{upspace} & $0.5cm$ & prolongement de l'axe des ordonnées
+
 \end{tabular}
 
 \subsection{Affichage d'une grille}
@@ -1137,10 +1147,12 @@ tikzTangent([<options tikz>],<paramètres>)
 \Cmath{tikzAxeX([line width=0.6pt,-{Stealth[round]}],step=1)}
 \Cmath{tikzAxeY([line width=0.6pt,-{Stealth[round]}],step=1,zero=false)}
 \Cmath{codeLua(f=function(x) return 1/x end)}
-\Cmath{tikzPlot([color=blue,smooth,line width=0.7],variable=x,function=f(x),samples=100,
-domain=-5:5)}
-\Cmath{tikzPoint(pointColor=blue,variable=-1,function=f,label=A,position=below left)}
-\Cmath{tikzPoint(pointColor=blue,variable=1,function=f,label=B,position=above right)}
+\Cmath{tikzPlot([color=blue,smooth,line width=0.7],variable=x,function=f(x),
+samples=100,domain=-5:5)}
+\Cmath{tikzPoint(pointColor=blue,variable=-1,function=f,label=A,
+position=below left)}
+\Cmath{tikzPoint(pointColor=blue,variable=1,function=f,label=B,
+position=above right)}
 \Cmath{tikzPoint(x=1,y=4,label=scr(H),size=0)}
 \end{tikzpicture}
 \end{code}
@@ -1167,20 +1179,20 @@ domain=-5:5)}
 \Cmath{tikzGrid([color=gray!50,dashed],xstep=pi/2,ystep=0.2)}
 \Cmath{tikzAxeX([line width=0.6,-{Stealth[round]}],step=pi/2,label=x,trig=true)}
 \Cmath{tikzAxeY([line width=0.6,-{Stealth[round]}],ymin=0,label=y,zero=false)}
-\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),samples=50,
-domain=-pi/2:pi/2)}
-\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),samples=50,
-domain=-5*pi/2:-3*pi/2)}
-\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),samples=50,
-domain=3*pi/2:5*pi/2)}
-\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,
-domain=-3*pi/2:-pi/2)}
-\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,
-domain=pi/2:3*pi/2)}
-\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,
-domain=-3*pi:-5*pi/2)}
-\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,samples=30,
-domain=5*pi/2:3*pi)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),
+samples=50,domain=-pi/2:pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),
+samples=50,domain=-5*pi/2:-3*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=cos(t),
+samples=50,domain=3*pi/2:5*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,
+samples=30,domain=-3*pi/2:-pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,
+samples=30,domain=pi/2:3*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,
+samples=30,domain=-3*pi:-5*pi/2)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=t,function=0,
+samples=30,domain=5*pi/2:3*pi)}
 \end{tikzpicture}
 \end{code}
 
@@ -1212,14 +1224,14 @@ domain=5*pi/2:3*pi)}
 \Cmath{tikzAxeY([line width=0.8pt,-{Stealth[round]}],step=0.5,zero=false)}
 \Cmath{codeLua(f=function(t) return cos(t)^3,sin(t)^3 end)}
 \Cmath{codeLua(g=function(t) return cos(t)*sin(t)^2,sin(t)*cos(t)^2 end)}
-\Cmath{tikzPlot([color=blue,smooth,line width=1],type=parametric,variable=t,function=f(t),
-samples=400,domain=-pi:pi)}
-\Cmath{tikzPlot([color=red,smooth,line width=1],type=parametric,variable=t,function=g(t),
-samples=400,domain=-pi:pi)}
-\Cmath{tikzPoint(labelColor=blue,variable=pi/6,function=f,label=scr(C)_f,position=above,
-size=0)}
-\Cmath{tikzPoint(labelColor=red,variable=pi/8,function=g,label=scr(C)_g,position=above left,
-size=0)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],type=parametric,variable=t,
+function=f(t),samples=400,domain=-pi:pi)}
+\Cmath{tikzPlot([color=red,smooth,line width=1],type=parametric,variable=t,
+function=g(t),samples=400,domain=-pi:pi)}
+\Cmath{tikzPoint(labelColor=blue,variable=pi/6,function=f,label=scr(C)_f,
+position=above,size=0)}
+\Cmath{tikzPoint(labelColor=red,variable=pi/8,function=g,label=scr(C)_g,
+position=above left,size=0)}
 \end{tikzpicture}
 \end{code}
 
@@ -1250,15 +1262,18 @@ size=0)}
 \Cmath{tikzAxeX([line width=0.6pt,-{Stealth[round]}],step=1)}
 \Cmath{tikzAxeY([line width=0.6pt,-{Stealth[round]}],step=1,zero=false)}
 \Cmath{codeLua(f=function(x)	return x*exp(x) end)}
-\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(x),samples=400)}
-\Cmath{tikzPoint(x=1,y=2.5,label={f(x)=x*:e^x},labelColor=blue,position=right,size=0)}
-\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=-2,function=f)}
-\Cmath{tikzPoint(variable=-2,function=f,label=A,pointColor=blue,labelColor=blue,
-position=below)}
-\Cmath{tikzTangent([color=brown,line width=1pt,{Stealth[round]}-{Stealth[round]}],
-variable=0.5,function=f,xmin=0,xmax=1)}
-\Cmath{tikzPoint(variable=0.5,function=f,label=B,pointColor=blue,labelColor=blue,
-position=right)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(x),
+samples=400)}
+\Cmath{tikzPoint(x=1,y=2.5,label={f(x)=x*:e^x},labelColor=blue,position=right,
+size=0)}
+\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=-2,
+function=f)}
+\Cmath{tikzPoint(variable=-2,function=f,label=A,pointColor=blue,
+labelColor=blue,position=below)}
+\Cmath{tikzTangent([color=brown,line width=1pt,{Stealth[round]}-
+{Stealth[round]}],variable=0.5,function=f,xmin=0,xmax=1)}
+\Cmath{tikzPoint(variable=0.5,function=f,label=B,pointColor=blue,
+labelColor=blue,position=right)}
 \end{tikzpicture}
 \end{code}
 
@@ -1286,13 +1301,15 @@ position=right)}
 \Cmath{tikzGrid([line width=0.4pt,color=gray!50,dashed])}
 \Cmath{tikzAxeX([line width=0.6pt,-{Stealth[round]}],step=1)}
 \Cmath{tikzAxeY([line width=0.6pt,-{Stealth[round]}],step=1)}
-\Cmath{codeLua(f=function(x)	return sqrt(x^3+x^2) end)}
-\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(x),samples=400)}
-\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=0,function=f,
-direction=-1,label=vec(T_g))}
-\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=0,function=f,
-direction=1,label=vec(T_d),position=below right)}
-\Cmath{tikzPoint(x=1.5,y=2.2,label={f(x)=√(x^3+x^2)},labelColor=blue,position=right,size=0)}
+\Cmath{codeLua(f=function(x) return sqrt(x^3+x^2) end)}
+\Cmath{tikzPlot([color=blue,smooth,line width=1],variable=x,function=f(x),
+samples=400)}
+\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=0,
+function=f,direction=-1,label=vec(T_g))}
+\Cmath{tikzTangent([color=red,line width=1pt,-{Stealth[round]}],variable=0,
+function=f,direction=1,label=vec(T_d),position=below right)}
+\Cmath{tikzPoint(x=1.5,y=2.2,label={f(x)=√(x^3+x^2)},labelColor=blue,
+position=right,size=0)}
 \end{tikzpicture}
 \end{code}
 
@@ -1319,18 +1336,20 @@ direction=1,label=vec(T_d),position=below right)}
 \Cmath{codeLua(f=function(theta) return cos(theta)*sin(theta) end)}
 \Cmath{tikzAxeX([line width=0.6,-{Stealth[round]}],step=0.1,label=x)}
 \Cmath{tikzAxeY([line width=0.6,-{Stealth[round]}],step=0.2,label=y)}
-\Cmath{tikzPlot([color=NavyBlue,smooth,line width=0.7],type=polar,variable=t,function=f(t),
-samples=100,domain=-2*pi:2*pi)}
-\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],variable=pi/6,
-function=f,type=polar,k=0.5,label=vec(u(:pi/6)),position=right)}
-\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/6,function=f,label=A,position=right,
+\Cmath{tikzPlot([color=NavyBlue,smooth,line width=0.7],type=polar,variable=t,
+function=f(t),samples=100,domain=-2*pi:2*pi)}
+\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],
+variable=pi/6,function=f,type=polar,k=0.5,label=vec(u(:pi/6)),position=right)}
+\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/6,function=f,label=A,
+position=right,type=polar)}
+\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],
+variable=pi/4,function=f,type=polar,k=0.5,label=vec(u(:pi/4)),position=right)}
+\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/4,function=f,label=B,
 type=polar)}
-\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],variable=pi/4,
-function=f,type=polar,k=0.5,label=vec(u(:pi/4)),position=right)}
-\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/4,function=f,label=B,type=polar)}
-\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],variable=pi/3,
-function=f,type=polar,k=0.5,label=vec(u(:pi/3)))}
-\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/3,function=f,label=C,type=polar)}
+\Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],
+variable=pi/3,function=f,type=polar,k=0.5,label=vec(u(:pi/3)))}
+\Cmath{tikzPoint(pointColor=NavyBlue,variable=pi/3,function=f,label=C,
+type=polar)}
 \Cmath{tikzPoint(x=-0.3,y=0.4,label={ρ=cosθ*sinθ},size=0)}
 \end{tikzpicture}
 \end{code}
@@ -1416,7 +1435,7 @@ Ceci fait, essayez de compiler le petit document ci-dessus.
 
 \section{Pour utiliser Xcas}
 
-Xcas doit être installé sur votre ordinateur et il faut configurer votre éditeur pour compiler en Lua\LaTeX\ avec l'option \texttt{-shell-escape} pour les appels à Xcas. De plus, l'auteur Bernard Parisse, suite à nos échanges, a fait quelques corrections nécessaires au fonctionnement de CmathLuaTeX. Il faut donc impérativement télécharger Xcas en version supérieure ou égale à 1.1.1 (datée de juin 2014) : \url{http://www-fourier.ujf-grenoble.fr/~parisse/install_fr}. J'en profite pour remercier ici Bernard pour sa grande disponibilité et sa rapidité à résoudre les problèmes.
+Xcas doit être installé sur votre ordinateur et il faut configurer votre éditeur pour compiler en Lua\LaTeX\ avec l'option \texttt{-shell-escape} pour les appels à Xcas. De plus, l'auteur Bernard Parisse, suite à nos échanges, a fait quelques corrections nécessaires au fonctionnement de Xcas avec CmathLuaTeX. Il faut donc impérativement télécharger Xcas en version supérieure ou égale à 1.1.1 (datée de juin 2014) : \url{http://www-fourier.ujf-grenoble.fr/~parisse/install_fr}. J'en profite pour remercier ici Bernard pour sa grande disponibilité et sa rapidité à résoudre les problèmes.
 
 Les utilisateurs de windows qui n'auraient pas choisi d'installer Xcas dans le répertoire par défaut devront modifier cette ligne du fichier \texttt{CmathLuaTeX.lua} pour prendre en compte votre répertoire d'installation (faites une recherche sur l'instruction ``bash") :
 
@@ -1467,7 +1486,8 @@ fera apparaître un nouveau document contenant :
 
 \begin{code}
 \begin{document}
-Pour $x\in \mathbb{R} $, on définit la fonction $f$ par $f \left( x\right)  = \sin x$.
+Pour $x\in \mathbb{R} $, on définit la fonction $f$ par $f \left( x\right) =
+ \sin x$.
 On a : \[f \left( \frac{\pi }{3}\right)  = \frac{\sqrt{3}}{2}\]
 \end{document}
 \end{code}
@@ -1504,20 +1524,19 @@ Dans la suite, je suppose que \TeX works est installé sur votre ordinateur.
 
 \subsection{Sous Window\$}
 
-Cmath\LuaTeX\ utilise librairie d'analyse grammaticale d'expressions \texttt{lpeg} de lua. Ce fichier est nécessaire à l'exécution des fonctions Lua de Cmath\LuaTeX\ et elle n'est pas incluse dans \TeX works. À ma demande, les développeurs ont accepté de compiler \TeX works avec une option qui permet au programme d'appeler des librairies externes. Cela permet d'utiliser la librairie \texttt{lpeg.dll} avec l'interpréteur Lua fourni avec \TeX works. Vous trouverez dans mon dépôt le répertoire \texttt{TeXworks 0.5-20160206 Windows} contenant une version de \TeX works portable fonctionnant avec la librairie \texttt{lpeg}.
+Cmath\LuaTeX\ utilise la librairie d'analyse grammaticale d'expressions \texttt{lpeg} de lua. Ce fichier est nécessaire à l'exécution des fonctions Lua de Cmath\LuaTeX\ et elle n'est pas incluse dans \TeX works. À ma demande, les développeurs ont accepté de compiler \TeX works avec une option qui permet au programme d'appeler des librairies externes. Cela permet d'utiliser la librairie \texttt{lpeg.dll} avec l'interpréteur Lua fourni avec \TeX works. Vous trouverez dans mon dépôt le répertoire \texttt{TeXworks 0.5-20160206 Windows} contenant une version de \TeX works portable fonctionnant avec la librairie \texttt{lpeg}.
 
 Les versions plus récentes de \TeX works ne permettent plus de fonctionner avec \texttt{lpeg}. J'ai relancé les développeurs pour intégrer cette librairie à leur programme...
 
 \subsection{Sous Linux}
 
-C'est plus simple. \TeX works s'appuie sur toute distribution Lua installée sur l'ordinateur. Il faut donc installer une distribution Lua (version >= 5.1) ainsi que la librairie lpeg à partir de votre installateur de paquets préféré.
+C'est plus simple. \TeX works s'appuie sur toute distribution Lua installée sur l'ordinateur. Il faut donc installer une distribution Lua (version au moins égale à 5.1) ainsi que la librairie lpeg à partir de votre installateur de paquets préféré.
 
 \subsection{Ajout des scripts}
 
 Maintenant, il faut configurer \TeX works pour les raccourcis clavier. Dans l'archive \texttt{master.zip}, je fournis un répertoire \texttt{TeXworks}. Il contient :
 
 \begin{itemize}
-\item la librairie lpeg.dll pour windows uniquement que j'ai compilée avec Mingw et lua 5.2. Elle fait double-emploi avec celle fournie par \TeX works.
 \item un répertoire scripts qui contient un répertoire Cmath à copier dans le répertoire scripts de \TeX works. Pourcela, ouvrez le répertoire appelé Ressources de \TeX works : on le trouve facilement grâce au menu Aide, Paramètres et Ressources de \TeX works. Une fenêtre s'ouvre ; cliquez sur le lien Ressources. Le contenu du répertoire s'ouvre. Un répertoire scripts s'y trouve déjà. Copier le répertoire \texttt{scripts/Cmath} que je fournis dans le répertoire \texttt{scripts} de \TeX works.
 \item	un répertoire configuration. Il contient un fichier shortcuts.ini qui désactive deux raccourcis intégrés à \TeX works : Ctrl+R pour rechercher/remplacer et Ctrl+= pour montrer la sélection. Ces deux fonctions resteront toutefois accessibles par le menu Recherche de \TeX works. Le but étant de rediriger ces deux raccourcis pour les symboles ``racine carrée" et ``environ". Si vous avez déjà un fichier \texttt{shortcuts.ini}, y ajouter les deux lignes du fichier que je fournis, sinon, le copier tel quel dans le répertoire configuration.
 \end{itemize}

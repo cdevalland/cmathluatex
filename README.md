@@ -25,9 +25,9 @@ Pour proposer des modifications sur les fichiers : installer git, cloner localem
 
 Pour rester informé des nouveautés et des mises à jour, inscrivez-vous à la liste cmathluatex :
 
-L'URL pour s'inscrire est : cmathluatex-request@ml.free.fr?subject=subscribe
+l'URL pour s'inscrire est : [cmathluatex-request@ml.free.fr?subject=subscribe](mailto:cmathluatex-request@ml.free.fr?subject=subscribe)
 
-L'URL pour se désinscrire est : cmathluatex-request@ml.free.fr?subject=unsubscribe
+L'URL pour se désinscrire est : [cmathluatex-request@ml.free.fr?subject=unsubscribe](mailto:cmathluatex-request@ml.free.fr?subject=unsubscribe)
 
 ### Historique des versions###
 

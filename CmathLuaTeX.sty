@@ -6,10 +6,11 @@
 \RequirePackage[e]{esvect} % pour de jolis vecteurs
 \RequirePackage{stmaryrd} % pour les intervalles d'entiers
 \RequirePackage{cancel} % pour biffer
-\RequirePackage[table,usenames, dvipsnames]{xcolor}
+%\RequirePackage[table,usenames, dvipsnames]{xcolor}
+\PassOptionsToPackage{table,usenames, dvipsnames}{xcolor} % \PassOptionsToPackage pour éviter "Option clash" au chargement de TikZ à cause de table
 \RequirePackage{tikz} % figures géométriques (nécessaire pour les tableaux de variations et de signes)
 \RequirePackage{tkz-tab} % pour les tableaux de variations et de signes
-\usetikzlibrary[arrows.meta] % jolies flèches
+\usetikzlibrary[shapes,arrows.meta] % jolies flèches
 \RequirePackage{array,cellspace} % pour les tableaux de valeurs
 \RequirePackage{blkarray} % pour afficher des systèmes et des matrices avec des opérations sur le côté.
 \newcommand{\bmmax}{2} % Évite de dépasser la limite TeX des 16 polices simultanées. Doit être chargée avant bm.
