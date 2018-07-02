@@ -1,4 +1,4 @@
-## Cmath pour LuaLaTeX c'est :##
+## Cmath pour LuaLaTeX c'est :
 * La syntaxe [Cmath](http://cdeval.free.fr/spip.php?article83) pour LaTeX,
 * Un code source très lisible,
 * Du calcul formel grâce aux appels faciles à [Giac](http://www-fourier.ujf-grenoble.fr/~parisse/giac_fr.html), le moteur de calcul formel de Xcas,
@@ -11,17 +11,17 @@
 * Fonctionne sous Linux, Window$ et probablement MacO$ (si quelqu'un veut faire le test !),
 * Libre et gratuit, sous licence GNU GPL v3. Le code source est accessible [ici](https://github.com/cdevalland/cmathluatex/blob/master/CmathLuaTeX.lua). L'onglet [Issues](https://github.com/cdevalland/cmathluatex/issues) de cette page permet de remonter des bogues, de proposer des améliorations, etc... 
 
-### Pour utiliser CmathLuaTeX###
+### Pour utiliser CmathLuaTeX
 
 * Télécharger l'archive contenant les fichiers grâce au bouton "Clone or Download"
 * Décompresser l'archive
 * Lire la [documentation](https://github.com/cdevalland/cmathluatex/blob/master/Documentation/Documentation%20CmathLuaTeX.pdf) et suivre les instructions d'installation.
 
-### Pour participer au développement###
+### Pour participer au développement
 Toute aide est la bienvenue, même s'il ne s'agit que d'améliorer la documentation, signaler des problèmes, etc...
 Pour proposer des modifications sur les fichiers : installer git, cloner localement le projet puis "pusher" les modifications.
 
-### Liste de diffusion###
+### Liste de diffusion
 
 Pour rester informé des nouveautés et des mises à jour, inscrivez-vous à la liste cmathluatex :
 
@@ -29,7 +29,11 @@ l'URL pour s'inscrire est : [cmathluatex-request@ml.free.fr?subject=subscribe](m
 
 L'URL pour se désinscrire est : [cmathluatex-request@ml.free.fr?subject=unsubscribe](mailto:cmathluatex-request@ml.free.fr?subject=unsubscribe)
 
-### Historique des versions###
+### Historique des versions
+
+2 juillet 2018 :
+
+	Mise à jour suite aux nouvelles versions de Giac.
 
 6 octobre 2016 :
 
@@ -53,6 +57,6 @@ Juin 2014 :
 
     Première version.
 
-###Qui suis-je ?###
+###Qui suis-je ?
 
 Christophe Devalland, Professeur de mathématiques en [CPGE ATS au lycée Blaise Pascal de Rouen](http://pascal-lyc.spip.ac-rouen.fr/spip.php?rubrique15).
