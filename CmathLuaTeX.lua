@@ -1,5 +1,5 @@
 --[[
-	Cmath pour LuaTeX, version 2018.07.02
+	Cmath pour LuaTeX, version 2018.07.03
     Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
 
     This program is free software: you can redistribute it and/or modify
@@ -1428,7 +1428,7 @@ sysl(arguments):={
 // operations (facultatif) : matrice des opérations élémentaires à afficher.
 local systeme; // vecteur contenant les lignes du système
 local variables; // vecteur contenant les variables
-local s:="\\left\\{\n\\begin{alignedat}{";
+local s:="\\[\\left\\{\n\\begin{alignedat}{";
 local nb_var;
 local nb_lig;
 local n,p;
@@ -1449,7 +1449,7 @@ if (size(arguments)==3){
   L1:=-1;//pas d'opérations à afficher
 }
 systeme:=arguments[0];
-if(type(dim(systeme))==DOM_INT){// transformer le vecteur en matrice
+if(type(dim(systeme))==DOM_INT){ // transformer le vecteur en matrice
   systeme:=syst2mat(arguments[0],arguments[1]);
 }
 variables:=arguments[1];
@@ -1491,7 +1491,7 @@ for(n:=0;n<nb_lig;n++){
         }
       }
     } else {
-      if(p==0){//terme de la première colonne ou premier terme non nul 
+      if(p==0){ //terme de la première colonne ou premier terme non nul 
         s:=s+ifte(sig=="-","-","")+scoef+" "+var2latex(variables[p])+" & ";
         premier_terme:=faux;
       } else {
@@ -1508,7 +1508,7 @@ for(n:=0;n<nb_lig;n++){
   if(ligne<>-1){
     if(n==L1-1){
       // afficher l'opération
-      local v1,sig1,scoef1,sig2,scoef2;
+      local v,sig1,scoef1,sig2,scoef2;
       v:=vCoef(coef1);sig1:=v[0];scoef1:=v[1];
       v:=vCoef(coef2);sig2:=v[0];scoef2:=v[1];
       s:=s+" & \\qquad L_"+string(L1)+" \\longleftarrow "+ifte(sig1=="+","","-")+scoef1+" L_"+string(L1)+sig2+scoef2+" L_"+string(L2);
@@ -1529,7 +1529,7 @@ for(n:=0;n<nb_lig;n++){
   } 
   s:=s+" \\\\\n"; 
 }
-s:=s+"\\end{alignedat}\n\\right.\n";
+s:=s+"\\end{alignedat}\n\\right.\\]\n";
 return(s);
 }:;
 
@@ -1556,7 +1556,7 @@ if(estNombre(coef)){
       v[0]:="+";
       v[1]:=var2latex(coef);
     } else {
-      if(sommet(coef)=='+' or sommet(coef)=='-'){// mettre des parenthèses
+      if(sommet(coef)=='+' or sommet(coef)=='-'){ // mettre des parenthèses
         v[0]:="+";
         v[1]:="\\left("+var2latex(coef)+"\\right)";
       } else {
@@ -1589,7 +1589,7 @@ j:=n;
 while((j<nb_lig-1 and direction==1) or (j>0 and direction==-1) and systeme[j][p]==0){
   j:=j+direction;
 }
-if((j==nb_lig-1 and direction==1) or (j==0 and direction==-1) and systeme[j][p]==0){// tous les coef nuls
+if((j==nb_lig-1 and direction==1) or (j==0 and direction==-1) and systeme[j][p]==0){ // tous les coef nuls
   return(-1);
 } else {
   coef:=systeme[j][p];
@@ -1679,7 +1679,7 @@ if(p>=nb_var or n>=nb_lig){ // pivotage terminé, afficher les solutions
   operations:=[];
   afficher("Ligne : "+string(n)+" Colonne : "+string(p));
   k:=cherchePivot(msysteme,n,p,nb_lig,1);
-  if(k==-1){// la colonne ne contient pas la variable
+  if(k==-1){ // la colonne ne contient pas la variable
     if(n<nb_lig-1){
       s:=s+"La variable $"+var2latex(variables[p])+"$ est absente à partir de la ligne "+string(n+2)+". Il n'y a donc rien à faire pour l'éliminer.\n\n";
     }
@@ -1687,7 +1687,7 @@ if(p>=nb_var or n>=nb_lig){ // pivotage terminé, afficher les solutions
     p++;
     s:=s+GaussPivotSysl(systeme,msysteme,variables,fraction,n,p,pivot_nul);
   } else {
-    if(k<>n){// il faut permuter
+    if(k<>n){ // il faut permuter
       if(estNombre(msysteme[n][p])==faux){
         s:=s+"On échange la ligne "+string(n+1)+" avec la ligne "+string(k+1)+" pour obtenir un pivot toujours non nul :\n";
       } else {
@@ -1704,10 +1704,10 @@ if(p>=nb_var or n>=nb_lig){ // pivotage terminé, afficher les solutions
       lv:=listeVariables(coef1); // vecteurs des variables
       lz:=solve(coef1=0,lv[0]); // zéros du coef pour la première variable
       nb_sol:=size(lz);
-      if(nb_sol>0 and coefVautZero(pivot_nul,lv[0],lz,nb_sol)==vrai){// disjonction des cas si au moins une valeur qui annule le pivot
+      if(nb_sol>0 and coefVautZero(pivot_nul,lv[0],lz,nb_sol)==vrai){ // disjonction des cas si au moins une valeur qui annule le pivot
         s:=s+"Le pivot $"+var2latex(coef1)+"$ peut s'annuler. On raisonne donc par disjonction des cas.\n\\begin{itemize}";
         for(j:=0;j<nb_sol;j++){
-          if(not(contains(pivot_nul,[lv[0],lz[j] ]))){//cette racine n'a pas été étudiée avant, le pivot peut s'annuler
+          if(not(contains(pivot_nul,[lv[0],lz[j] ]))){ //cette racine n'a pas été étudiée avant, le pivot peut s'annuler
             // substituer et résoudre ce cas 
             s:=s+"\n\\item\n"; 
             msys_subst:=simplifier(subst(msysteme,lv[0]=lz[j]));
@@ -1771,7 +1771,6 @@ if(p>=nb_var or n>=nb_lig){ // pivotage terminé, afficher les solutions
   }
 }
 }:;
-
 
 coefVautZero(pivot_nul,variable,liste_zeros,nb_sol):={
 local k;
@@ -1877,7 +1876,7 @@ if(operations==[]){
   coef1:=operations[ligne][2];
   coef2:=operations[ligne][3];
 }
-afficher(matrice);
+//afficher(matrice);
 nb_col:=ncols(matrice);
 nb_lig:=nrows(matrice);
 s:=s+"(*{"+string(nb_col)+"}{c})l}\n";
@@ -1956,13 +1955,13 @@ if((p>=nb_col) or (n>=nb_lig)){
   operations:=[];
   afficher("Ligne : "+string(n)+" Colonne : "+string(p));  
   v:=cherchePivotRang(matrice,n,p,nb_lig,nb_col);
-  if(v==[-1,-1]){// tous les coef sont nuls
+  if(v==[-1,-1]){ // tous les coef sont nuls
     //s:=s+"Le pivot de la ligne "+string(n+1)+", colonne "+string(p+1)+" est nul.\\\\\n";
     p++;n++;
     s:=s+GaussPivotRang(matrice,n,p,pivot_nul,rang);
   } else {
     j:=v[0];k:=v[1];
-    if(j<>n and k<>p and n<nb_lig-1){// il faut permuter
+    if(j<>n and k<>p and n<nb_lig-1){ // il faut permuter
       if(j>-1){ //permuter deux lignes
         if(estNombre(matrice[n][p])==faux){
           s:=s+"On échange la ligne "+string(n+1)+" avec la ligne "+string(j+1)+" pour obtenir un pivot toujours non nul :\n";
@@ -1991,11 +1990,11 @@ if((p>=nb_col) or (n>=nb_lig)){
       lv:=listeVariables(coef1); // vecteurs des variables
       lz:=solve(coef1=0,lv[0]); // zéros du coef pour la première variable
       nb_sol:=size(lz);
-      if(nb_sol>0 and coefVautZero(pivot_nul,lv[0],lz,nb_sol)==vrai){// disjonction des cas si au moins une valeur qui annule le pivot
+      if(nb_sol>0 and coefVautZero(pivot_nul,lv[0],lz,nb_sol)==vrai){ // disjonction des cas si au moins une valeur qui annule le pivot
         s:=s+ifte((n<nb_lig-1)and(p<nb_col-1),"Le pivot ","Le coefficient ");
         s:=s+"$"+var2latex(coef1)+"$ peut s'annuler. On raisonne donc par disjonction des cas.\n\\begin{itemize}";
         for(j:=0;j<nb_sol;j++){
-          if(not(contains(pivot_nul,[lv[0],lz[j] ]))){//cette racine n'a pas été étudiée avant, le pivot peut s'annuler
+          if(not(contains(pivot_nul,[lv[0],lz[j] ]))){ //cette racine n'a pas été étudiée avant, le pivot peut s'annuler
             // substituer et résoudre ce cas 
             s:=s+"\n\\item\n"; 
             matrice_subst:=simplifier(subst(matrice,lv[0]=lz[j]));
@@ -2055,7 +2054,6 @@ if((p>=nb_col) or (n>=nb_lig)){
 return(s);
 }:;
 
-
 GaussRang(matrice):={
 local s;
 s:="Par la méthode du pivot de Gauss, on calcule le rang de la matrice :\n"+affMatrice(matrice,[]);
@@ -2063,6 +2061,7 @@ s:="Par la méthode du pivot de Gauss, on calcule le rang de la matrice :\n"+aff
 s:=s+GaussPivotRang(matrice,0,0,[],0);
 return(s);
 }:;
+
 
 GaussInv(matrice):={
 local s;
@@ -2091,24 +2090,24 @@ if(n==nb_lig){ // repartir en remontant
     return(GaussPivotInv(matrice,n-1,p-1,pivot_nul,-1))
   }  
 } else {  
-  if(n==0 and direction==-1){// afficher la matrice inverse
+  if(n==0 and direction==-1){ // afficher la matrice inverse
     local matrice_inverse:=matrix(nb_lig,nb_lig,(j,k)->matrice[j][k+nb_lig]);
     for(j:=0;j<nb_lig;j++){
       matrice_inverse[j]:=simplifier(matrice_inverse[j]/matrice[j][j]);
     }
     s:=s+"La matrice inverse est donc "+affMatrice(matrice_inverse,[])+"\n";
     return(s);   
-  } else {// pivoter
+  } else { // pivoter
   operations:=[];
   k:=cherchePivot(matrice,n,p,nb_lig,direction);
-  if(k==-1){// la colonne ne contient pas la variable
+  if(k==-1){ // la colonne ne contient pas la variable
     //if(n<nb_lig-1){
     //  s:=s+"La variable $"+var2latex(variables[p])+"$ est absente à partir de la ligne "+string(n+2)+". Il n'y a donc rien à faire pour l'éliminer.\\\\\n";
     //}
     afficher("Rien à faire pour la colonne "+string(p));
     s:=s+GaussPivotInv(matrice,n+direction,p+direction,pivot_nul,direction);
   } else {
-    if(k<>n and direction==1){// il faut permuter
+    if(k<>n and direction==1){ // il faut permuter
       if(estNombre(matrice[n][p])==faux){
         s:=s+"On échange la ligne "+string(n+1)+" avec la ligne "+string(k+1)+" pour obtenir un pivot toujours non nul :\n";
       } else {
@@ -2129,12 +2128,12 @@ if(n==nb_lig){ // repartir en remontant
       }*/
       lz:=solve(coef1=0,lv[0]); // zéros du coef pour la première variable
       nb_sol:=size(lz);
-      if(nb_sol>0 and coefVautZero(pivot_nul,lv[0],lz,nb_sol)==vrai){// disjonction des cas si au moins une valeur qui annule le pivot
+      if(nb_sol>0 and coefVautZero(pivot_nul,lv[0],lz,nb_sol)==vrai){ // disjonction des cas si au moins une valeur qui annule le pivot
         local liste_sol:="";
         local nb_nv_sol:=0; // zéros non étudiés avant
         
         for(j:=0;j<nb_sol;j++){
-          if(not(contains(pivot_nul,[lv[0],lz[j] ]))){//cette racine n'a pas été étudiée avant, le pivot peut s'annuler
+          if(not(contains(pivot_nul,[lv[0],lz[j] ]))){ //cette racine n'a pas été étudiée avant, le pivot peut s'annuler
             // substituer et résoudre ce cas 
             if(nb_nv_sol>0){
               liste_sol:=liste_sol+"\\mathpunct{;}";
