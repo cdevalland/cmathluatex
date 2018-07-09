@@ -1428,7 +1428,7 @@ sysl(arguments):={
 // operations (facultatif) : matrice des opérations élémentaires à afficher.
 local systeme; // vecteur contenant les lignes du système
 local variables; // vecteur contenant les variables
-local s:="\\[\\left\\{\n\\begin{alignedat}{";
+local s:="\\left\\{\n\\begin{alignedat}{";
 local nb_var;
 local nb_lig;
 local n,p;
@@ -1529,7 +1529,7 @@ for(n:=0;n<nb_lig;n++){
   } 
   s:=s+" \\\\\n"; 
 }
-s:=s+"\\end{alignedat}\n\\right.\\]\n";
+s:=s+"\\end{alignedat}\n\\right.\n";
 return(s);
 }:;
 
@@ -3243,7 +3243,7 @@ function tikzAxeX(arg)
 	local position="below"
 	local label="x"
 	local optionsTikz=""
-	local rightspace=0.5
+	local rightspace=0
 	local trig=false
 	local digits=3
 	local zero=true
@@ -3310,7 +3310,7 @@ function tikzAxeY(arg)
 	local position="right=3pt"
 	local label="y"
 	local optionsTikz=""
-	local upspace=0.5
+	local upspace=0
 	local trig=false
 	local digits=3
 	local zero=true
