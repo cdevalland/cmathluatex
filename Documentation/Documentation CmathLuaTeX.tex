@@ -1360,7 +1360,7 @@ type=polar)}
 \Cmath{tikzWindow(x1cm=0.1,y1cm=0.1,xmin=-0.5,xmax=0.5,ymin=-0.5,ymax=0.5)}
 \Cmath{tikzGrid([color=gray!50,dashed],xstep=0.1,ystep=0.1)}
 \Cmath{codeLua(f=function(theta) return cos(theta)*sin(theta) end)}
-\Cmath{tikzAxeX([line width=0.6,-{Stealth[round]}],step=0.1,label=x)}
+\Cmath{tikzAxeX([line width=0.6,-{Stealth[round]}],step=0.1,label=x,tickxmin=0.5)}
 \Cmath{tikzAxeY([line width=0.6,-{Stealth[round]}],step=0.2,label=y)}
 \Cmath{tikzPlot([color=NavyBlue,smooth,line width=0.7],type=polar,variable=t,function=f(t),samples=100,domain=-2*pi:2*pi)}
 \Cmath{tikzTangent([color=OliveGreen,line width=0.7pt,-{Stealth[round]}],variable=pi/6,function=f,type=polar,k=0.5,label=vec(u(:pi/6)),position=right)}
