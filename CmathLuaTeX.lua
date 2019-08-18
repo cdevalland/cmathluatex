@@ -2273,9 +2273,10 @@ initCas():={
   with_sqrt(1);
 }:;
 
-trigo(expression_trigo):={
+trigo(expressionTrigo):={
 // renvoie vrai si l'expression dépend d'un paramètre n_1 (solutions d'une équation trigo dans xcas)  
-  if (subst(expression_trigo,n_1=0)==expression_trigo)
+  local n_1;purge(n_1);
+  if (subst(expressionTrigo,n_1=0)==expressionTrigo)
     return faux;
   else
     return vrai;
@@ -2290,12 +2291,14 @@ debutTableau(colonne,hauteurLigne,valX,nb_decimales):={
   s:="\\begin{tikzpicture}\n";
   s:=s+"\\tkzTabInit[lgt=2,espcl=2,deltacl=0.5]\n";
   s:=s+"{";
-  for(k:=0;k<size(colonne);k++){
+  for(k:=0;k<size(colonne);k++)
+  {
     if (k>0){s:=s+","};
     s:=s+colonne[k]+" / "+hauteurLigne[k];
   }  
   s:=s+"}\n{";
-  for(k:=0;k<size(valX);k++){
+  for(k:=0;k<size(valX);k++)
+  {
     if (k>0){s:=s+","};
       if(type(nb_decimales)==DOM_INT and type(valX[k])==DOM_FLOAT){
         s:=s+"$"+var2latex(evalf(valX[k],nb_decimales))+"$";
@@ -2307,8 +2310,38 @@ debutTableau(colonne,hauteurLigne,valX,nb_decimales):={
   return(s);
 }:;
 
+Elague(IE,liste):={
+  local nliste,nIE,k,listeelaguee,expres,m,mini,maxi;
+  local n_1;purge(n_1);
+  listeelaguee:=[];
+  nliste:=size(liste);
+  nIE:=size(IE);
+  mini:=IE[0];maxi:=IE[nIE-1];
+  for(k:=0;k<nliste;k++){
+    expres:=liste[k];
+    if (trigo(expres)) {
+      m:=0;
+      while(subst(expres,n_1=m)<=maxi and subst(expres,n_1=m)>=mini) {
+        listeelaguee:=concat(listeelaguee,simplify(subst(expres,n_1=m)));
+        m:=m+1;
+      };
+      m:=-1;
+      while(subst(expres,n_1=m)<=maxi and subst(expres,n_1=m)>=mini) {
+        listeelaguee:=concat(listeelaguee,simplify(subst(expres,n_1=m)));
+        m:=m-1;
+      }
+    } else {
+      if(expres>mini and expres<maxi){
+        listeelaguee:=concat(listeelaguee,expres);
+      }
+    }
+  }
+  return(sort(listeelaguee));
+}:;
+
 trouveVI(IE,f):={
   local k,s,o,n,listeVI:=[];
+  local x;purge(x);
   s:=sommet(f);
   o:=op(f);
   if (s=='inv') {
@@ -2343,39 +2376,11 @@ trouveVI(IE,f):={
   }}}}}
 }:;
 
-Elague(IE,liste):={
-  local nliste,nIE,k,listeelaguee,expres,m,mini,maxi;
-  listeelaguee:=[];
-  nliste:=size(liste);
-  nIE:=size(IE);
-  mini:=IE[0];maxi:=IE[nIE-1];
-  for(k:=0;k<nliste;k++){
-    expres:=liste[k];
-    if (trigo(expres)) {
-      m:=0;
-      while(subst(expres,n_1=m)<=maxi and subst(expres,n_1=m)>=mini) {
-        listeelaguee:=concat(listeelaguee,simplify(subst(expres,n_1=m)));
-        m:=m+1;
-      };
-      m:=-1;
-      while(subst(expres,n_1=m)<=maxi and subst(expres,n_1=m)>=mini) {
-        listeelaguee:=concat(listeelaguee,simplify(subst(expres,n_1=m)));
-        m:=m-1;
-      }
-    } else {
-      if(expres>mini and expres<maxi){
-        listeelaguee:=concat(listeelaguee,expres);
-      }
-    }
-  }
-  return(trier(listeelaguee));
-}:;
-
-
 
 trouveZeros(IE,f):={
   local n:=size(IE);
   local Z,err,k;
+  local x;purge(x);
   try {Z:=solve(factor(simplify(f(x)=0)),x);}
   catch(err){
     local xmin:=IE[0];
@@ -2426,7 +2431,8 @@ tabSignes(IE,f,g):={
   local k,x,nIE,a,xi;
   local signes:=[];
   nIE:=size(IE);
-  for(k:=0;k<=nIE-2;k++){
+  for(k:=0;k<=nIE-2;k++)
+  {
     if(estDefinie(f,IE[k]) and estDefinie(g,IE[k])){
       if(abs(f(IE[k]))<1e-10){
         signes:=append(signes,0);
@@ -2471,13 +2477,15 @@ calculeImages(IE,f,nb_decimales):={
   local k;
   local images;
   local nIE:=size(IE);
+  local x;purge(x);
   if(type(nb_decimales)!=DOM_INT){
     images:=[ [infinity,simplifier(limite(f(x),x,IE[0],1))] ];
   } else {
+    //images:=[ [infinity,format(evalf(limite(f(x),x,IE[0],1)),"f"+string(nb_decimales))] ];
     images:=[ [infinity,evalf(limite(f(x),x,IE[0],1),nb_decimales)] ];
   }
-
-  for(k:=1;k<=nIE-2;k++){
+  for(k:=1;k<=nIE-2;k++)
+  {
     if(type(nb_decimales)!=DOM_INT){
       images:=append(images,[simplifier(limite(f(x),x,IE[k],-1)),simplifier(limite(f(x),x,IE[k],1))]);
     } else {
@@ -2717,7 +2725,8 @@ listeFacteurs(expression_pro):={
     numerateur:=[expression_pro];
   }
   // extraire le dénominateur et regrouper les facteurs constants
-  for(k:=0;k<size(numerateur);k++){
+  for(k:=0;k<size(numerateur);k++)
+  {
     if(sommet(numerateur[k])=='inv'){
       if(sommet(op(numerateur[k]))=='*'){
         denominateur:=append(denominateur,op(op(numerateur[k])));
@@ -2798,6 +2807,7 @@ local a;
 local IE:=arguments[0];
 local f:=arguments[1];
 local nb_decimales;
+local x;purge(x);
 if (size(arguments)==3){
   nb_decimales:=arguments[2];
 } else {
@@ -2811,13 +2821,13 @@ nom_fonction:=id_fonction[2][1];
 nom_derivee:=id_fonction[3][1];
 //unapply(f,x);
 fp:=function_diff(f);
-IE:=trier(IE);
+IE:=sort(IE);
 VI:=trouveVI(IE,f(x));
 ValeursX:=insereValeurs(IE,VI);
 Zeros_fp:=trouveZeros(IE,fp);
 Zeros_fp:=sontDefinies(f,Zeros_fp);
 ValeursX:=insereValeurs(ValeursX,Zeros_fp);
-ValeursX:=trier([op(set[op(ValeursX)])]);
+ValeursX:=sort([op(set[op(ValeursX)])]);
 ValeursX:=simplifier(ValeursX);
 // construction de la structure du tableau
 sTkzTab:=debutTableau(["$"+nom_variable+"$","$"+nom_derivee+"("+nom_variable+")"+"$","$"+nom_fonction+"$"],[1,1,2],ValeursX,nb_decimales);
@@ -2854,28 +2864,28 @@ local hauteurs_lignes;
 local id_fonction, nom_variable, nom_fonction;
 local k;
 local denominateur;
+local x;purge(x);
 
 initCas();
 id_fonction:=identifier_fonc(f);
 f:=id_fonction[0];
 nom_variable:=id_fonction[1][0];
 nom_fonction:=id_fonction[2][0];
-IE:=trier(IE);
+IE:=sort(IE);
 VI:=trouveVI(IE,f(x));
 ValeursX:=insereValeurs(IE,VI);
 Zerosf:=trouveZeros(IE,f);
 ValeursX:=insereValeurs(ValeursX,Zerosf);
 ValeursX:=simplifier(ValeursX);
 facteurs:=execute("listeFacteurs(f("+nom_variable+"))");
-if (size(facteurs[1])>0){
-  // il y a un dénominteur, augmenter la hauteur de la dernière ligne
+if (size(facteurs[1])>0)
+{
   denominateur:=vrai;
 } else {
   denominateur:=faux;
-}
+};
 facteurs:=op(facteurs[0]),op(facteurs[1]);
 if (size(facteurs)==1){ facteurs:=NULL };
-// construction de la structure du tableau
 colonne:=append([nom_variable],facteurs);
 if(type(nom_fonction)==DOM_STRING){
   colonne:=append(colonne,"$\\displaystyle "+var2latex(f(x))+"$");
@@ -2891,14 +2901,13 @@ if (denominateur){
   hauteurs_lignes:=append(hauteurs_lignes,1);
 }
 sTkzTab:=debutTableau(colonne,hauteurs_lignes,ValeursX,"");
-// construction du signe des facteurs
-for(k:=0;k<size(facteurs);k++){
+for(k:=0;k<size(facteurs);k++)
+{
   facteur:=execute("unapply(facteurs[k],"+nom_variable+")");
   Signes:=tabSignes(ValeursX,facteur,x->1);
   sTkzTabLine:=ligneSignes(Signes);
   sTkzTab+=sTkzTabLine;
 }
-// construction du signe de f s'il y a au moins 2 facteurs
 Signes:=tabSignes(ValeursX,f,x->1);
 sTkzTabLine:=ligneSignes(Signes);
 sTkzTab+=sTkzTabLine;
@@ -2931,11 +2940,12 @@ local sTkzTabIma; // lignes des images de f ou g
 local k,n,j;
 local id_fonctionf, nom_variablef, nom_fonctionf, nom_deriveef;
 local id_fonctiong, nom_variableg, nom_fonctiong, nom_deriveeg;
-
 local IE:=arguments[0];
 local f:=arguments[1];
 local g:=arguments[2];
 local nb_decimales;
+local x;purge(x);
+
 if (size(arguments)==4){
   nb_decimales:=arguments[3];
 } else {
@@ -2954,7 +2964,7 @@ nom_fonctiong:=id_fonctiong[2][1];
 nom_deriveeg:=id_fonctiong[3][1];
 fp:=function_diff(f);
 gp:=function_diff(g);
-IE:=trier(IE);
+IE:=sort(IE);
 VIf:=trouveVI(IE,f(x));
 ValeursX:=insereValeurs(IE,VIf);
 VIg:=trouveVI(IE,g(x));
@@ -2965,7 +2975,7 @@ ValeursX:=insereValeurs(ValeursX,Zeros_fp);
 Zeros_gp:=trouveZeros(IE,gp);
 Zeros_gp:=sontDefinies(g,Zeros_gp);
 ValeursX:=insereValeurs(ValeursX,Zeros_gp);
-ValeursX:=trier([op(set[op(ValeursX)])]);
+ValeursX:=sort([op(set[op(ValeursX)])]);
 ValeursX:=simplifier(ValeursX);
 // construction de la structure du tableau
 sTkzTab:=debutTableau(["$"+nom_variablef+"$",
@@ -3033,7 +3043,8 @@ if(type(nom_fonctionf)==DOM_STRING){
 } else {
   s:=s+id_fonctionf[2][1]+"("+id_fonctionf[1][1]+")$ & ";
 }
-for(k:=0;k<n-1;k++){
+for(k:=0;k<n-1;k++)
+{
   if(type(nb_decimales)!=DOM_INT){
     s:=s+"$\\displaystyle "+var2latex(simplifier(f(IE[k])))+"$ &";
   } else {
