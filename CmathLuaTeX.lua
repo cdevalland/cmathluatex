@@ -3676,7 +3676,7 @@ function pgfPlot3(arg)
 				+  P'xdomain'*Egal*C(argument)/function(...) pxDomaine=... end
 				+  P'ydomain'*Egal*C(argument)/function(...) pyDomaine=... end
 				+  P'xsamples'*Egal*C(argument)/function(...) pxSamples=... end
-				+  P'ysamples'*Egal*C(argument)/function(...) pxSamples=... end
+				+  P'ysamples'*Egal*C(argument)/function(...) pySamples=... end
 				+  C(ExpressionEntreCrochets)/function(...) optionsPGF=... end,
 		argument=(CaractereSansParenthesesSep^1*(ExpressionEntreParentheses*argument^0)^0)*Espace,
 		ExpressionEntreParentheses=P{'('*(CaractereSansParentheses+V(1))^0*')'},
@@ -3729,7 +3729,6 @@ function pgfPlot3(arg)
 	coordinates=coordinates.."};"
 	return coordinates
 end
-
 
 --[[
 -- debug
