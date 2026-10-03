@@ -1,6 +1,6 @@
 --[[
-	Cmath pour LuaTeX, version 2018.07.03
-    Copyright (C) 2014  Christophe Devalland (christophe.devalland@ac-rouen.fr)
+	Cmath pour LuaTeX, version 2026.04.20
+    Copyright (C) 2014-2026  Christophe Devalland (christophe.devalland@ac-normandie.fr)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
---]]
+]]
 
 os.setlocale("en_US.UTF-8", "numeric") -- le séparateur décimal doit être le point
 sin,cos,tan,asin,acos,atan=math.sin,math.cos,math.tan,math.asin,math.acos,math.atan
@@ -54,6 +54,7 @@ local Operateur=C(P('<=>')+P('<=')+P('>=')+P('<>')+P('->')+S('=><')
 		+	P(':ic')+P('⊂')
 		+	P(':ni')+P('⊄')
 		+	P(':re')+P('⟵')
+		+	P(':pr')
 		+	P('⩽')+P('⩾')
 		+	P('≠')
 		) * Espace
@@ -85,7 +86,8 @@ local TSubstOperateurLaTeX = {	['<=>']='\\Leftrightarrow ',
 		[':rc']='\\Leftarrow ', ['⇐']='\\Leftarrow ',
 		[':ic']='\\subset ', ['⊂']='\\subset ',
 		[':ni']='\\not\\subset ', ['⊄']='\\not\\subset ',
-		[':re']='\\leftarrow ',['⟵']='\\leftarrow '
+		[':re']='\\leftarrow ',['⟵']='\\leftarrow ',
+		[':pr']='\\mspace{4 mu}\\backslash',
 		}
 local TSubstOperateurTW = {	['<=>']='⟺',
 		['<=']='⩽',
@@ -166,6 +168,7 @@ local Raccourci = 	C( P'...'
 		+	(P':Qe'+P'ℚe')
 		+	(P':Q'+P'ℚ')
 		+	(P':K'+P'𝕂')
+		+	(P':U'+P'𝕌')
 		+	(P':e'+P'е')
 		+	(P':i'+P'і')
 		+	P':d'
@@ -220,6 +223,7 @@ local TSubstRaccourciLaTeX = {	['...']='\\dots ',
 		[':Qe']='\\mathbb{Q}^{*} ', ['ℚe']='\\mathbb{Q}^{*} ',
 		[':Q']='\\mathbb{Q} ', ['ℚ']='\\mathbb{Q} ',
 		[':K']='\\mathbb{K} ', ['𝕂']='\\mathbb{K} ',
+		[':U']='\\mathbb{U} ', ['𝕌']='\\mathbb{U} ',
 		[':e']='\\mathrm{e} ', ['е']='\\mathrm{e} ',
 		[':i']='\\mspace{1 mu}\\mathrm{i} ', ['і']='\\mspace{1 mu}\\mathrm{i} ',
 		[':d']='{\\mathop{}\\mathopen{}\\mathrm{d}}'
@@ -270,11 +274,12 @@ local TSubstRaccourciTW = {	[':al']='α',
 		[':Qe']='ℚe',
 		[':Q']='ℚ',
 		[':K']='𝕂',
+		[':U']='𝕌',
 		[':e']='е',
 		[':i']='і'	
 		}
 
-local Lettre = R("az")+R("AZ")+P("!")+P("'")+P("′")
+local Lettre = R("az")+R("AZ")+P("!")+P("'")+P("′")+P("~")
 local Mot=C(Lettre^1+P('∭')+P('∬')+P('∫')+P('√')) - Guillemet
 local Op_LaTeX = C(P("\\")*Lettre^1) * Espace
 local TermOp = C(S("+-")) * Espace
@@ -420,11 +425,9 @@ function fFormule_signee(arg1,arg2)
    return {'signe '..arg1,arg2}
 end
 
-
 function fIntervalle_Entier(arg1)
 	return {'⟦⟧',arg1}
 end
-
 
 local FonctionsCmath = 	P('abs')+	-- valeur absolue
 		P('iiint')+P('∭')+			-- intégrale triple
@@ -435,7 +438,7 @@ local FonctionsCmath = 	P('abs')+	-- valeur absolue
 		P('cal')+P('scr')+P('frak')+P('pzc')+ -- polices
 		P('gra')+					-- gras
 		P('ang')+					-- angle
-		P('til')+					-- tilde
+		P('til')+						-- tilde
 		P('bar')+					-- barre
 		P('sou')+					-- souligné
 		P('nor')+					-- norme
@@ -473,6 +476,9 @@ local FonctionsCmath = 	P('abs')+	-- valeur absolue
 		P('derp')+					-- dérivée partielle
 		P('der')+					-- dérivée physicienne
 		P('res')+					-- restreint à
+		P('ent')+					-- partie entière inférieure
+		P('flo')+					-- partie entière inférieure
+		P('cei')+					-- partie entière supérieure
 		P('ds')+					-- mode display
 		P('ts')+					-- mode text
 		P('im')+					-- partie imaginaire
@@ -1009,6 +1015,21 @@ local TraitementFonctionsCmath =
 		return construitLimite(arbre,'sup')
 	end,
 	
+	['ent']=
+	function(arbre) 
+		return '\\left \\lfloor {'..Tree2Latex(arbre)..'} \\right \\rfloor'
+	end,
+	
+	['flo']=
+	function(arbre) 
+		return '\\left \\lfloor {'..Tree2Latex(arbre)..'} \\right \\rfloor'
+	end,
+	
+	['cei']=
+	function(arbre) 
+		return '\\left \\lceil {'..Tree2Latex(arbre)..'} \\right \\rceil'
+	end,
+	
 	['im']=
 	function(arbre) 
 		return '\\mathfrak{Im}\\,{'..Tree2Latex(arbre)..'}' 
@@ -1079,6 +1100,7 @@ elseif (op=='*' or op==' ') then
 elseif (op=='×' or op=='**') then
 	return Tree2Latex(Arbre[2])..'\\times '..Tree2Latex(Arbre[3])
 elseif (op=='..') then
+	-- produit scalaire
 	return Tree2Latex(Arbre[2])..'\\cdot '..Tree2Latex(Arbre[3])
 elseif (op=='//') then
 	return Tree2Latex(Arbre[2])..'/'..Tree2Latex(Arbre[3])		
@@ -1245,7 +1267,7 @@ else
 end
 end
 
-function Giac(programme,instruction,latex)
+function GiacOld(programme,instruction,latex)
 -- exécute le programme sans conserver le retour
 -- puis exécute l'instruction en renvoyant le résultat
 -- conversion en latex selon le booléen latex (pas de conversion pour les tableaux de variations/signes)
@@ -1291,6 +1313,58 @@ f:close()
 os.execute(commande)
 io.input(giacOut)
 return(io.read("*all"))
+end
+
+function Giac(programme, instruction, latex)
+    local commande
+    
+    -- Construction du code à envoyer à Giac
+    -- On n'a plus besoin d'archiver/désarchiver ou d'utiliser fopen/fclose
+    local prg = programme .. "\n"
+    prg = prg .. "purge(Resultat);\n"
+    prg = prg .. "som:=sommet(quote(" .. instruction .. "));\n"
+    prg = prg .. "if(som=='sto' or som=='supposons'){\n"
+    prg = prg .. "  " .. instruction .. ";\n"
+    prg = prg .. "  Resultat:='\"\"';} else {\n"
+    prg = prg .. "  Resultat:=(" .. instruction .. ")};\n"
+    prg = prg .. "if(Resultat=='Resultat'){\n"
+    prg = prg .. "  Resultat:=\"Erreur Xcas\"};\n"
+    
+    -- Au lieu d'écrire dans un fichier, on affiche le résultat dans le terminal (stdout)
+    if latex then
+        prg = prg .. "print(Unquoted,var2latex(Resultat));\n"
+    else
+        prg = prg .. "print(Unquoted,Resultat);\n"
+    end
+    
+    prg = instruction
+    
+    -- Détermination de la commande OS
+    if QuelOs() == 'linux' then
+        -- Sous Linux, on demande à icas de lire le code directement depuis l'argument en ligne de commande
+        -- (L'option -e ou le pipe standard permet souvent d'exécuter un script à la volée)
+        -- Si 'icas' accepte l'entrée standard, on peut utiliser echo
+        commande = "echo '" .. string.gsub(prg, "'", "'\\''") .. "' | icas"
+    else 
+        -- Sous Windows
+        -- On passe la chaîne de caractères à icas via un pipe ou une commande echo interprétée par bash
+        -- Attention à bien échapper les guillemets et apostrophes pour Windows/Bash
+        commande = '\\xcas\\bash.exe -c "export LANG=fr_FR.UTF-8 ; echo \'' .. string.gsub(prg, "'", "'\\''") .. '\' | /xcas/icas.exe"'
+    end
+
+    -- Exécution de la commande et récupération de la sortie standard
+    local handle = io.popen(commande)
+    if not handle then 
+        return "Erreur d'exécution de la commande Giac" 
+    end
+    
+    local resultat = handle:read("*a") -- Lit tout ce que Giac a "print"
+    handle:close()
+    
+    -- Nettoyage des éventuels sauts de ligne finaux renvoyés par stdout
+    resultat = string.gsub(resultat, "^%s*(.-)%s*$", "%1")
+    
+    return resultat
 end
 
 function RepertoireTMP()
@@ -1405,18 +1479,23 @@ end
 XCAS_var2latex=[[
 var2latex(variable):={
 // supprime les mathrm, les cdot et évite la perte des indices
-local s:=latex(variable);
+local s;
 local j;
-for(j:=inString(s,"\\_");j<>-1;j:=inString(s,"\\_")){
-  s:=left(s,j)+"_"+mid(s,j+2);
+if (type(variable)==string){
+  return("\\text{"&variable&"}")}
+else {
+  s:=latex(variable);
+  for(j:=inString(s,"\\_");j<>-1;j:=inString(s,"\\_")){
+    s:=left(s,j)+"_"+mid(s,j+2);
+  }
+  for(j:=inString(s,"\\mathrm");j<>-1;j:=inString(s,"\\mathrm")){
+    s:=left(s,j)+mid(s,j+7);
+  }
+  for(j:=inString(s,"\\cdot");j<>-1;j:=inString(s,"\\cdot")){
+    s:=left(s,j)+mid(s,j+5);
+  }
+  return(s);
 }
-for(j:=inString(s,"\\mathrm");j<>-1;j:=inString(s,"\\mathrm")){
-  s:=left(s,j)+mid(s,j+7);
-}
-for(j:=inString(s,"\\cdot");j<>-1;j:=inString(s,"\\cdot")){
-  s:=left(s,j)+mid(s,j+5);
-}
-return(s);
 }:;
 ]]
 
@@ -1627,7 +1706,7 @@ listeVariables(s_expression):={
   local s:=sommet(s_expression);
   if(s=='id'){
     if(estNombre(s_expression)){
-      return(NULL);
+      return([]);
     } else {
       return([s_expression]);
     }
@@ -2709,9 +2788,12 @@ identifier_fonc(expression_fonc):={
     commande:="unapply(d,"+variable+")";
     return([execute(commande),[variable,latex(variable)],[fonc,var2latex(fonc)],[fonc+"'",var2latex(fonc)+"'"] ]);
   } else {
-  return([unapply(expression_fonc,x),["x","x"],["x->"+expression_fonc,"x\\mapsto "+var2latex(expression_fonc)],["(x->"+expression_fonc+")'","\\left( x\\mapsto "+var2latex(expression_fonc)+"\\right) '"] ])
+    g:=unapply(expression_fonc,x);
+    variable:=op(g)[0];
+    return([g,[variable,"x"],["x->"+expression_fonc,"x\\mapsto "+var2latex(expression_fonc)],["(x->"+expression_fonc+")'","\\left( x\\mapsto "+var2latex(expression_fonc)+"\\right) '"] ])
   }
 }:;
+
 
 listeFacteurs(expression_pro):={
   local k,s,o;
@@ -2864,8 +2946,9 @@ local hauteurs_lignes;
 local id_fonction, nom_variable, nom_fonction;
 local k;
 local denominateur;
-local x;purge(x);
-
+local x;
+local nb_facteurs;
+purge(x);
 initCas();
 id_fonction:=identifier_fonc(f);
 f:=id_fonction[0];
@@ -2878,14 +2961,20 @@ Zerosf:=trouveZeros(IE,f);
 ValeursX:=insereValeurs(ValeursX,Zerosf);
 ValeursX:=simplifier(ValeursX);
 facteurs:=execute("listeFacteurs(f("+nom_variable+"))");
-if (size(facteurs[1])>0)
-{
+nb_facteurs:=0;
+if (size(facteurs[1])>0){
+  // il y a un dénominateur, augmenter la hauteur de la dernière ligne
   denominateur:=vrai;
 } else {
   denominateur:=faux;
-};
+}
 facteurs:=op(facteurs[0]),op(facteurs[1]);
-if (size(facteurs)==1){ facteurs:=NULL };
+if (size(facteurs)==1){ 
+  facteurs:=NULL;
+} else {
+  nb_facteurs:=size(facteurs);
+};
+// construction de la structure du tableau
 colonne:=append([nom_variable],facteurs);
 if(type(nom_fonction)==DOM_STRING){
   colonne:=append(colonne,"$\\displaystyle "+var2latex(f(x))+"$");
@@ -2901,13 +2990,14 @@ if (denominateur){
   hauteurs_lignes:=append(hauteurs_lignes,1);
 }
 sTkzTab:=debutTableau(colonne,hauteurs_lignes,ValeursX,"");
-for(k:=0;k<size(facteurs);k++)
-{
+// construction du signe des facteurs
+for(k:=0;k<nb_facteurs;k++){
   facteur:=execute("unapply(facteurs[k],"+nom_variable+")");
   Signes:=tabSignes(ValeursX,facteur,x->1);
   sTkzTabLine:=ligneSignes(Signes);
   sTkzTab+=sTkzTabLine;
 }
+// construction du signe de f s'il y a au moins 2 facteurs
 Signes:=tabSignes(ValeursX,f,x->1);
 sTkzTabLine:=ligneSignes(Signes);
 sTkzTab+=sTkzTabLine;
@@ -3116,9 +3206,7 @@ local ExpressionEntreCrochets=P{'('*(CaractereSansCrochets+V(1))^0*')'}
 
 -- crée une liste de coordonnées 2D utilisable avec PGFplots
 function tikzPlot(arg)
-	local pVariable="x"
-	local pSamples=100
-	local pFunction,pType,pDomaine
+	local pVariable,pSamples,pFunction,pType,pDomaine
 	local a=xmin
 	local b=xmax	
 	local optionsTikz=""
@@ -3126,7 +3214,7 @@ function tikzPlot(arg)
 	local Options, Option, argument = V'Options', V'Option', V'argument'
 	local ExpressionEntreParentheses=V'ExpressionEntreParentheses'
 	local ExpressionEntreCrochets=V'ExpressionEntreCrochets'
-	local OptionsPlot = P { Options,
+	local OptionsPlot = P { "Options",
 		Options = C(Option * Cg(P(SepListe) * Option)^0),
 		Option = P'variable'*Egal*C(argument)/function(...) pVariable=... end 
 				+  P'type'*Egal*C(argument)/function(...) pType=... end
@@ -3134,7 +3222,8 @@ function tikzPlot(arg)
 				+  P'domain'*Egal*C(argument)/function(...) pDomaine=... end
 				+  P'samples'*Egal*C(argument)/function(...) pSamples=... end
 				+  C(ExpressionEntreCrochets)/function(...) optionsTikz=... end,
-		argument=(CaractereSansParenthesesSep^1*(ExpressionEntreParentheses*argument^0)^0)*Espace,
+		--argument=(CaractereSansParenthesesSep^1*(ExpressionEntreParentheses*argument^0)^0)*Espace,
+    argument = (ExpressionEntreParentheses + CaractereSansParenthesesSep)^1 * Espace,
 		ExpressionEntreParentheses=P{'('*(CaractereSansParentheses+V(1))^0*')'},
 		ExpressionEntreCrochets=P{'['*(CaractereSansCrochets+V(1))^0*']'}
 	}
@@ -3260,6 +3349,7 @@ function tikzAxeX(arg)
 	local zero=true
 	local tickxmin=xmin
 	local tickxmax=xmax
+	local signe_p=""
 	-- grammaire des arguments
 	local Options, Option, argument = V'Options', V'Option', V'argument'
 	local ExpressionEntreParentheses=V'ExpressionEntreParentheses'
@@ -3286,27 +3376,43 @@ function tikzAxeX(arg)
 	match(OptionsAxe,arg)
 	local axe="\\draw "..optionsTikz.." ("..aXmin/x1cm..",0) -- ("..aXmax/x1cm+rightspace..
 	",0) node [right] {$"..Cmath2LaTeX(label).."$};\n"
-	local x,p,q
 	if tick==true then
+		local x
+		--local nbdigits="%."..string.format( "%.0f", digits).."f"
 		for x=tickxmin,tickxmax+step/1e10,step do
 			x=round(x,digits)
 			if x~=0 or (zero==true) then
 				axe=axe.."\\draw [thick] ("..x/x1cm..",2pt)--("..x/x1cm..",-2pt) node ["..position.."] {\\small "
 				if trig==true and x~=0 then
+					local signe_p=""
+					local p,q
 					p,q=rational(x/math.pi,1e-3)
-					if p==1 then p="" end
-					if p==-1 then p="-" end
+					if p<0 then 
+						signe_p="-"
+						p = -p
+					end
 					if q==1 then
-						axe=axe.."$"..p.."\\pi$};\n"
+						if p==1 then
+							axe=axe.."$"..signe_p.."\\pi$};\n"
+						else
+							axe=axe.."$"..signe_p..string.format("%.0f", p).."\\pi$};\n"
+						end
 					else
-						axe=axe.."$\\frac{"..p.."\\pi}{"..q.."}$};\n"
+						if p==1 then
+							axe=axe.."$"..signe_p.."\\frac{\\pi}{"..string.format("%.0f", q).."}$};\n"
+						else
+							axe=axe.."$"..signe_p.."\\frac{"..string.format("%.0f", p).."\\pi}{"..string.format("%.0f", q).."}$};\n"
+						end
 					end
 				else
-					axe=axe.."$"..x.."$};\n"
+					--local nb = nbdigits(x,digits)
+					axe=axe.."$"..string.format("%."..nbdigits(x,digits).."f", x).."$};\n"
+					--axe=axe.."$"..tostring(x).."$};\n"
 				end
 			end		
 		end
 	end
+	--tex.print(axe)
 	return axe
 end
 
@@ -3353,23 +3459,36 @@ function tikzAxeY(arg)
 	match(OptionsAxe,arg)
 	local axe="\\draw "..optionsTikz.." (0,"..aYmin/y1cm..") -- (0,"..aYmax/y1cm+upspace..
 	") node [above] {$"..Cmath2LaTeX(label).."$};\n"
-	local y,p,q
 	if tick==true then
+		local y
 		for y=tickymin,tickymax+step/1e10,step do
 			y=round(y,digits)
 			if y~=0 or (zero==true) then
 				axe=axe.."\\draw [thick] (2pt,"..y/y1cm..")--(-2pt,"..y/y1cm..") node ["..position.."] {\\small "
 				if trig==true and y~=0 then
+					local signe_p=""
+					local p,q
 					p,q=rational(y/math.pi,1e-3)
-					if p==1 then p="" end
-					if p==-1 then p="-" end
+					if p<0 then 
+						signe_p="-"
+						p = -p
+					end
 					if q==1 then
-						axe=axe.."$"..p.."\\pi$};\n"
+						if p==1 then
+							axe=axe.."$"..signe_p.."\\pi$};\n"
+						else
+							axe=axe.."$"..signe_p..string.format("%.0f", p).."\\pi$};\n"
+						end
 					else
-						axe=axe.."$\\frac{"..p.."\\pi}{"..q.."}$};\n"
+						if p==1 then
+							axe=axe.."$"..signe_p.."\\frac{\\pi}{"..string.format("%.0f", q).."}$};\n"
+						else
+							axe=axe.."$"..signe_p.."\\frac{"..string.format("%.0f", p).."\\pi}{"..string.format("%.0f", q).."}$};\n"
+						end
 					end
 				else
-					axe=axe.."$"..y.."$};\n"
+					axe=axe.."$"..string.format("%."..nbdigits(y,digits).."f", y).."$};\n"
+					--axe=axe.."$"..tostring(x).."$};\n"
 				end
 			end		
 		end
@@ -3385,6 +3504,7 @@ function tikzPoint(arg)
 	local tType=""
 	local pointColor='black'
 	local labelColor='black'
+  local label=""
 	-- grammaire des arguments
 	local Options, Option, argument = V'Options', V'Option', V'argument'
 	local ExpressionEntreParentheses=V'ExpressionEntreParentheses'
@@ -3434,7 +3554,9 @@ function tikzPoint(arg)
 		size.."pt) circle ("..size/2 .."pt);\n"
 		point=point.."\\fill["..pointColor.."!50] ".." ("..x/x1cm..","..y/y1cm..") circle ("..size/2 .."pt);\n"
 	end
-	point=point.."\\draw ["..labelColor.."] ("..x/x1cm..","..y/y1cm..") node ["..position.."] {$"..Cmath2LaTeX(label).."$};\n"
+  if label~="" then
+    point=point.."\\draw ["..labelColor.."] ("..x/x1cm..","..y/y1cm..") node ["..position.."] {$"..Cmath2LaTeX(label).."$};\n"
+  end
 	return point
 end
 
@@ -3503,6 +3625,15 @@ end
 function round(num, idp)
   local mult = 10^(idp or 0)
   return math.floor(num * mult + 0.5) / mult
+end
+
+function nbdigits(x,digits)
+	-- élimine les zéros inutiles jusqu'à digits chiffres après la virgule
+	local n=0
+	while round(x,n)~=x and n<digits do
+		n=n+1
+	end
+	return string.format("%.0f",n)
 end
 
 function rational(x,eps)

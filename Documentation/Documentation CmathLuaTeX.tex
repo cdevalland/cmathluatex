@@ -219,7 +219,7 @@ ang((vec(u),vec(v)))
 \end{code}
 \[\Cmath{ang((vec(u),vec(v)))}\]
 
-\item La puissance : \texttt{a{}\^{}b}\\
+\item La puissance : $\texttt{a{}\^{}b}$\\
 \begin{code}
 :e^(1+1/n),(1/2)^n
 \end{code}
@@ -581,7 +581,7 @@ tabVal(f,xmin,xmax,xpas,nb_decimales):={
   if(nb_decimales==0){
     tab:=seq([simplifier(x),f(x)],x,xmin,xmax,xpas);
   } else {
-    tab:=seq([simplifier(x),format(f(x),"f"+string(nb_decimales))],x,xmin,xmax,
+    tab:=seq([simplifier(x),evalf(f(x),nb_decimales)],x,xmin,xmax,
 xpas);
   }
   tab:=prepend(tab,[x,f(x)]);
@@ -1494,7 +1494,7 @@ On a : \[f \left( \frac{\pi }{3}\right)  = \frac{\sqrt{3}}{2}\]
 
 \section{Utilisation avec \TeX works}
 
-Le confort d'utilisation de Cmath\LuaTeX\ sera optimale avec l'excellent éditeur \TeX works. Son apparence est rudimentaire mais il est d'une efficacité redoutable une fois qu'on a pris le temps de le personnaliser. Le gros avantage de l'utiliser avec Cmath\LuaTeX\ est qu'il permet d'exécuter des scripts écrits en Lua et par conséquent ceux de Cmath\LuaTeX. L'autre grande force de \TeX works est la possibilité de complètement créer ses propres raccourcis claviers pour y mettre le texte que l'on veut (voir \url{https://github.com/TeXworks/texworks/wiki/CodeCompletion}). Un raccourci suivi de la touche TAB permet alors de faire défiler les possibilités que l'on aura programmées. Exemple : dans mon fichier de ``completion", j'ai inscrit, entre autre :
+Le confort d'utilisation de Cmath\LuaTeX\ sera optimale avec l'éditeur \TeX works. Son apparence est rudimentaire mais il est d'une efficacité redoutable une fois qu'on a pris le temps de le personnaliser. Le gros avantage de l'utiliser avec Cmath\LuaTeX\ est qu'il permet d'exécuter des scripts écrits en Lua et par conséquent ceux de Cmath\LuaTeX. L'autre grande force de \TeX works est la possibilité de complètement créer ses propres raccourcis claviers pour y mettre le texte que l'on veut (voir \url{https://github.com/TeXworks/texworks/wiki/CodeCompletion}). Un raccourci suivi de la touche TAB permet alors de faire défiler les possibilités que l'on aura programmées. Exemple : dans mon fichier de ``completion", j'ai inscrit, entre autre :
 
 \begin{code}
 ...
@@ -1518,6 +1518,8 @@ On obtient :
 
 \end{enumerate}•
 \end{code}
+
+\TeX works est installé par défaut avec \TeX live. Il est disponible aussi dans les paquets des distributions Linux. Cependant, je conseille d'utiliser celui fourni par le développeur sur son site \url{http://tug.org/texworks/}. Il faut s'assurer par ailleurs que le paquet \texttt{texworks-scripting-lua} soit installé en même temps pour que les scripts Lua fonctionnent.
 
 Dans la suite, je suppose que \TeX works est installé sur votre ordinateur.
 
@@ -1602,7 +1604,7 @@ Tapez \texttt{xcas(1+2)} suivi de \texttt{Ctrl+F9} :
 $3$ % Traduction CmathLuaTeX de : xcas(1+2)
 \end{code}
 
-Si certains raccourcis ne fonctionnent pas, il se peut que leur séquence de touche soient interceptée par le système d'exploitation. Le cas s'est présenté sur un Linux Mint. Dans ce cas, désactivez le raccourci concerné dans dans le système.
+Si certains raccourcis ne fonctionnent pas, il se peut que leur séquence de touche soient interceptée par le système d'exploitation. Le cas s'est présenté sur un Linux Mint. Dans ce cas, désactivez le raccourci concerné dans le système d'exploitation.
 
 
 

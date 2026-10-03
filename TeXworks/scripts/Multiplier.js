@@ -8,5 +8,4 @@
 // Script-Type: standalone
 // Context: TeXDocument
 
-
 TW.target.insertText('×');
