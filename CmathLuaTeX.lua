@@ -3446,7 +3446,7 @@ function tikzAxeY(arg)
 				+ P'digits'*Egal*C(argument)/function(...) digits=eval(...) end
 				+ P'zero'*Egal*C(argument)/function(...) zero=eval(...) end
 				+ C(ExpressionEntreCrochets)/function(...) optionsTikz=... end
-				+ P'tick'*Egal*C(argument)/function(...) tick=eva(...) end
+				+ P'tick'*Egal*C(argument)/function(...) tick=eval(...) end
 				+ P'position'*Egal*C(argument)/function(...) position=... end
 				+ P'upspace'*Egal*C(argument)/function(...) upspace=... end
 				+ P'tickymin'*Egal*C(argument)/function(...) tickymin=eval(...) end
